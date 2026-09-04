@@ -136,19 +136,27 @@ func doShell(home string, t *tally) {
 	ui.Result("fish", "already", fishPath)
 	t.skip++
 
-	// fish must be a known shell before chsh will accept it.
+	// fish must be a known shell before chsh will accept it. Both of these
+	// need a password, so they run attached to the terminal — on a fresh
+	// machine you want to type it once, not be handed homework.
 	shells, _ := os.ReadFile("/etc/shells")
-	if !strings.Contains(string(shells), fishPath) {
-		if *dryRun {
-			ui.Result("/etc/shells", "would", "register fish")
-			t.done++
-		} else {
-			ui.Result("/etc/shells", "skipped", "needs sudo: echo "+fishPath+" | sudo tee -a /etc/shells")
-			t.skip++
-		}
-	} else {
+	switch {
+	case strings.Contains(string(shells), fishPath):
 		ui.Result("/etc/shells", "already", "fish registered")
 		t.skip++
+	case *dryRun:
+		ui.Result("/etc/shells", "would", "register fish (sudo)")
+		t.done++
+	default:
+		ui.Note("registering fish in /etc/shells — sudo will ask for your password")
+		if err := step.Stream("/bin/sh", "-c",
+			"echo "+fishPath+" | sudo tee -a /etc/shells >/dev/null"); err != nil {
+			ui.Result("/etc/shells", "failed", "run by hand: echo "+fishPath+" | sudo tee -a /etc/shells")
+			t.fail++
+		} else {
+			ui.Result("/etc/shells", "registered", "")
+			t.done++
+		}
 	}
 
 	cur := os.Getenv("SHELL")
@@ -160,8 +168,14 @@ func doShell(home string, t *tally) {
 		ui.Result("login shell", "would", "chsh -s "+fishPath)
 		t.done++
 	default:
-		ui.Result("login shell", "skipped", "run: chsh -s "+fishPath)
-		t.skip++
+		ui.Note("changing the login shell — chsh will ask for your password")
+		if err := step.Stream("chsh", "-s", fishPath); err != nil {
+			ui.Result("login shell", "failed", "run by hand: chsh -s "+fishPath)
+			t.fail++
+		} else {
+			ui.Result("login shell", "changed", "fish — open a new terminal")
+			t.done++
+		}
 	}
 	ui.Blank()
 }
