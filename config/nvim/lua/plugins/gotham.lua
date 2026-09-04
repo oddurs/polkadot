@@ -7,23 +7,27 @@
 --
 -- To go back to catppuccin, change `colorscheme` in lua/plugins/colorscheme.lua.
 
+-- vim-gotham's own palette, not the terminal port. The two differ by a
+-- channel or two everywhere; using the terminal values here would leave these
+-- overrides a shade off the highlights the plugin draws itself.
+-- Source: config/gotham/upstream/vim-gotham-README.md
 local palette = {
-  bg = "#0a0f14",
-  surface = "#10151b",
-  panel = "#081f2d",
-  selection = "#093748",
-  border = "#245361",
-  muted = "#4e5165",
-  comment = "#888ba5",
-  subtle = "#599caa",
-  fg = "#98d1ce",
-  bright = "#d3ebe9",
-  red = "#c33027",
-  orange = "#d26939",
-  yellow = "#edb54b",
-  green = "#26a98b",
-  blue = "#195465",
-  cyan = "#33859d",
+  bg = "#0c1014", -- base0
+  surface = "#11151c", -- base1
+  panel = "#091f2e", -- base2
+  selection = "#0a3749", -- base3
+  border = "#245361", -- base4
+  subtle = "#599cab", -- base5
+  fg = "#99d1ce", -- base6
+  bright = "#d3ebe9", -- base7
+  red = "#c23127",
+  orange = "#d26937",
+  yellow = "#edb443",
+  green = "#2aa889",
+  blue = "#195466",
+  cyan = "#33859e",
+  comment = "#888ca6", -- magenta
+  muted = "#4e5166", -- violet
 }
 
 return {

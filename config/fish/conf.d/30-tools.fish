@@ -1,46 +1,42 @@
 # ─── tool integrations ────────────────────────────────────────────────────
-# Each is guarded, so a machine part-way through a bootstrap still gets a
-# working shell instead of a screenful of errors.
+# Everything here is guarded twice: on the binary existing, so a half-finished
+# bootstrap still gets a working shell; and on the shell being interactive,
+# because prompt hooks, history search and key bindings are worth ~110ms and
+# do nothing at all inside `fish -c`.
 
-# mise — one version manager for node, python, go, everything. Replaces the
-# nvm and pyenv evals, which cost ~200ms of shell startup between them.
-if type -q mise
-    mise activate fish | source
+# --- every shell, interactive or not ---
+
+# mise resolves the right node/python for the directory, which scripts and
+# editors need as much as a prompt does. The shims path is the cheap half and
+# is enough on its own for non-interactive use.
+if test -d $HOME/.local/share/mise/shims
+    fish_add_path -g -p $HOME/.local/share/mise/shims
 end
 
-# starship — the prompt.
-if type -q starship
-    starship init fish | source
-end
+# --- interactive only ---
+# A block rather than an early `exit`: inside conf.d, `exit` terminates the
+# whole shell, not just this file.
+if status is-interactive
 
-# zoxide — `z` learns where you go. `zi` picks interactively.
-if type -q zoxide
-    zoxide init fish --cmd z | source
-end
+    # The full activation adds the cd hook, so versions switch as you move.
+    type -q mise; and mise activate fish | source
 
-# atuin — searchable, durable shell history. --disable-up-arrow keeps plain
-# up-arrow as fish's own prefix search, which is better for the last command;
-# ctrl-r is where the full search lives.
-if type -q atuin
-    atuin init fish --disable-up-arrow | source
-end
+    type -q starship; and starship init fish | source
+    type -q zoxide; and zoxide init fish --cmd z | source
 
-# fzf — ctrl-t files, ctrl-r is atuin's, alt-c directories.
-if type -q fzf
-    fzf --fish | source
-end
+    # --disable-up-arrow keeps plain up-arrow as fish's own prefix search, which is
+    # better for the last command; ctrl-r is where the full search lives.
+    type -q atuin; and atuin init fish --disable-up-arrow | source
 
-# direnv — per-project environments.
-if type -q direnv
-    direnv hook fish | source
-end
+    type -q fzf; and fzf --fish | source
+    type -q direnv; and direnv hook fish | source
 
-# 1Password shell plugins, if the CLI is set up.
-if test -f $HOME/.config/op/plugins.sh
-    # The plugin file is bash; fish reads the aliases it defines via a shim.
-    for line in (grep '^alias ' $HOME/.config/op/plugins.sh 2>/dev/null)
-        set -l name (string replace -r '^alias ([^=]+)=.*' '$1' -- $line)
-        set -l body (string replace -r '^alias [^=]+="?([^"]*)"?$' '$1' -- $line)
-        test -n "$name" -a -n "$body"; and alias $name="$body"
-    end
+    # 1Password shell plugins, if the CLI is set up.
+    if test -f $HOME/.config/op/plugins.sh
+        for line in (grep '^alias ' $HOME/.config/op/plugins.sh 2>/dev/null)
+            set -l name (string replace -r '^alias ([^=]+)=.*' '$1' -- $line)
+            set -l body (string replace -r '^alias [^=]+="?([^"]*)"?$' '$1' -- $line)
+            test -n "$name" -a -n "$body"; and alias $name="$body"
+        end
+end
 end
