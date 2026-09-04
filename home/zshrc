@@ -1,0 +1,66 @@
+#
+# zsh — the fallback shell.
+#
+# fish is the login shell; this exists so that a broken fish config, a `sudo -s`,
+# or anything that insists on a POSIX-ish shell still lands somewhere working.
+# Managed by polkadot: ~/Code/polkadot/home/zshrc
+#
+
+# Prezto.
+if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
+  source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
+fi
+
+# Homebrew.
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# Runtimes. mise replaced nvm and pyenv — both are gone, along with the ~200ms
+# they cost at every prompt.
+command -v mise >/dev/null && eval "$(mise activate zsh)"
+
+# PATH.
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.bun/bin:$HOME/go/bin:$PATH"
+
+# Environment, matching fish's conf.d/10-env.fish.
+export EDITOR=nvim VISUAL=nvim
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_CACHE_HOME="$HOME/.cache"
+export XDG_STATE_HOME="$HOME/.local/state"
+export BAT_THEME="base16"
+export RIPGREP_CONFIG_PATH="$HOME/.config/ripgrep/config"
+export HOMEBREW_NO_ANALYTICS=1 HOMEBREW_NO_ENV_HINTS=1 HOMEBREW_NO_AUTO_UPDATE=1
+
+# Tools.
+command -v starship >/dev/null && eval "$(starship init zsh)"
+command -v zoxide   >/dev/null && eval "$(zoxide init zsh --cmd z)"
+command -v atuin    >/dev/null && eval "$(atuin init zsh --disable-up-arrow)"
+command -v direnv   >/dev/null && eval "$(direnv hook zsh)"
+command -v fzf      >/dev/null && source <(fzf --zsh)
+
+# Aliases, matching fish's abbreviations.
+alias cat="bat --paging=never"
+alias ls="eza --icons --group-directories-first"
+alias ll="eza --icons --group-directories-first -la --git"
+alias tree="eza --icons --tree --git-ignore"
+alias lg=lazygit
+alias ld=lazydocker
+alias v=nvim
+alias g=git
+alias rm="rm -i"
+alias mv="mv -i"
+alias cp="cp -i"
+
+# 1Password shell plugins.
+[[ -f ~/.op/plugins.sh ]] && source ~/.op/plugins.sh
+
+# Resolved on first use rather than at every shell start: `op read` blocks on
+# 1Password auth, which stalls the prompt in every terminal.
+supabase_token() {
+  [[ -n $SUPABASE_ACCESS_TOKEN ]] ||
+    export SUPABASE_ACCESS_TOKEN="$(op read 'op://Development/Supabase/access-token')"
+  print -r -- "$SUPABASE_ACCESS_TOKEN"
+}
+
+# fish, if you want it from inside zsh.
+alias f=fish

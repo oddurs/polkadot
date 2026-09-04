@@ -27,6 +27,7 @@ var links = []struct{ from, to string }{
 	{"config/herdr", ".config/herdr"},
 	{"config/ripgrep", ".config/ripgrep"},
 	{"config/vscode/settings.json", "Library/Application Support/Code/User/settings.json"},
+	{"home/zshrc", ".zshrc"},
 	{"home/gitconfig", ".gitconfig"},
 	{"home/gitignore_global", ".gitignore_global"},
 	{"home/git_commit_template", ".git_commit_template"},
