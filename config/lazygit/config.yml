@@ -1,0 +1,76 @@
+# ─── lazygit ──────────────────────────────────────────────────────────────
+# Managed by polkadot. Found here because $XDG_CONFIG_HOME is exported in
+# fish; without that, lazygit reads ~/Library/Application Support/lazygit.
+
+gui:
+  nerdFontsVersion: "3"
+  showFileTree: true
+  showRandomTip: false
+  showCommandLog: false
+  showBottomLine: false
+  nerdFontsVersion: "3"
+  scrollHeight: 4
+  sidePanelWidth: 0.3
+  mainPanelSplitMode: flexible
+  language: en
+  timeFormat: "2006-01-02"
+  shortTimeFormat: "15:04"
+  commitLength:
+    show: true
+  # Gotham.
+  theme:
+    activeBorderColor: ["#26a98b", bold]
+    inactiveBorderColor: ["#245361"]
+    searchingActiveBorderColor: ["#edb54b", bold]
+    optionsTextColor: ["#599caa"]
+    selectedLineBgColor: ["#093748"]
+    inactiveViewSelectedLineBgColor: ["#081f2d"]
+    cherryPickedCommitBgColor: ["#093748"]
+    cherryPickedCommitFgColor: ["#edb54b"]
+    markedBaseCommitBgColor: ["#093748"]
+    markedBaseCommitFgColor: ["#d26939"]
+    unstagedChangesColor: ["#c33027"]
+    defaultFgColor: ["#98d1ce"]
+
+git:
+  paging:
+    # delta is already the git pager; reuse it here so diffs look identical
+    # whichever tool you are reading them in.
+    colorArg: always
+    pager: delta --dark --paging=never
+  commit:
+    signOff: false
+  merging:
+    args: ""
+  parseEmoji: false
+  # Log graph on, because the shape of history is the reason to be in lazygit.
+  log:
+    order: topo-order
+    showGraph: always
+    showWholeGraph: false
+  autoFetch: true
+  autoRefresh: true
+  fetchAll: false
+
+os:
+  editPreset: "nvim"
+  # Open files at the right line when you press `e`.
+  edit: "nvim {{filename}}"
+  editAtLine: "nvim +{{line}} {{filename}}"
+
+refresher:
+  refreshInterval: 10
+  fetchInterval: 60
+
+confirmOnQuit: false
+disableStartupPopups: true
+notARepository: "skip"
+promptToReturnFromSubprocess: false
+
+keybinding:
+  universal:
+    # `q` quits, but only from the top level; nested views should just close.
+    quit: "q"
+    return: "<esc>"
+  files:
+    commitChangesWithEditor: "C"

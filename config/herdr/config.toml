@@ -1,0 +1,46 @@
+# ─── herdr ────────────────────────────────────────────────────────────────
+# Managed by polkadot. Persistent terminal sessions for coding agents —
+# claude, codex and opencode keep running across sleep, network drops and
+# restarts, and can be reattached from another machine.
+#
+#   herdr                       start / attach in the current project
+#   herdr --session <name>      a named session
+#   herdr session attach <n>    reattach
+#   herdr --remote <ssh>        drive a session on another box
+#   herdr server reload-config  pick up edits to this file
+
+onboarding = false
+
+[theme]
+# "terminal" inherits the host palette, so Herdr is Gotham wherever Ghostty is
+# — and follows automatically if the terminal theme ever changes. The overrides
+# below only pin the chrome that the terminal palette does not cover.
+name = "terminal"
+auto_switch = false
+
+[theme.custom]
+sidebar_bg = "#0a0f14"
+panel_bg = "reset"
+active_row_bg = "#081f2d"
+selection_bg = "#093748"
+accent = "#26a98b"
+red = "#c33027"
+green = "#26a98b"
+
+[terminal]
+# New panes get fish as a login shell, so conf.d and PATH are correct inside
+# an agent's terminal exactly as they are in a normal one.
+default_shell = "/opt/homebrew/bin/fish"
+shell_mode = "login"
+# New panes open beside the pane you split from, not at $HOME.
+new_cwd = "follow"
+
+[update]
+channel = "stable"
+version_check = true
+manifest_check = true
+
+[keys]
+# ctrl+b is tmux's prefix and this machine runs tmux too. ctrl+a keeps the two
+# from fighting over the same chord.
+prefix = "ctrl+a"

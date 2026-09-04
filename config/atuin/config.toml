@@ -1,0 +1,35 @@
+# ─── atuin ────────────────────────────────────────────────────────────────
+# Shell history that survives, searches properly, and knows what directory and
+# exit code each command had. Local-only by default — run `atuin register` if
+# you ever want it synced between machines.
+
+## Search
+search_mode = "fuzzy"
+filter_mode = "global"
+# Ctrl-r opens scoped to the current directory first, which is almost always
+# what you meant; press ctrl-r again to widen to global.
+filter_mode_shell_up_key_binding = "directory"
+search_mode_shell_up_key_binding = "prefix"
+
+## Display
+style = "compact"
+inline_height = 18
+show_preview = true
+show_help = false
+show_tabs = false
+enter_accept = true
+
+## Storage
+auto_sync = false
+update_check = false
+history_filter = [
+  "^\\s",              # a leading space keeps it out of history, as in zsh
+  "^(op|gh auth|aws) ",
+  "password",
+  "SECRET",
+  "TOKEN",
+]
+cwd_filter = ["^/private/tmp"]
+
+[stats]
+common_subcommands = ["git", "docker", "npm", "cargo", "brew", "gh", "mise"]

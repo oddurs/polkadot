@@ -1,0 +1,6 @@
+# base16 renders through the terminal's own 16 colours, so bat is Gotham
+# wherever Gotham is loaded — and follows the terminal if that ever changes.
+--theme="base16"
+--style="numbers,changes,header"
+--italic-text=always
+--paging=auto

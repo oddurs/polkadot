@@ -1,0 +1,30 @@
+# Things that should never be in anyone's repository.
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Editors
+.idea/
+*.swp
+*.swo
+*~
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.nvim.lua
+.exrc
+
+# Tooling scratch
+.direnv/
+.envrc.local
+*.log
+.claude/settings.local.json
+
+# Agent + AI scratch
+.aider*
+.cursorignore

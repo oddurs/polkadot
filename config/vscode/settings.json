@@ -1,0 +1,90 @@
+{
+  // ─── theme ──────────────────────────────────────────────────────────────
+  // Gotham. Halide's themes are still installed; switch with Cmd+K Cmd+T.
+  "workbench.colorTheme": "Gotham",
+  "workbench.iconTheme": null,
+  "window.autoDetectColorScheme": false,
+
+  // ─── type ───────────────────────────────────────────────────────────────
+  // Same face and size as the terminal, so a split screen reads as one thing.
+  "editor.fontFamily": "JetBrainsMono Nerd Font, Menlo, monospace",
+  "editor.fontSize": 14,
+  "editor.lineHeight": 1.7,
+  "editor.fontLigatures": true,
+  "terminal.integrated.fontFamily": "JetBrainsMono Nerd Font",
+  "terminal.integrated.fontSize": 14,
+  "terminal.integrated.lineHeight": 1.2,
+  "editor.fontWeight": "400",
+
+  // ─── editor ─────────────────────────────────────────────────────────────
+  "editor.cursorBlinking": "solid",
+  "editor.cursorSmoothCaretAnimation": "off",
+  "editor.renderWhitespace": "boundary",
+  "editor.renderLineHighlight": "line",
+  "editor.guides.indentation": true,
+  "editor.guides.bracketPairs": "active",
+  "editor.bracketPairColorization.enabled": true,
+  "editor.minimap.enabled": false,
+  "editor.stickyScroll.enabled": true,
+  "editor.linkedEditing": true,
+  "editor.suggestSelection": "first",
+  "editor.inlineSuggest.enabled": true,
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": { "source.fixAll": "explicit" },
+  "editor.rulers": [],
+  "editor.wordWrap": "off",
+  "editor.tabSize": 2,
+  "editor.detectIndentation": true,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+
+  // ─── chrome ─────────────────────────────────────────────────────────────
+  // Everything that is not the code, turned down.
+  "workbench.startupEditor": "none",
+  "workbench.editor.showTabs": "multiple",
+  "workbench.editor.tabSizing": "shrink",
+  "workbench.activityBar.location": "top",
+  "workbench.tree.indent": 14,
+  "workbench.list.smoothScrolling": true,
+  "breadcrumbs.enabled": true,
+  "explorer.compactFolders": false,
+  "explorer.confirmDelete": false,
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "package.json": "package-lock.json, bun.lock, bun.lockb, yarn.lock, pnpm-lock.yaml, .npmrc, biome.json",
+    "tsconfig.json": "tsconfig.*.json, next-env.d.ts",
+    "next.config.*": "next-env.d.ts, postcss.config.*, tailwind.config.*",
+    "*.ts": "$(capture).test.ts, $(capture).spec.ts, $(capture).d.ts",
+    "*.tsx": "$(capture).test.tsx, $(capture).spec.tsx, $(capture).module.css",
+    "go.mod": "go.sum"
+  },
+
+  // ─── terminal ───────────────────────────────────────────────────────────
+  // fish, matching the outside world.
+  "terminal.integrated.defaultProfile.osx": "fish",
+  "terminal.integrated.profiles.osx": {
+    "fish": { "path": "/opt/homebrew/bin/fish", "args": ["-l"] }
+  },
+  "terminal.integrated.cursorBlinking": false,
+  "terminal.integrated.cursorStyle": "block",
+  "terminal.integrated.smoothScrolling": true,
+
+  // ─── git ────────────────────────────────────────────────────────────────
+  "git.autofetch": true,
+  "git.confirmSync": false,
+  "git.enableSmartCommit": true,
+  "git.openRepositoryInParentFolders": "always",
+  "diffEditor.ignoreTrimWhitespace": false,
+  "diffEditor.renderSideBySide": true,
+
+  // ─── noise ──────────────────────────────────────────────────────────────
+  "telemetry.telemetryLevel": "off",
+  "update.showReleaseNotes": false,
+  "extensions.ignoreRecommendations": true,
+  "security.workspace.trust.untrustedFiles": "open",
+  "npm.fetchOnlinePackageInfo": false,
+
+  "github.copilot.nextEditSuggestions.enabled": true,
+  "zig.zls.enabled": "on"
+}

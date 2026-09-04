@@ -1,0 +1,131 @@
+# ─── git ──────────────────────────────────────────────────────────────────
+# Managed by polkadot: ~/Code/polkadot/home/gitconfig
+
+[user]
+	name = Oddur Sigurdsson
+	email = oddurs@gmail.com
+
+[init]
+	defaultBranch = main
+
+[core]
+	pager = delta
+	excludesfile = ~/.gitignore_global
+	editor = nvim
+	# Treat these as binary so a stray CRLF never becomes a 400-file diff.
+	autocrlf = input
+	fsmonitor = true
+	untrackedCache = true
+
+[commit]
+	template = ~/.git_commit_template
+	verbose = true
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	navigate = true
+	side-by-side = true
+	line-numbers = true
+	hyperlinks = true
+	# base16 reads the terminal's own 16 colours, so diffs are Gotham wherever
+	# Gotham is loaded — and follow the terminal if that ever changes.
+	syntax-theme = base16
+	file-style = "#599caa" bold
+	file-decoration-style = "#245361" ul
+	hunk-header-style = syntax
+	hunk-header-decoration-style = "#245361" box
+	line-numbers-left-style = "#245361"
+	line-numbers-right-style = "#245361"
+	line-numbers-zero-style = "#4e5165"
+	line-numbers-minus-style = "#c33027"
+	line-numbers-plus-style = "#26a98b"
+	minus-style = syntax "#2a1416"
+	minus-emph-style = syntax "#4d1f22"
+	plus-style = syntax "#0d2b26"
+	plus-emph-style = syntax "#14453c"
+	blame-palette = "#0a0f14 #10151b #081f2d #093748"
+
+[merge]
+	conflictstyle = zdiff3
+	tool = nvimdiff
+
+[diff]
+	colorMoved = default
+	algorithm = histogram
+	# Better hunk headers for these languages.
+	renames = copies
+	mnemonicPrefix = true
+
+[diff "lockb"]
+	textconv = bun
+	binary = true
+
+[push]
+	default = simple
+	autoSetupRemote = true
+	followTags = true
+
+[pull]
+	rebase = true
+
+[rebase]
+	autoStash = true
+	autoSquash = true
+	updateRefs = true
+
+[fetch]
+	prune = true
+	pruneTags = true
+	all = true
+
+[rerere]
+	# Remember how you resolved a conflict and reapply it next time.
+	enabled = true
+	autoUpdate = true
+
+[branch]
+	sort = -committerdate
+
+[tag]
+	sort = version:refname
+
+[log]
+	date = iso
+
+[status]
+	showUntrackedFiles = all
+	submoduleSummary = true
+
+[help]
+	autocorrect = prompt
+
+[alias]
+	s = status --short --branch
+	l = log --oneline --graph --decorate -20
+	ll = log --graph --pretty=format:'%C(yellow)%h%C(reset) %C(cyan)%an%C(reset) %C(green)%ar%C(reset)%C(auto)%d%C(reset)%n  %s'
+	last = log -1 HEAD --stat
+	# What am I about to push?
+	unpushed = log @{upstream}..HEAD --oneline
+	# What changed on main since I branched?
+	behind = log HEAD..@{upstream} --oneline
+	amend = commit --amend --no-edit
+	undo = reset --soft HEAD~1
+	nuke = reset --hard HEAD
+	wip = !git add -A && git commit -m 'wip'
+	unwip = !git log -1 --pretty=%s | grep -q '^wip$' && git reset --soft HEAD~1
+	# Branches by recency, which is the only useful order.
+	br = branch --sort=-committerdate --format='%(HEAD) %(color:cyan)%(refname:short)%(color:reset) %(color:dim)%(committerdate:relative)%(color:reset)'
+	# Everything not merged into main.
+	stale = "!git branch --merged main | grep -v '^\\*\\|main' | xargs -r git branch -d"
+	root = rev-parse --show-toplevel
+
+[url "git@github.com:"]
+	insteadOf = https://github.com/
+
+[credential]
+	helper = osxkeychain
+
+[gpg]
+	format = ssh

@@ -1,0 +1,9 @@
+
+
+# ── Subject: imperative, under ~50 chars, no trailing period.
+#    "Fix the pin ordering" — not "Fixed" or "Fixes".
+#
+# ── Body: what changed and *why*. The diff already says how.
+#    Wrap at 72.
+#
+# ── Footer: Refs #123, Co-Authored-By, BREAKING CHANGE.

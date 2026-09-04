@@ -1,0 +1,137 @@
+# ─── starship ─────────────────────────────────────────────────────────────
+# Managed by polkadot. Gotham palette, two lines, quiet by default.
+#
+# The rule here: a segment only appears when it is telling you something you
+# could otherwise get wrong. Directory and git always matter. A runtime version
+# matters only inside a project that pins one. Duration matters only when
+# something took long enough to notice.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+$directory\
+$git_branch$git_status$git_state\
+$nodejs$python$golang$rust$php\
+$docker_context$kubernetes\
+$cmd_duration\
+$line_break\
+$character"""
+
+add_newline = true
+# node --version can exceed the 500ms default on a cold cache, which makes the
+# runtime segment flicker in and out.
+command_timeout = 1500
+palette = 'gotham'
+
+[palettes.gotham]
+bg      = '#0a0f14'
+surface = '#10151b'
+panel   = '#081f2d'
+border  = '#245361'
+muted   = '#4e5165'
+comment = '#888ba5'
+subtle  = '#599caa'
+fg      = '#98d1ce'
+bright  = '#d3ebe9'
+red     = '#c33027'
+orange  = '#d26939'
+yellow  = '#edb54b'
+green   = '#26a98b'
+blue    = '#195465'
+cyan    = '#33859d'
+
+[character]
+success_symbol = '[❯](green)'
+error_symbol = '[❯](red)'
+vimcmd_symbol = '[❮](yellow)'
+
+[directory]
+style = 'bold subtle'
+format = '[$path]($style)[$read_only]($read_only_style) '
+truncation_length = 3
+truncate_to_repo = true
+read_only = ' ro'
+read_only_style = 'muted'
+
+[directory.substitutions]
+'~/Code' = ' code'
+'~/Notes' = ' notes'
+'Documents' = ' docs'
+'Downloads' = ' dl'
+
+[git_branch]
+style = 'cyan'
+symbol = ' '
+format = 'on [$symbol$branch]($style) '
+
+[git_status]
+style = 'orange'
+format = '([$all_status$ahead_behind]($style) )'
+conflicted = '≠${count} '
+ahead = '↑${count} '
+behind = '↓${count} '
+diverged = '↕↑${ahead_count}↓${behind_count} '
+untracked = '?${count} '
+stashed = '≡${count} '
+modified = '!${count} '
+staged = '+${count} '
+renamed = '»${count} '
+deleted = '−${count} '
+
+[git_state]
+style = 'red'
+format = '\([$state( $progress_current/$progress_total)]($style)\) '
+
+# Runtimes: shown only where the project actually pins one.
+[nodejs]
+style = 'green'
+symbol = ' '
+format = '[$symbol($version )]($style)'
+detect_files = ['package.json', '.nvmrc', '.node-version', '.tool-versions']
+
+[python]
+style = 'yellow'
+symbol = ' '
+format = '[$symbol($version )(\($virtualenv\) )]($style)'
+
+[golang]
+style = 'cyan'
+symbol = ' '
+format = '[$symbol($version )]($style)'
+
+[rust]
+style = 'orange'
+symbol = ' '
+format = '[$symbol($version )]($style)'
+
+[php]
+style = 'comment'
+symbol = ' '
+format = '[$symbol($version )]($style)'
+
+[docker_context]
+style = 'blue'
+symbol = ' '
+format = '[$symbol$context]($style) '
+only_with_files = true
+
+[kubernetes]
+disabled = false
+style = 'comment'
+symbol = '☸ '
+format = '[$symbol$context( \($namespace\))]($style) '
+
+[cmd_duration]
+style = 'muted'
+min_time = 2000
+format = '[took $duration]($style) '
+
+# Off: these are either always true or never interesting.
+[hostname]
+disabled = true
+[username]
+disabled = true
+[package]
+disabled = true
+[aws]
+disabled = true

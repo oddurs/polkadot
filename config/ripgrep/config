@@ -1,0 +1,9 @@
+# Flags worth always having. Referenced by $RIPGREP_CONFIG_PATH.
+--smart-case
+--hidden
+--glob=!.git/
+--glob=!node_modules/
+--glob=!.next/
+--glob=!dist/
+--max-columns=200
+--max-columns-preview

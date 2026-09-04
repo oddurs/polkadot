@@ -1,0 +1,3 @@
+bin/
+# mise writes resolved versions here; the pins in config.toml are the source
+.mise.lock

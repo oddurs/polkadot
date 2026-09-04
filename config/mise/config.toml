@@ -1,0 +1,16 @@
+# ─── mise ─────────────────────────────────────────────────────────────────
+# One version manager, replacing nvm and pyenv. Per-project versions come from
+# .tool-versions, .nvmrc, .node-version or mise.toml — all of which mise reads.
+# These are the fallbacks for a directory that pins nothing.
+
+[tools]
+node = "lts"
+python = "3.13"
+go = "latest"
+
+[settings]
+# Install a missing version automatically when you cd into a project that
+# pins it, rather than erroring and making you do it by hand.
+idiomatic_version_file_enable_tools = ["node", "python"]
+experimental = true
+jobs = 4
