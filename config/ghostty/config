@@ -44,3 +44,22 @@ keybind = cmd+opt+up=goto_split:up
 keybind = cmd+opt+down=goto_split:down
 keybind = cmd+shift+enter=toggle_split_zoom
 keybind = cmd+k=clear_screen
+
+# Mac shortcuts, forwarded into the editor.
+#
+# Ghostty would otherwise swallow these. `text:` sends the CSI-u encoding for
+# the key with the super modifier (9 = super, 10 = super+shift), which Neovim
+# decodes to <D-s>, <D-Z> and so on. Anything that does not understand CSI-u
+# parses the sequence and discards it, so the shell is unaffected.
+#
+# Cmd+C, Cmd+V and Cmd+X are deliberately absent: they stay Ghostty's own
+# copy and paste, which already work correctly inside Neovim.
+keybind = cmd+s=text:\x1b[115;9u
+keybind = cmd+z=text:\x1b[122;9u
+keybind = cmd+shift+z=text:\x1b[122;10u
+keybind = cmd+a=text:\x1b[97;9u
+keybind = cmd+f=text:\x1b[102;9u
+keybind = cmd+shift+f=text:\x1b[102;10u
+keybind = cmd+p=text:\x1b[112;9u
+keybind = cmd+b=text:\x1b[98;9u
+keybind = cmd+slash=text:\x1b[47;9u

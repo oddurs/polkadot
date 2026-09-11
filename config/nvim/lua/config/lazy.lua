@@ -1,8 +1,13 @@
 -- Bootstrap lazy.nvim, then the spec.
 --
--- Built on LazyVim 16 with blink.cmp for completion and snacks.nvim for the
+-- Built on LazyVim with blink.cmp for completion and snacks.nvim for the
 -- picker, so no extra here brings in telescope, fzf-lua or nvim-cmp — mixing
 -- those with the defaults is how a LazyVim config ends up fighting itself.
+--
+-- What is deliberately absent: the vim-operator tooling. Surround, yank
+-- rings, jump-by-label, text objects and harpoon are excellent if you drive
+-- the editor by motions, and dead weight if you drive it by mouse and arrow
+-- keys. This config is the second kind. See lua/config/keymaps.lua.
 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
@@ -24,7 +29,9 @@ vim.opt.rtp:prepend(lazypath)
 
 local extras = {
   -- Languages, chosen from what is actually in ~/Code: Next.js and TypeScript,
-  -- Go, Rust, Python, Zig, plus the formats every project carries.
+  -- Go, Rust, Python, Zig, plus the formats every project carries. These are
+  -- server and parser configuration; they cost nothing until a matching file
+  -- is opened.
   "lang.typescript",
   "lang.tailwind",
   "lang.json",
@@ -39,39 +46,18 @@ local extras = {
   "lang.sql",
   "lang.git",
 
-  -- Editing
-  "coding.mini-surround", -- cs"' ds( ysiw)
-  "coding.yanky", -- a yank ring, with a picker over it
-
-  -- Moving around
-  "editor.harpoon2", -- pin the four files you are actually working in
-  "editor.aerial", -- symbol outline
-  "editor.inc-rename", -- LSP rename with live preview
-  "editor.refactoring", -- extract function / variable (needs nvim 0.12+)
-  "editor.illuminate", -- highlight the other uses of the symbol under the cursor
-  "editor.dial", -- ctrl-a/ctrl-x that understands dates, booleans, hex
-  "editor.mini-diff", -- inline diff against the index
-
   -- Quality gates
   "formatting.prettier",
   "linting.eslint",
-  "test.core",
-  "dap.core",
 
   -- Utility
+  "editor.inc-rename", -- rename a symbol with a live preview of the edit
   "util.dot", -- syntax for the dotfiles this repo is made of
   "util.mini-hipatterns", -- render #0a0f14 in its own colour
-  "util.octo", -- GitHub issues and PRs in the editor, via gh
-  "util.project",
+  "util.project", -- project detection for the picker
 
   -- UI
   "ui.treesitter-context", -- keep the enclosing function on screen
-  "ui.indent-blankline",
-
-  -- Copilot is here because there is a copilot-chat licence on this machine
-  -- already. Run :Copilot auth once; delete these two lines to drop it.
-  "ai.copilot",
-  "ai.copilot-chat",
 }
 
 local spec = { { "LazyVim/LazyVim", import = "lazyvim.plugins" } }
@@ -82,15 +68,27 @@ table.insert(spec, { import = "plugins" })
 
 require("lazy").setup({
   spec = spec,
-  defaults = { lazy = false, version = false },
-  install = { colorscheme = { "gotham256", "habamax" } },
-  checker = { enabled = true, notify = false },
+  -- `lazy = true` is the whole point of lazy.nvim. The previous value here was
+  -- `false`, which forced every plugin that had not declared its own trigger
+  -- to load during startup whether the session needed it or not.
+  defaults = { lazy = true, version = false },
+  install = { colorscheme = { "gotham", "habamax" } },
+  -- The update check is a network round trip on every start, to tell you
+  -- something you can ask for with :Lazy whenever you feel like it.
+  checker = { enabled = false },
   change_detection = { notify = false },
   ui = { border = "rounded", backdrop = 100 },
   performance = {
     rtp = {
       disabled_plugins = {
-        "gzip", "tarPlugin", "tohtml", "tutor", "zipPlugin", "rplugin", "netrwPlugin",
+        "gzip",
+        "matchit",
+        "netrwPlugin",
+        "rplugin",
+        "tarPlugin",
+        "tohtml",
+        "tutor",
+        "zipPlugin",
       },
     },
   },

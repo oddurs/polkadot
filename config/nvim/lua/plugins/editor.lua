@@ -1,51 +1,159 @@
--- Editor behaviour on top of LazyVim's defaults.
---
--- The theme is one thing; the reason to open nvim is another. These are the
--- pieces that make the day-to-day feel finished: git in a keystroke, motion
--- that doesn't need counting, and a file tree that gets out of the way.
+-- The buffer itself: parsing, language servers, formatting, git.
 
 return {
-  -- lazygit, one keystroke away and sharing the terminal's colours.
+  -- Treesitter for highlighting and indentation. The textobject queries are
+  -- deliberately absent: `vif` and `daf` are motions, and this config is not
+  -- driven by motions.
   {
-    "folke/snacks.nvim",
+    "nvim-treesitter/nvim-treesitter",
+    opts = function(_, opts)
+      vim.list_extend(opts.ensure_installed or {}, {
+        "bash", "css", "diff", "dockerfile", "fish", "gitcommit", "gitignore",
+        "go", "gomod", "gosum", "graphql", "html", "javascript", "jsdoc", "json",
+        "jsonc", "lua", "luadoc", "make", "markdown", "markdown_inline", "python",
+        "regex", "rust", "scss", "sql", "toml", "tsx", "typescript", "vim",
+        "vimdoc", "yaml", "zig",
+      })
+      return opts
+    end,
+  },
+
+  -- LSP. LazyVim wires the servers; these are the behaviours worth changing.
+  {
+    "neovim/nvim-lspconfig",
     opts = {
-      lazygit = {
-        configure = false, -- our own config.yml is already Gotham
-        win = { style = "lazygit", border = "rounded" },
+      -- Inlay hints are off by default. They are genuinely useful and they
+      -- also reflow the line you are reading, which is the opposite of what
+      -- a calm screen wants. `<leader>uh` turns them on per buffer.
+      inlay_hints = { enabled = false },
+      codelens = { enabled = false },
+      diagnostics = {
+        virtual_text = { spacing = 4, prefix = "●", source = "if_many" },
+        severity_sort = true,
+        float = { source = "if_many" },
       },
-      indent = { enabled = true, animate = { enabled = false } },
-      scroll = { enabled = false }, -- smooth scroll fights fast movement
-      notifier = { enabled = true, timeout = 2500 },
-      words = { enabled = true },
+      servers = {
+        lua_ls = {
+          settings = {
+            Lua = {
+              hint = { enable = true, arrayIndex = "Disable" },
+              workspace = { checkThirdParty = false },
+            },
+          },
+        },
+        vtsls = {
+          settings = {
+            typescript = {
+              inlayHints = {
+                parameterNames = { enabled = "literals" },
+                variableTypes = { enabled = false },
+                propertyDeclarationTypes = { enabled = true },
+                functionLikeReturnTypes = { enabled = true },
+              },
+              preferences = { importModuleSpecifier = "non-relative" },
+            },
+          },
+        },
+        gopls = {
+          settings = {
+            gopls = {
+              hints = {
+                assignVariableTypes = true,
+                compositeLiteralFields = true,
+                parameterNames = true,
+                rangeVariableTypes = true,
+              },
+              analyses = { unusedparams = true, shadow = true },
+              staticcheck = true,
+              gofumpt = true,
+            },
+          },
+        },
+      },
+    },
+  },
+
+  -- Formatting. Two rules: shell scripts keep two-space indents, and a file
+  -- with no configured formatter falls back to the LSP rather than nothing.
+  {
+    "stevearc/conform.nvim",
+    opts = {
+      formatters_by_ft = {
+        fish = { "fish_indent" },
+        sh = { "shfmt" },
+        bash = { "shfmt" },
+        go = { "goimports", "gofumpt" },
+        lua = { "stylua" },
+        toml = { "taplo" },
+        ["_"] = { "trim_whitespace" },
+      },
+      formatters = { shfmt = { prepend_args = { "-i", "2", "-ci" } } },
+      default_format_opts = { lsp_format = "fallback" },
+    },
+  },
+
+  -- Brackets and quotes close themselves.
+  {
+    "nvim-mini/mini.pairs",
+    opts = { modes = { insert = true, command = true, terminal = false } },
+  },
+
+  -- Reopen a project where you left it.
+  {
+    "folke/persistence.nvim",
+    event = "BufReadPre",
+    opts = {},
+    keys = {
+      { "<leader>qs", function() require("persistence").load() end, desc = "Restore session" },
+      { "<leader>ql", function() require("persistence").load({ last = true }) end, desc = "Restore last session" },
+      { "<leader>qd", function() require("persistence").stop() end, desc = "Don't save current session" },
+    },
+  },
+
+  -- ── git ──────────────────────────────────────────────────────────────────
+  {
+    "lewis6991/gitsigns.nvim",
+    opts = {
+      signs = {
+        add = { text = "▎" },
+        change = { text = "▎" },
+        delete = { text = "" },
+        topdelete = { text = "" },
+        changedelete = { text = "▎" },
+        untracked = { text = "▎" },
+      },
+      current_line_blame = false, -- on demand, via <leader>gt
+      current_line_blame_opts = { delay = 300, virt_text_pos = "eol" },
     },
     keys = {
-      { "<leader>gg", function() require("snacks").lazygit() end, desc = "Lazygit" },
-      { "<leader>gl", function() require("snacks").lazygit.log() end, desc = "Lazygit log (cwd)" },
-      { "<leader>gf", function() require("snacks").lazygit.log_file() end, desc = "Lazygit file history" },
-      { "<leader>gb", function() require("snacks").git.blame_line() end, desc = "Git blame line" },
+      { "<leader>gt", "<cmd>Gitsigns toggle_current_line_blame<cr>", desc = "Toggle line blame" },
     },
   },
 
-  -- Jump anywhere with two characters.
+  -- Side-by-side diffs and file history, in the editor rather than a pager.
   {
-    "folke/flash.nvim",
-    opts = { modes = { char = { jump_labels = true } } },
-  },
-
-  -- The file tree, positioned right and closing after you pick something.
-  {
-    "nvim-neo-tree/neo-tree.nvim",
+    "sindrets/diffview.nvim",
+    cmd = { "DiffviewOpen", "DiffviewFileHistory", "DiffviewClose" },
     opts = {
-      close_if_last_window = true,
-      window = { width = 32 },
-      filesystem = {
-        follow_current_file = { enabled = true },
-        use_libuv_file_watcher = true,
-        filtered_items = { visible = true, hide_dotfiles = false, hide_gitignored = true },
+      enhanced_diff_hl = true,
+      view = {
+        default = { winbar_info = true },
+        merge_tool = { layout = "diff3_mixed", disable_diagnostics = true },
       },
     },
+    keys = {
+      { "<leader>gv", "<cmd>DiffviewOpen<cr>", desc = "Diffview: working tree" },
+      { "<leader>gV", "<cmd>DiffviewClose<cr>", desc = "Diffview: close" },
+      { "<leader>gh", "<cmd>DiffviewFileHistory %<cr>", desc = "Diffview: this file's history" },
+      { "<leader>gH", "<cmd>DiffviewFileHistory<cr>", desc = "Diffview: branch history" },
+    },
   },
 
-  -- Show the key hints sooner; the default delay is long enough to forget.
-  { "folke/which-key.nvim", opts = { delay = 300 } },
+  -- Conflict resolution that does not involve counting angle brackets.
+  {
+    "akinsho/git-conflict.nvim",
+    version = "*",
+    event = "BufReadPre",
+    opts = { default_mappings = true, disable_diagnostics = true },
+  },
 }

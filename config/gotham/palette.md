@@ -36,7 +36,7 @@ Slots 10–12 are the reason Gotham stays calm: where most schemes spend the
 bright range on louder text, Gotham spends it on darker blues used as UI
 shades. A port that "fixes" this by brightening them is no longer Gotham.
 
-Used by: Ghostty, fish, fzf, starship, lazygit, delta, bat, btop, herdr.
+Used by: Ghostty, Neovim, fish, fzf, starship, lazygit, delta, bat, btop, herdr.
 
 ## Editor — [vim-gotham](https://github.com/whatyouhide/vim-gotham)
 
@@ -54,10 +54,16 @@ the terminal set but not identical — every channel differs by one or two.
 | 6 | `#99d1ce` | | cyan | `#33859e` |
 | 7 | `#d3ebe9` | | green | `#2aa889` |
 
-Used by: Neovim. The treesitter and UI overrides in
-`config/nvim/lua/plugins/gotham.lua` extend the `gotham256` colorscheme, so
-they must use *these* values — the terminal set would leave the added
-highlights a shade off from the ones the plugin draws itself.
+Not used any more. Neovim used to extend the `gotham256` colorscheme with a
+file of overrides, and those overrides had to use *these* values or sit a
+shade off the highlights the plugin drew itself.
+
+Neovim now ships its own complete colorscheme, `config/nvim/colors/gotham.lua`,
+with no plugin underneath it and nothing to sit flush with. It uses the
+**terminal** set above, which means `Normal` is byte-identical to the ground
+behind Ghostty's window padding and there is no seam around the editor. The
+values live in `config/nvim/lua/gotham/palette.lua`, read by both the
+colorscheme and the statusline.
 
 ## Everything else gets it for free
 
