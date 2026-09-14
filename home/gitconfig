@@ -24,28 +24,18 @@
 [interactive]
 	diffFilter = delta --color-only
 
+# Subway Seat generates delta's colours; this file names behaviour only. The
+# include below is what selects the flavor, and `polkadot theme` keeps the file
+# it points at in step with everything else.
+[include]
+	path = ~/.config/delta/london-moquette.gitconfig
+
 [delta]
 	navigate = true
 	side-by-side = true
 	line-numbers = true
 	hyperlinks = true
-	# base16 reads the terminal's own 16 colours, so diffs are Gotham wherever
-	# Gotham is loaded — and follow the terminal if that ever changes.
-	syntax-theme = base16
-	file-style = "#599caa" bold
-	file-decoration-style = "#245361" ul
-	hunk-header-style = syntax
-	hunk-header-decoration-style = "#245361" box
-	line-numbers-left-style = "#245361"
-	line-numbers-right-style = "#245361"
-	line-numbers-zero-style = "#4e5165"
-	line-numbers-minus-style = "#c33027"
-	line-numbers-plus-style = "#26a98b"
-	minus-style = syntax "#2a1416"
-	minus-emph-style = syntax "#4d1f22"
-	plus-style = syntax "#0d2b26"
-	plus-emph-style = syntax "#14453c"
-	blame-palette = "#0a0f14 #10151b #081f2d #093748"
+	features = london-moquette
 
 [merge]
 	conflictstyle = zdiff3

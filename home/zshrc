@@ -65,6 +65,9 @@ supabase_token() {
 # fish, if you want it from inside zsh.
 alias f=fish
 
+# lazygit: ours first, then Subway Seat's colours (see the fish copy).
+export LG_CONFIG_FILE=~/.config/lazygit/config.yml,~/.config/lazygit/london-moquette-delta.yml
+
 # >>> subway-seat >>>
 source ~/.config/zsh/london-moquette.zsh
 # <<< subway-seat <<<

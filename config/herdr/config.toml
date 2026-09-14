@@ -12,19 +12,14 @@
 onboarding = false
 
 [theme]
-# "terminal" inherits the host palette, so herdr is London Moquette wherever
-# Ghostty is, and follows automatically if the terminal theme ever changes. The
-# overrides below pin the chrome the terminal palette does not cover; they are
-# Subway Seat London Moquette, generated from that repo's palette.
-name = "terminal"
+# Subway Seat generates herdr's chrome against catppuccin as its base, so the
+# name has to match or the overrides land on the wrong roles. The override
+# block itself is appended by `polkadot theme` and rewritten in place; there is
+# deliberately no [theme.custom] here, because a second one is not a merge —
+# it is invalid TOML, and herdr refuses to start.
+name = "catppuccin"
 auto_switch = false
 
-[theme.custom]
-panel_bg = "#1E2941"
-sidebar_bg = "#172032"
-active_row_bg = "#263451"
-selection_bg = "#303F61"
-surface_dim = "#172032"
 surface0 = "#263451"
 surface1 = "#303F61"
 overlay0 = "#576685"

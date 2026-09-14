@@ -1,5 +1,6 @@
 # ─── starship ─────────────────────────────────────────────────────────────
-# Managed by polkadot. Gotham palette.
+# Managed by polkadot. The palette is Subway Seat's, appended at the end of
+# this file by its installer — this file names roles, never hex.
 #
 # Three prompts, not one:
 #
@@ -28,31 +29,17 @@ add_newline = true
 # node --version can exceed the 500ms default on a cold cache, which makes the
 # runtime segment flicker in and out.
 command_timeout = 1500
-palette = 'gotham'
+palette = 'london_moquette'
 
-[palettes.gotham]
-bg      = '#0a0f14'
-surface = '#10151b'
-panel   = '#081f2d'
-border  = '#245361'
-muted   = '#4e5165'
-comment = '#888ba5'
-subtle  = '#599caa'
-fg      = '#98d1ce'
-bright  = '#d3ebe9'
-red     = '#c33027'
-orange  = '#d26939'
-yellow  = '#edb54b'
-green   = '#26a98b'
-blue    = '#195465'
-cyan    = '#33859d'
-
+# Three chevrons, warming left to right so the eye lands on the last one —
+# which is where the cursor sits. A failed command turns all three red, which
+# is readable at a glance in a screen of scrollback without reading the code.
 [character]
-success_symbol = '[❯](green)'
-error_symbol = '[❯](red)'
-vimcmd_symbol = '[❮](yellow)'
-vimcmd_replace_symbol = '[❮](orange)'
-vimcmd_visual_symbol = '[❮](cyan)'
+success_symbol = '[❯](bright-red)[❯](purple)[❯](yellow)'
+error_symbol = '[❯](red)[❯](red)[❯](bright-red)'
+vimcmd_symbol = '[❮](green)[❮](cyan)[❮](blue)'
+vimcmd_replace_symbol = '[❮](purple)[❮](purple)[❮](yellow)'
+vimcmd_visual_symbol = '[❮](cyan)[❮](blue)[❮](bright-blue)'
 
 # The exit code, only when there was one. `signal_symbol` catches the ones you
 # actually care about — a ^C reads differently from a segfault.
@@ -72,20 +59,20 @@ pipestatus = true
 pipestatus_format = '[$pipestatus]($style) '
 
 [jobs]
-style = 'orange'
+style = 'purple'
 symbol = '⏵'
 format = '[$symbol$number]($style) '
 number_threshold = 1
 symbol_threshold = 1
 
 [directory]
-style = 'bold subtle'
+style = 'bold blue'
 format = '[$path]($style)[$read_only]($read_only_style) '
 truncation_length = 3
 truncate_to_repo = true
 truncation_symbol = '…/'
 read_only = ' ro'
-read_only_style = 'muted'
+read_only_style = 'bright-black'
 
 [directory.substitutions]
 '~/Code' = ' code'
@@ -101,7 +88,7 @@ truncation_length = 24
 truncation_symbol = '…'
 
 [git_status]
-style = 'orange'
+style = 'purple'
 format = '([$all_status$ahead_behind]($style) )'
 conflicted = '≠${count} '
 ahead = '↑${count} '
@@ -145,17 +132,17 @@ symbol = ' '
 format = '[$symbol($version )]($style)'
 
 [rust]
-style = 'orange'
+style = 'purple'
 symbol = ' '
 format = '[$symbol($version )]($style)'
 
 [php]
-style = 'comment'
+style = 'bright-black'
 symbol = ' '
 format = '[$symbol($version )]($style)'
 
 [container]
-style = 'comment'
+style = 'bright-black'
 format = '[⬢ $name]($style) '
 
 [docker_context]
@@ -166,14 +153,14 @@ only_with_files = true
 
 [kubernetes]
 disabled = false
-style = 'comment'
+style = 'bright-black'
 symbol = '☸ '
 format = '[$symbol$context( \($namespace\))]($style) '
 
 # ─── right side ───────────────────────────────────────────────────────────
 
 [cmd_duration]
-style = 'muted'
+style = 'bright-black'
 min_time = 2000
 format = '[$duration]($style) '
 show_milliseconds = false
@@ -191,7 +178,7 @@ style = 'yellow'
 
 [time]
 disabled = false
-style = 'border'
+style = 'bright-black'
 format = '[$time]($style)'
 time_format = '%H:%M'
 

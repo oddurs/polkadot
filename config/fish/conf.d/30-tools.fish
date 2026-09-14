@@ -40,3 +40,8 @@ if status is-interactive
         end
 end
 end
+
+# lazygit reads one config, or several comma-separated and merged left to
+# right. Ours first, then Subway Seat's colours — so switching flavor never
+# means editing the config that holds the keybindings.
+set -gx LG_CONFIG_FILE ~/.config/lazygit/config.yml,~/.config/lazygit/london-moquette-delta.yml
