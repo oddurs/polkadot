@@ -18,3 +18,12 @@ config/atuin/themes/
 # herdr writes session state beside its config.
 config/herdr/session*.json
 config/herdr/.plugins.lock
+
+# opencode: skills and machine state
+config/opencode/skills/
+config/opencode/node_modules/
+config/opencode/bun.lock
+config/opencode/package*.json
+
+# herdr writes release notes beside its config too.
+config/herdr/release-notes.json
