@@ -326,3 +326,149 @@ func doDoctor(home, root string) {
 // switch <flavor>` changes it for the apps already installed; changing it here
 // is what a fresh machine gets.
 const themeFlavor = "moquette"
+
+// The repositories this machine's configuration is actually made of. polkadot
+// holds the dotfiles, subway-seat generates the theme, fresh-config is the
+// editor. Keeping them in one list is what lets `sync` be one command rather
+// than three things you have to remember.
+var repos = []struct{ name, path, url string }{
+	{"polkadot", "Code/polkadot", "git@github.com:oddurs/polkadot.git"},
+	{"subway-seat", "Code/subway-seat", "git@github.com:oddurs/subway-seat.git"},
+	{"fresh-config", ".config/fresh", "git@github.com:oddurs/fresh-config.git"},
+}
+
+// doSync fast-forwards each of them and puts back anything new.
+//
+// Fast-forward only, and never over a dirty tree: this runs unattended from a
+// launchd timer, and the one thing it must never do is touch work in progress
+// or leave a merge conflict in a config file that a shell is about to read.
+// A repo it cannot advance is reported and skipped, not forced.
+func doSync(l *link.Linker, t *tally) {
+	ui.Section("sync")
+	home, _ := os.UserHomeDir()
+	changed := false
+
+	for _, r := range repos {
+		dir := filepath.Join(home, r.path)
+		if _, err := os.Stat(filepath.Join(dir, ".git")); err != nil {
+			ui.Result(r.name, "skipped", "not cloned")
+			t.skip++
+			continue
+		}
+		if out, err := step.Sh(fmt.Sprintf("git -C %q status --porcelain", dir)); err == nil && strings.TrimSpace(out) != "" {
+			ui.Result(r.name, "skipped", "uncommitted changes")
+			t.skip++
+			continue
+		}
+		// A feature branch with no upstream is the normal state of a repo
+		// somebody is working in, not a problem to report every Monday.
+		if _, err := step.Sh(fmt.Sprintf("git -C %q rev-parse --abbrev-ref --symbolic-full-name @{u}", dir)); err != nil {
+			ui.Result(r.name, "skipped", "branch has no upstream")
+			t.skip++
+			continue
+		}
+		before, _ := step.Sh(fmt.Sprintf("git -C %q rev-parse HEAD", dir))
+		if *dryRun {
+			ui.Result(r.name, "would", "git pull --ff-only")
+			t.done++
+			continue
+		}
+		if _, err := step.Sh(fmt.Sprintf("git -C %q pull --ff-only --quiet 2>&1", dir)); err != nil {
+			ui.Result(r.name, "failed", "cannot fast-forward — diverged, or no network")
+			t.fail++
+			continue
+		}
+		after, _ := step.Sh(fmt.Sprintf("git -C %q rev-parse HEAD", dir))
+		if before == after {
+			ui.Result(r.name, "already", "current")
+			t.skip++
+			continue
+		}
+		short, _ := step.Sh(fmt.Sprintf("git -C %q log --oneline %s..%s | head -3", dir, strings.TrimSpace(before), strings.TrimSpace(after)))
+		ui.Result(r.name, "updated", strings.TrimSpace(strings.SplitN(short, "\n", 2)[0]))
+		t.done++
+		changed = true
+	}
+	ui.Blank()
+
+	// Only relink when something moved. A sync that changed nothing should
+	// print three lines and touch no files.
+	if changed {
+		doLink(l, t)
+		doTheme(t)
+	}
+}
+
+// The launchd agent that runs the above. Weekly rather than daily: these
+// repositories change when I change them, and a timer that fires more often
+// than the thing it watches is just noise in the log.
+const syncPlist = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key><string>dev.polkadot.sync</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/bin/sh</string>
+		<string>-lc</string>
+		<string>cd %s && %s run . sync</string>
+	</array>
+	<key>StartCalendarInterval</key>
+	<dict>
+		<key>Weekday</key><integer>1</integer>
+		<key>Hour</key><integer>9</integer>
+		<key>Minute</key><integer>0</integer>
+	</dict>
+	<key>RunAtLoad</key><false/>
+	<key>StandardOutPath</key><string>%s/Library/Logs/polkadot-sync.log</string>
+	<key>StandardErrorPath</key><string>%s/Library/Logs/polkadot-sync.log</string>
+</dict>
+</plist>
+`
+
+func doTimer(t *tally) {
+	ui.Section("timer")
+	home, _ := os.UserHomeDir()
+	root, _ := repoRoot()
+	dst := filepath.Join(home, "Library", "LaunchAgents", "dev.polkadot.sync.plist")
+
+	goBin, err := step.Run("/bin/sh", "-c", "command -v go")
+	if err != nil {
+		ui.Result("go", "failed", "not on PATH; the timer needs it to run `go run .`")
+		t.fail++
+		ui.Blank()
+		return
+	}
+	body := fmt.Sprintf(syncPlist, root, strings.TrimSpace(goBin), home, home)
+
+	if *dryRun {
+		ui.Result("dev.polkadot.sync", "would", "install, Mondays at 09:00")
+		t.done++
+		ui.Blank()
+		return
+	}
+	if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
+		ui.Result("LaunchAgents", "failed", err.Error())
+		t.fail++
+		ui.Blank()
+		return
+	}
+	if err := os.WriteFile(dst, []byte(body), 0o644); err != nil {
+		ui.Result(dst, "failed", err.Error())
+		t.fail++
+		ui.Blank()
+		return
+	}
+	// bootout first so a changed plist is actually reloaded; it fails
+	// harmlessly when nothing is loaded yet.
+	uid := os.Getuid()
+	_, _ = step.Sh(fmt.Sprintf("launchctl bootout gui/%d/dev.polkadot.sync 2>/dev/null", uid))
+	if _, err := step.Sh(fmt.Sprintf("launchctl bootstrap gui/%d %q", uid, dst)); err != nil {
+		ui.Result("dev.polkadot.sync", "failed", "written, but launchctl refused it")
+		t.fail++
+	} else {
+		ui.Result("dev.polkadot.sync", "loaded", "Mondays at 09:00")
+		t.done++
+	}
+	ui.Blank()
+}
