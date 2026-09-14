@@ -1,0 +1,268 @@
+// ─── opencode ─────────────────────────────────────────────────────────────
+// Managed by polkadot: ~/Code/polkadot/config/opencode/opencode.jsonc
+//
+// opencode reads this, ./agents, ./commands and ./templates from
+// ~/.config/opencode. Skills are not here — see skills.md for why.
+//
+//   opencode                 start in the current project
+//   opencode run "<task>"    one shot, no TUI
+//   /models                  switch model mid-session
+//   ctrl+x then ?            the leader key, and everything bound to it
+
+{
+  "$schema": "https://opencode.ai/config.json",
+
+  // ─── models ─────────────────────────────────────────────────────────────
+  // Names carry $in/$out per million tokens, because the cost of a choice
+  // should be visible at the moment you make it. Verified against
+  // openrouter.ai/api/v1/models; re-check before editing, they move.
+
+  "model": "openrouter/sonnet",
+  "small_model": "openrouter/haiku",
+
+  "instructions": ["AGENTS.md"],
+
+  "provider": {
+    "openrouter": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "OpenRouter",
+      "options": {
+        "baseURL": "https://openrouter.ai/api/v1",
+        "apiKey": "{env:OPENROUTER_API_KEY}",
+        "timeout": 300000,
+        "headers": {
+          "HTTP-Referer": "https://github.com/oddurs",
+          "X-Title": "opencode"
+        }
+      },
+      "models": {
+        // Reach for these when the work is hard.
+        "opus": {
+          "name": "Claude Opus 5  ·  $5/$25",
+          "id": "anthropic/claude-opus-5",
+          "limit": { "context": 1000000, "output": 128000 }
+        },
+        "sonnet": {
+          "name": "Claude Sonnet 5  ·  $2/$10",
+          "id": "anthropic/claude-sonnet-5",
+          "limit": { "context": 1000000, "output": 128000 }
+        },
+        "gpt": {
+          "name": "GPT-5.6 Terra Pro  ·  $2/$12",
+          "id": "openai/gpt-5.6-terra-pro",
+          "limit": { "context": 1050000, "output": 128000 }
+        },
+
+        // Fast enough to stay in the loop with, cheap enough not to think
+        // about. `small_model` runs titles, summaries and compaction.
+        "haiku": {
+          "name": "Claude Haiku 4.5  ·  $1/$5",
+          "id": "anthropic/claude-haiku-4.5",
+          "limit": { "context": 200000, "output": 64000 }
+        },
+        "flash": {
+          "name": "Gemini 3.8 Flash  ·  $0.75/$3.75",
+          "id": "google/gemini-3.8-flash",
+          "limit": { "context": 1048576, "output": 65536 }
+        },
+
+        // For the long mechanical passes where the bill is the constraint.
+        "qwen": {
+          "name": "Qwen3 Coder 480B  ·  $0.30/$1",
+          "id": "qwen/qwen3-coder",
+          "limit": { "context": 262144, "output": 65536 }
+        },
+        "deepseek": {
+          "name": "DeepSeek V3  ·  $0.26/$1.03",
+          "id": "deepseek/deepseek-chat",
+          "limit": { "context": 163840, "output": 16000 }
+        }
+      }
+    }
+  },
+
+  // ─── display ────────────────────────────────────────────────────────────
+  // Subway Seat London Moquette, linked into ./themes by `polkadot theme`.
+  // Switch with: sh ~/Code/subway-seat/install.sh switch <flavor>
+
+  "theme": "london-moquette",
+  "tui": {
+    "scroll_speed": 3,
+    "scroll_acceleration": { "enabled": true },
+    "diff_style": "auto"
+  },
+
+  // ctrl+b is tmux and ctrl+a is herdr. ctrl+x is the one chord left that
+  // nothing else on this machine wants.
+  "keybinds": { "leader": "ctrl+x" },
+
+  // ─── permission ─────────────────────────────────────────────────────────
+  // Ask by default; allow what cannot change anything; deny what cannot be
+  // undone. The allowlist is read-only commands and the test/build verbs —
+  // an agent that has to ask before `cargo check` is an agent you stop using.
+
+  "permission": {
+    "*": "ask",
+    "read": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "list": "allow",
+    "lsp": "allow",
+    "task": "allow",
+    "webfetch": "allow",
+    "websearch": "allow",
+    "skill": { "*": "allow" },
+    "edit": "ask",
+    "write": "ask",
+
+    "bash": {
+      "*": "ask",
+
+      // The seam. Every repo here answers these six verbs, so this is most of
+      // what an agent needs and none of it changes history.
+      "scripts/task *": "allow",
+      "scripts/agent doctor*": "allow",
+      "scripts/agent list*": "allow",
+      "just *": "allow",
+
+      // git, read-only. Nothing here writes a ref.
+      "git status*": "allow",
+      "git diff*": "allow",
+      "git log*": "allow",
+      "git show*": "allow",
+      "git branch*": "allow",
+      "git blame*": "allow",
+      "git rev-parse*": "allow",
+      "git remote -v*": "allow",
+      "git stash list*": "allow",
+      "git worktree list*": "allow",
+
+      // gh, read-only.
+      "gh pr view*": "allow",
+      "gh pr list*": "allow",
+      "gh pr diff*": "allow",
+      "gh pr checks*": "allow",
+      "gh run list*": "allow",
+      "gh run view*": "allow",
+      "gh issue list*": "allow",
+      "gh issue view*": "allow",
+
+      // Build and test. These write to target/ and node_modules and nowhere
+      // that matters.
+      "cargo check*": "allow",
+      "cargo build*": "allow",
+      "cargo test*": "allow",
+      "cargo clippy*": "allow",
+      "cargo fmt*": "allow",
+      "cargo nextest*": "allow",
+      "pnpm *": "allow",
+      "npm run*": "allow",
+      "npm test*": "allow",
+      "npx *": "allow",
+      "bun *": "allow",
+      "uv run*": "allow",
+      "uv sync*": "allow",
+      "pytest*": "allow",
+      "go build*": "allow",
+      "go test*": "allow",
+      "go vet*": "allow",
+      "vitest*": "allow",
+      "playwright*": "allow",
+
+      // Looking around.
+      "ls *": "allow",
+      "cat *": "allow",
+      "head *": "allow",
+      "tail *": "allow",
+      "rg *": "allow",
+      "fd *": "allow",
+      "jq *": "allow",
+      "yq *": "allow",
+      "wc *": "allow",
+      "file *": "allow",
+      "which *": "allow",
+      "tokei *": "allow",
+      "dust *": "allow",
+      "difft *": "allow",
+      "hyperfine *": "allow",
+      "cairn *": "allow",
+
+      // The hooks are the point, and the default branch only advances through
+      // a merged pull request. Both of these are enforced elsewhere too; this
+      // is the layer that stops an agent trying.
+      "git commit --no-verify*": "deny",
+      "git push --no-verify*": "deny",
+      "git push --force*": "deny",
+      "git push -f*": "deny",
+      "git push origin main*": "deny",
+      "rm -rf *": "deny",
+      "sudo *": "deny",
+      "> ~/.zshrc": "deny",
+      "> ~/.config/fish/*": "deny"
+    }
+  },
+
+  // ─── behaviour ──────────────────────────────────────────────────────────
+
+  "autoupdate": true,
+  "compaction": {
+    "auto": true,
+    "prune": true,
+    "reserved": 10000
+  },
+  "share": "manual",
+
+  // Local only. `opencode web` binds to this; there is no reason for it to
+  // listen on anything the network can reach.
+  "server": {
+    "port": 19850,
+    "hostname": "127.0.0.1"
+  },
+
+  // ─── mcp ────────────────────────────────────────────────────────────────
+
+  "mcp": {
+    // Library and framework documentation, fetched rather than remembered.
+    "context7": {
+      "type": "local",
+      "command": ["npx", "-y", "@upstash/context7-mcp"],
+      "enabled": true
+    },
+    "github": {
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-github"],
+      "environment": { "GITHUB_PERSONAL_ACCESS_TOKEN": "{env:GITHUB_TOKEN}" }
+    },
+    "supabase": { "type": "remote", "url": "https://mcp.supabase.com/mcp" },
+    "vercel": { "type": "remote", "url": "https://mcp.vercel.com" }
+  },
+
+  // ─── watcher ────────────────────────────────────────────────────────────
+  // Build output and dependencies. Watching target/ on a Rust project is how
+  // you get a file-watcher storm during a cargo build.
+
+  "watcher": {
+    "ignore": [
+      "node_modules/**",
+      ".git/**",
+      "target/**",
+      "dist/**",
+      "build/**",
+      ".next/**",
+      ".turbo/**",
+      ".vercel/**",
+      ".supabase/**",
+      "coverage/**",
+      ".cache/**",
+      "tmp/**",
+      ".temp/**",
+      "*.lock"
+    ]
+  }
+
+  // Formatting is deliberately not configured. Every repo here answers
+  // `scripts/task fmt`, which runs that project's own formatter with that
+  // project's own config — and opencode's built-in formatters handle a file
+  // in a repo that has no seam. An `npx prettier` override here would be a
+  // third opinion, slower than both and agreeing with neither.
+}

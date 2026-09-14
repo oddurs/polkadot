@@ -27,6 +27,13 @@ var links = []struct{ from, to string }{
 	// Only config.yml: hosts.yml beside it holds the OAuth token.
 	{"config/gh/config.yml", ".config/gh/config.yml"},
 	{"config/codex/config.toml", ".codex/config.toml"},
+	// opencode reads these from ~/.config/opencode. node_modules, bun.lock and
+	// the skills are machine state and stay out of the repo.
+	{"config/opencode/opencode.jsonc", ".config/opencode/opencode.jsonc"},
+	{"config/opencode/AGENTS.md", ".config/opencode/AGENTS.md"},
+	{"config/opencode/agents", ".config/opencode/agents"},
+	{"config/opencode/commands", ".config/opencode/commands"},
+	{"config/opencode/templates", ".config/opencode/templates"},
 	{"config/claude/settings.json", ".claude/settings.json"},
 	// Instructions, not state: CLAUDE.md loads every session, rules/ load when
 	// a matching file is touched, skills/ load on demand. Everything else

@@ -44,14 +44,21 @@ shape, so restoring is a plain `mv` back.
 ## Layout
 
 ```
-config/     → ~/.config/*        fish, starship, nvim, lazygit, ghostty,
-                                 herdr, atuin, mise, btop, bat, ripgrep
-home/       → ~/*                gitconfig, gitignore_global, commit template
-config/vscode/settings.json      → ~/Library/Application Support/Code/User/
-config/claude/                   → ~/.claude/*   CLAUDE.md, rules/, skills/,
-                                 settings.json — instructions, never state
-Brewfile                         formulae, casks, VS Code extensions
+config/      → ~/.config/*     fish, starship, ghostty, lazygit, herdr,
+                               atuin, mise, btop, bat, ripgrep, tmux
+home/        → ~/*             gitconfig, gitignore_global, commit template
+config/claude/    → ~/.claude/*        CLAUDE.md, rules/, skills/, settings.json
+config/opencode/  → ~/.config/opencode/  config, AGENTS.md, agents/, commands/
+config/codex/     → ~/.codex/config.toml
+config/gh/        → ~/.config/gh/config.yml     (not hosts.yml — that is a token)
+config/vscode/    → ~/Library/Application Support/Code/User/
+Brewfile                       formulae, casks, VS Code extensions
 ```
+
+The line every one of those follows: **instructions are tracked, state is not.**
+`CLAUDE.md` and an agent's command definitions belong in a repo. Session
+history, plugin caches, OAuth tokens and 2 MB of somebody else's skill packages
+do not.
 
 Everything is symlinked, not copied. Edit in the repo, it is live immediately;
 edit in place, it is already staged.
@@ -148,7 +155,15 @@ belong in a repo. History, projects, plugins and auto memory stay out.
 
 `gh` is here too, with aliases for the loop these repos actually run: `gh mine`,
 `gh cs` to watch checks, `gh done` to squash-merge and delete the branch.
-`gh dash` (a gh extension, not a formula) is the same view without a browser. Herdr hosts the other three in
+`gh dash` (a gh extension, not a formula) is the same view without a browser.
+
+opencode carries the most configuration, because it has the most to say: seven
+models behind short names that show what each costs per million tokens, a
+permission table that allows the read-only half of git and the whole of
+`scripts/task` while denying anything that rewrites history, and five agents and
+eleven commands of its own. Its skills are third-party and deliberately absent —
+[`config/opencode/skills.md`](config/opencode/skills.md) says which, and how to
+get them back. Herdr hosts the other three in
 persistent sessions that survive sleep, network drops and restarts, and can be
 reattached from another machine. Its prefix is `ctrl+a` so it does not fight
 tmux, and its panes open `fish -l` so an agent's shell is the same shell you get
