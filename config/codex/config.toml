@@ -20,6 +20,9 @@ exclude_tmpdir_env_var = false
 
 [tui]
 notifications = true
+# The theme files are symlinked into ~/.codex/themes by `polkadot theme`;
+# this is the line that actually selects one.
+theme = "london-moquette"
 
 [shell_environment_policy]
 # fish is the login shell; codex should see the same PATH a terminal does.

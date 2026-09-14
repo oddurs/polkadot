@@ -36,6 +36,7 @@ var links = []struct{ from, to string }{
 	{"config/claude/rules", ".claude/rules"},
 	{"config/claude/skills", ".claude/skills"},
 	{"config/ripgrep", ".config/ripgrep"},
+	{"config/tmux/tmux.conf", ".tmux.conf"},
 	{"config/vscode/settings.json", "Library/Application Support/Code/User/settings.json"},
 	{"home/zshrc", ".zshrc"},
 	{"home/gitconfig", ".gitconfig"},

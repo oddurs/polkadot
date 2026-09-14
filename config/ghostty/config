@@ -3,13 +3,13 @@
 
 # Theme.
 #
-# Subway Seat London Moquette: the Tube's Corporate Blue turned right down.
-# The theme files live in ./themes/ and are symlinks into ~/Code/subway-seat,
-# placed by `polkadot theme`. Switch flavor with:
+# Not set here. `polkadot theme` appends `theme = London Moquette` in a marked
+# block at the end of this file, and its installer rewrites that block in
+# place — so naming a theme here too would leave a dead line behind every time
+# the flavor changed.
 #
 #   sh ~/Code/subway-seat/install.sh switch <flavor>
 #   ghostty +list-themes    browse everything with live preview
-theme = London Moquette
 
 # ─── type ─────────────────────────────────────────────────────────────────
 font-family = JetBrainsMono Nerd Font
