@@ -8,7 +8,18 @@ import (
 	"strings"
 )
 
-var color = os.Getenv("NO_COLOR") == "" && os.Getenv("TERM") != "dumb"
+// Colour only when somebody is watching. Under the launchd timer stdout is a
+// log file, and escape codes in a log are noise you have to strip before you
+// can read what went wrong.
+var color = os.Getenv("NO_COLOR") == "" && os.Getenv("TERM") != "dumb" && isTerminal()
+
+func isTerminal() bool {
+	fi, err := os.Stdout.Stat()
+	if err != nil {
+		return false
+	}
+	return fi.Mode()&os.ModeCharDevice != 0
+}
 
 func paint(code, s string) string {
 	if !color {

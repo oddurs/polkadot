@@ -360,6 +360,13 @@ func doSync(l *link.Linker, t *tally) {
 			t.skip++
 			continue
 		}
+		// A feature branch with no upstream is the normal state of a repo
+		// somebody is working in, not a problem to report every Monday.
+		if _, err := step.Sh(fmt.Sprintf("git -C %q rev-parse --abbrev-ref --symbolic-full-name @{u}", dir)); err != nil {
+			ui.Result(r.name, "skipped", "branch has no upstream")
+			t.skip++
+			continue
+		}
 		before, _ := step.Sh(fmt.Sprintf("git -C %q rev-parse HEAD", dir))
 		if *dryRun {
 			ui.Result(r.name, "would", "git pull --ff-only")
