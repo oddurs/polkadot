@@ -1,0 +1,487 @@
+[
+  {
+    "plugin_id": "herdr-navigator",
+    "name": "Herdr Navigator",
+    "version": "0.3.6",
+    "min_herdr_version": "0.7.3",
+    "description": "Jump to any Herdr workspace, agent, project, session, remote, directory, or action from one fuzzy navigator.",
+    "manifest_path": "/Users/oddurs/Code/polkadot/config/herdr/plugins/github/herdr-navigator-3a5a6fa5dfb5/herdr-plugin.toml",
+    "plugin_root": "/Users/oddurs/Code/polkadot/config/herdr/plugins/github/herdr-navigator-3a5a6fa5dfb5",
+    "enabled": true,
+    "platforms": [
+      "linux",
+      "macos"
+    ],
+    "build": [
+      {
+        "command": [
+          "cargo",
+          "build",
+          "--release"
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "id": "jump-back",
+        "title": "Herdr Navigator: jump back",
+        "contexts": [
+          "workspace",
+          "global"
+        ],
+        "command": [
+          "./target/release/herdr-navigator",
+          "jump-back"
+        ]
+      },
+      {
+        "id": "open",
+        "title": "Herdr Navigator: open",
+        "contexts": [
+          "workspace",
+          "global"
+        ],
+        "command": [
+          "./target/release/herdr-navigator",
+          "open"
+        ]
+      },
+      {
+        "id": "open-side",
+        "title": "Herdr Navigator: side pane",
+        "contexts": [
+          "workspace",
+          "global"
+        ],
+        "command": [
+          "./target/release/herdr-navigator",
+          "open-side"
+        ]
+      }
+    ],
+    "panes": [
+      {
+        "id": "picker",
+        "title": "Herdr Navigator",
+        "placement": "overlay",
+        "command": [
+          "./target/release/herdr-navigator",
+          "ui"
+        ]
+      },
+      {
+        "id": "picker-side",
+        "title": "Navigator Side",
+        "placement": "split",
+        "command": [
+          "./target/release/herdr-navigator",
+          "ui",
+          "--side"
+        ]
+      }
+    ],
+    "source": {
+      "kind": "github",
+      "owner": "thanhdat77",
+      "repo": "herdr-navigator",
+      "resolved_commit": "9bdf30f03f53730e6232377a3fca3bdc6ed9f3ca",
+      "managed_path": "/Users/oddurs/.config/herdr/plugins/github/herdr-navigator-3a5a6fa5dfb5",
+      "installed_unix_ms": 1789359564749
+    }
+  },
+  {
+    "plugin_id": "namesync",
+    "name": "Namesync",
+    "version": "0.2.0",
+    "min_herdr_version": "0.8.0",
+    "description": "Keeps workspace, tab and agent names in step with the work as it changes, and holds off when it should not. Works with no model; can use one when you want.",
+    "manifest_path": "/Users/oddurs/Code/polkadot/config/herdr/plugins/github/namesync-a86ec994d142/herdr-plugin.toml",
+    "plugin_root": "/Users/oddurs/Code/polkadot/config/herdr/plugins/github/namesync-a86ec994d142",
+    "enabled": true,
+    "platforms": [
+      "linux",
+      "macos",
+      "windows"
+    ],
+    "startup": [
+      {
+        "command": [
+          "node",
+          "src/cli.js",
+          "startup"
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "id": "dry-run",
+        "title": "Preview what would be renamed",
+        "contexts": [
+          "workspace"
+        ],
+        "command": [
+          "node",
+          "src/cli.js",
+          "dry-run"
+        ]
+      },
+      {
+        "id": "group",
+        "title": "Preview grouping spaces by project",
+        "contexts": [
+          "workspace"
+        ],
+        "command": [
+          "node",
+          "src/cli.js",
+          "group"
+        ]
+      },
+      {
+        "id": "lock",
+        "title": "Lock this workspace name",
+        "contexts": [
+          "workspace"
+        ],
+        "command": [
+          "node",
+          "src/cli.js",
+          "lock"
+        ]
+      },
+      {
+        "id": "reformat",
+        "title": "Re-render owned labels",
+        "contexts": [
+          "workspace"
+        ],
+        "command": [
+          "node",
+          "src/cli.js",
+          "reformat"
+        ]
+      },
+      {
+        "id": "rename-all",
+        "title": "Rename every workspace",
+        "contexts": [
+          "workspace"
+        ],
+        "command": [
+          "node",
+          "src/cli.js",
+          "rename-all"
+        ]
+      },
+      {
+        "id": "rename-now",
+        "title": "Rename this workspace now",
+        "contexts": [
+          "workspace"
+        ],
+        "command": [
+          "node",
+          "src/cli.js",
+          "rename-now"
+        ]
+      },
+      {
+        "id": "restart",
+        "title": "Restart the namer watcher",
+        "contexts": [
+          "workspace"
+        ],
+        "command": [
+          "node",
+          "src/cli.js",
+          "restart"
+        ]
+      },
+      {
+        "id": "setup",
+        "title": "Show the sidebar rows to add",
+        "contexts": [
+          "workspace"
+        ],
+        "command": [
+          "node",
+          "src/cli.js",
+          "setup"
+        ]
+      },
+      {
+        "id": "status",
+        "title": "Namesync status",
+        "contexts": [
+          "workspace"
+        ],
+        "command": [
+          "node",
+          "src/cli.js",
+          "status"
+        ]
+      },
+      {
+        "id": "unlock",
+        "title": "Unlock this workspace name",
+        "contexts": [
+          "workspace"
+        ],
+        "command": [
+          "node",
+          "src/cli.js",
+          "unlock"
+        ]
+      }
+    ],
+    "source": {
+      "kind": "github",
+      "owner": "oddurs",
+      "repo": "herdr-namesync",
+      "resolved_commit": "44e4c066838d38cc50cf7f014d6ba6d8e06d734c",
+      "managed_path": "/Users/oddurs/.config/herdr/plugins/github/namesync-a86ec994d142",
+      "installed_unix_ms": 1789359166434
+    }
+  },
+  {
+    "plugin_id": "persiyanov.reviewr",
+    "name": "reviewr",
+    "version": "0.37.1",
+    "min_herdr_version": "0.7.5",
+    "description": "Review agent-written diffs beside the chat and add line comments to the agent input.",
+    "manifest_path": "/Users/oddurs/Code/polkadot/config/herdr/plugins/github/persiyanov.reviewr-e87b654a74f8/herdr-plugin.toml",
+    "plugin_root": "/Users/oddurs/Code/polkadot/config/herdr/plugins/github/persiyanov.reviewr-e87b654a74f8",
+    "enabled": true,
+    "platforms": [
+      "macos",
+      "linux"
+    ],
+    "build": [
+      {
+        "command": [
+          "bash",
+          "herdr/install.sh"
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "id": "close",
+        "title": "reviewr: close pane",
+        "contexts": [
+          "pane",
+          "workspace"
+        ],
+        "command": [
+          "bash",
+          "herdr/pane.sh",
+          "close"
+        ]
+      },
+      {
+        "id": "open",
+        "title": "reviewr: open pane",
+        "contexts": [
+          "pane",
+          "workspace"
+        ],
+        "command": [
+          "bash",
+          "herdr/pane.sh",
+          "open"
+        ]
+      },
+      {
+        "id": "toggle",
+        "title": "reviewr: toggle pane",
+        "contexts": [
+          "pane",
+          "workspace"
+        ],
+        "command": [
+          "bash",
+          "herdr/pane.sh",
+          "toggle"
+        ]
+      }
+    ],
+    "events": [
+      {
+        "on": "worktree.created",
+        "command": [
+          "bash",
+          "herdr/pane.sh",
+          "auto-open"
+        ]
+      },
+      {
+        "on": "worktree.opened",
+        "command": [
+          "bash",
+          "herdr/pane.sh",
+          "auto-open"
+        ]
+      }
+    ],
+    "panes": [
+      {
+        "id": "pane",
+        "title": "reviewr",
+        "placement": "split",
+        "command": [
+          "sh",
+          "-c",
+          "exec \"$HERDR_PLUGIN_ROOT/bin/herdr-reviewr\""
+        ]
+      }
+    ],
+    "source": {
+      "kind": "github",
+      "owner": "persiyanov",
+      "repo": "herdr-reviewr",
+      "resolved_commit": "68f2faca2c203c536c25109a0c6e9a8c5d0b21ef",
+      "managed_path": "/Users/oddurs/.config/herdr/plugins/github/persiyanov.reviewr-e87b654a74f8",
+      "installed_unix_ms": 1789359559604
+    }
+  },
+  {
+    "plugin_id": "rcosteira.account-switch",
+    "name": "Account Switch",
+    "version": "0.1.0",
+    "min_herdr_version": "0.8.0",
+    "description": "Hot-swap Claude Code / Codex logins without re-authenticating. Overlay picker, cycle-to-next keybinding, and a per-pane account badge ($acct).",
+    "manifest_path": "/Users/oddurs/Code/polkadot/config/herdr/plugins/github/rcosteira.account-switch-2cef96264577/herdr-plugin.toml",
+    "plugin_root": "/Users/oddurs/Code/polkadot/config/herdr/plugins/github/rcosteira.account-switch-2cef96264577",
+    "enabled": true,
+    "platforms": [
+      "macos",
+      "linux"
+    ],
+    "startup": [
+      {
+        "command": [
+          "python3",
+          "switcher.py",
+          "stamp"
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "id": "disable-badge",
+        "title": "Accounts: remove the $acct badge from the sidebar",
+        "contexts": [
+          "global"
+        ],
+        "command": [
+          "python3",
+          "switcher.py",
+          "disable-badge"
+        ]
+      },
+      {
+        "id": "enable-badge",
+        "title": "Accounts: add the $acct badge to the sidebar",
+        "contexts": [
+          "global"
+        ],
+        "command": [
+          "python3",
+          "switcher.py",
+          "enable-badge"
+        ]
+      },
+      {
+        "id": "next",
+        "title": "Accounts: switch to next account",
+        "contexts": [
+          "global",
+          "pane"
+        ],
+        "command": [
+          "python3",
+          "switcher.py",
+          "next"
+        ]
+      },
+      {
+        "id": "open",
+        "title": "Accounts: open picker",
+        "contexts": [
+          "global"
+        ],
+        "command": [
+          "python3",
+          "switcher.py",
+          "open"
+        ]
+      },
+      {
+        "id": "save",
+        "title": "Accounts: save current login as a profile",
+        "contexts": [
+          "global"
+        ],
+        "command": [
+          "python3",
+          "switcher.py",
+          "save"
+        ]
+      },
+      {
+        "id": "status",
+        "title": "Accounts: status",
+        "contexts": [
+          "global"
+        ],
+        "command": [
+          "python3",
+          "switcher.py",
+          "status"
+        ]
+      },
+      {
+        "id": "usage",
+        "title": "Accounts: open usage",
+        "contexts": [
+          "global"
+        ],
+        "command": [
+          "python3",
+          "switcher.py",
+          "open-usage"
+        ]
+      }
+    ],
+    "panes": [
+      {
+        "id": "picker",
+        "title": "Accounts",
+        "placement": "overlay",
+        "command": [
+          "python3",
+          "switcher.py",
+          "ui"
+        ]
+      },
+      {
+        "id": "usage",
+        "title": "Usage",
+        "placement": "overlay",
+        "command": [
+          "python3",
+          "switcher.py",
+          "usage-ui"
+        ]
+      }
+    ],
+    "source": {
+      "kind": "github",
+      "owner": "rcosteira79",
+      "repo": "herdr-account-switch",
+      "resolved_commit": "732b52aed3ef6f8cdbfb28607269c86c85b4449a",
+      "managed_path": "/Users/oddurs/.config/herdr/plugins/github/rcosteira.account-switch-2cef96264577",
+      "installed_unix_ms": 1789359765610
+    }
+  }
+]

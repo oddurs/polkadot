@@ -1,0 +1,8 @@
+# The review unit here is the branch, not the last turn: work reaches a PR via
+# `scripts/agent check` over the whole branch, so that is the scope to land on.
+default_scope = "branch"
+navigator_position = "right"
+
+# Left at the default `catppuccin`. reviewr does not read herdr's
+# [theme.custom], so the London Moquette tokens cannot reach it — vanilla
+# catppuccin is the same base and the closest match available.

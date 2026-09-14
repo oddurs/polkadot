@@ -1,0 +1,12 @@
+# Navigator inherits herdr's theme and [theme.custom] while [theme].name is
+# unset, so it picks up London Moquette without being told twice.
+
+# Depth 1: ~/Code holds the repos themselves, not trees of them.
+[[roots]]
+path = "~/Code"
+max_depth = 1
+
+# Depth 3 reaches <repo>/<type>/<slug> — the worktree layout in CLAUDE.md.
+[[roots]]
+path = "~/Code/.worktrees"
+max_depth = 3

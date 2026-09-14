@@ -72,7 +72,7 @@ teal = "#54B4B5"
 # current agent state; $age is how long the intent has been the current one.
 [ui.sidebar.agents]
 rows = [
-  ["state_icon", { token = "$n", fg = "#54B4B5", bold = true }, { token = "$project", fg = "#D8DEEA", bold = true }, { token = "$worktree", fg = "#DE8946" }, { token = "$acct", fg = "#AE9EDC" }, { token = "$locked", fg = "#DE8946" }, { token = "$stale", fg = "#73819C" }, { token = "$since", fg = "#73819C" }],
+  ["state_icon", { token = "$n", fg = "#54B4B5", bold = true }, { token = "$project", fg = "#D8DEEA", bold = true }, { token = "$worktree", fg = "#DE8946" }, { token = "$locked", fg = "#DE8946" }, { token = "$stale", fg = "#73819C" }, { token = "$since", fg = "#73819C" }],
   [{ token = "terminal_title_stripped", fg = "#7595DA" }],
 ]
 
@@ -82,31 +82,3 @@ rows = [
   [{ token = "workspace", fg = "#7595DA" }],
 ]
 # <<< namesync end
-
-# >>> plugin keybindings >>>
-# prefix is ctrl+a, and t/u/i are unbound in herdr's defaults.
-[[keys.command]]
-key = "prefix+t"
-type = "plugin_action"
-command = "herdr-navigator.open"
-description = "jump to anything"
-
-[[keys.command]]
-key = "prefix+u"
-type = "plugin_action"
-command = "herdr-navigator.jump-back"
-description = "last workspace"
-
-[[keys.command]]
-key = "prefix+i"
-type = "plugin_action"
-command = "rcosteira.account-switch.open"
-description = "switch account"
-
-# cmd chords reach herdr; many macOS terminals swallow alt+ themselves.
-[[keys.command]]
-key = "cmd+r"
-type = "plugin_action"
-command = "persiyanov.reviewr.toggle"
-description = "review the diff"
-# <<< plugin keybindings <<<
