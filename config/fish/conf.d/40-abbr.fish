@@ -82,7 +82,7 @@ abbr -a .... 'cd ../../..'
 abbr -a c 'cd ~/Code'
 
 # editors and agents
-abbr -a v nvim
+abbr -a v fresh
 abbr -a cl claude
 abbr -a oc opencode
 abbr -a hd herdr

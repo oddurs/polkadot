@@ -32,28 +32,18 @@ brew "git"
 brew "git-delta"
 # Open source programming language to build simple/reliable/efficient software
 brew "go"
-# Improved top (interactive process viewer)
-brew "htop"
 # Lazier way to manage everything docker
 brew "lazydocker"
 # Simple terminal UI for git commands
 brew "lazygit"
 # Polyglot runtime manager (asdf rust clone)
 brew "mise"
-# Ambitious Vim-fork focused on extensibility and agility
-brew "neovim"
-# Manage multiple Node.js versions
-brew "nvm"
 # Search tool like grep and The Silver Searcher
 brew "ripgrep"
 # AI coding agent, built for the terminal
 brew "opencode"
-# Python dependency management tool
-brew "pipenv"
 # PDF rendering library (based on the xpdf-3.0 code base)
 brew "poppler"
-# Python version management
-brew "pyenv"
 # Develop and deploy code with zero configuration
 brew "railway"
 # Low-level access to audio, keyboard, mouse, joystick, and graphics
@@ -79,6 +69,39 @@ brew "zig"
 # Shell extension to navigate your filesystem faster
 brew "zoxide"
 # Command-line interface for 1Password
+# ─── agents ───────────────────────────────────────────────────────────────
+# What an agent reaches for constantly, and what it cannot do well without.
+# Every one of these earns its place by being something a coding agent runs
+# dozens of times an hour, or by closing a loop it would otherwise leave open.
+
+# Terminal IDE: the editor, and $EDITOR everywhere
+brew "fresh-editor"
+# JSON on the command line — the lingua franca of every --json flag
+brew "jq"
+# The same, for YAML: CI workflows, Kubernetes, any config an agent edits
+brew "yq"
+# Python package and project manager, replacing pip, pipenv and pyenv
+brew "uv"
+# Re-run a command when files change — the tightest feedback loop there is
+brew "watchexec"
+# Command-line benchmarking with statistics, so a perf claim has a number
+brew "hyperfine"
+# Structural diffs: shows what changed in the syntax, not in the bytes
+brew "difftastic"
+# Count code by language — scope a refactor before starting it
+brew "tokei"
+# Render Markdown in the terminal, which is what agents write
+brew "glow"
+# sed with a sane syntax, for the search-and-replace an agent does by hand
+brew "sd"
+# Disk usage by directory, sorted — finds the target/ that ate the disk
+brew "dust"
+# A task runner with a real dependency graph, where scripts/task outgrows sh
+brew "just"
+# SWI-Prolog, for the grammar in fresh-config
+brew "swi-prolog"
+
+# ─── casks ────────────────────────────────────────────────────────────────
 cask "1password-cli"
 # The typeface everything is set in
 cask "font-jetbrains-mono-nerd-font"
@@ -90,13 +113,7 @@ cask "iterm2"
 cask "orbstack"
 # Open-source code editor
 cask "visual-studio-code"
-vscode "alireza94.theme-gotham"
 vscode "dooez.alt-catppuccin-vsc"
-vscode "github.copilot-chat"
-vscode "halide.halide-themes"
 vscode "ziglang.vscode-zig"
-cargo "zinex-cli"
 npm "@openai/codex"
-npm "corepack"
 npm "openclaw"
-npm "pnpm"

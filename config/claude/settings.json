@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "cleanupPeriodDays": 30,
+  "env": {
+    "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "128000"
+  },
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
+  "permissions": {
+    "allow": [
+      "Bash(brew info *)",
+      "Bash(brew list *)",
+      "Bash(brew outdated *)",
+      "Bash(cairn *)",
+      "Bash(cargo build *)",
+      "Bash(cargo check *)",
+      "Bash(cargo clippy *)",
+      "Bash(cargo deny *)",
+      "Bash(cargo fmt *)",
+      "Bash(cargo insta *)",
+      "Bash(cargo llvm-cov *)",
+      "Bash(cargo nextest *)",
+      "Bash(cargo test *)",
+      "Bash(cat *)",
+      "Bash(difft *)",
+      "Bash(dust *)",
+      "Bash(fd *)",
+      "Bash(fresh --version)",
+      "Bash(gh api repos/*)",
+      "Bash(gh issue view *)",
+      "Bash(gh pr checks *)",
+      "Bash(gh pr diff *)",
+      "Bash(gh pr list *)",
+      "Bash(gh pr view *)",
+      "Bash(gh run list *)",
+      "Bash(gh run view *)",
+      "Bash(git branch *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git show *)",
+      "Bash(git status *)",
+      "Bash(glow *)",
+      "Bash(grep *)",
+      "Bash(head *)",
+      "Bash(hyperfine *)",
+      "Bash(jq *)",
+      "Bash(just --list)",
+      "Bash(just check)",
+      "Bash(just test)",
+      "Bash(ls *)",
+      "Bash(npm test *)",
+      "Bash(pnpm test *)",
+      "Bash(rg *)",
+      "Bash(scripts/agent doctor)",
+      "Bash(scripts/agent list)",
+      "Bash(scripts/task check)",
+      "Bash(scripts/task fmt:check)",
+      "Bash(scripts/task lint)",
+      "Bash(scripts/task test)",
+      "Bash(tail *)",
+      "Bash(tokei *)",
+      "Bash(tree *)",
+      "Bash(uv run *)",
+      "Bash(uv sync *)",
+      "Bash(wc *)",
+      "Bash(yq *)",
+      "WebFetch(domain:code.claude.com)",
+      "WebFetch(domain:crates.io)",
+      "WebFetch(domain:docs.rs)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:nextjs.org)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:stylexjs.com)"
+    ],
+    "deny": [
+      "Bash(git commit --no-verify *)",
+      "Bash(git push --force *)",
+      "Bash(git push --no-verify *)",
+      "Bash(git push -f *)",
+      "Bash(rm -rf /*)",
+      "Read(./**/.env)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(~/.aws/**)",
+      "Read(~/.codex/auth.json)",
+      "Read(~/.config/gh/hosts.yml)",
+      "Read(~/.config/sops/**)",
+      "Read(~/.ssh/**)"
+    ],
+    "defaultMode": "auto"
+  },
+  "model": "opus[1m]",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/Users/oddurs/.claude/hooks/herdr-agent-state.sh' session",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline.sh",
+    "padding": 0
+  },
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
+    "vercel-plugin@vercel": true,
+    "vercel@claude-plugins-official": true,
+    "subway-seat@subway-seat": true
+  },
+  "extraKnownMarketplaces": {
+    "subway-seat": {
+      "source": {
+        "source": "github",
+        "repo": "oddurs/subway-seat"
+      }
+    }
+  },
+  "spinnerTipsEnabled": false,
+  "effortLevel": "high",
+  "autoUpdatesChannel": "stable",
+  "autoMemoryEnabled": true,
+  "skipDangerousModePermissionPrompt": true,
+  "theme": "London Moquette",
+  "agentPushNotifEnabled": true
+}

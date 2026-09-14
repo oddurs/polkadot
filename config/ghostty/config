@@ -3,13 +3,13 @@
 
 # Theme.
 #
-# Gotham is a single dark palette — there is no light counterpart, so it is set
-# unconditionally. Halide's computed themes are still in ./themes/ and follow
-# macOS appearance in pairs; swap the commented line back in to use them.
+# Subway Seat London Moquette: the Tube's Corporate Blue turned right down.
+# The theme files live in ./themes/ and are symlinks into ~/Code/subway-seat,
+# placed by `polkadot theme`. Switch flavor with:
 #
+#   sh ~/Code/subway-seat/install.sh switch <flavor>
 #   ghostty +list-themes    browse everything with live preview
-theme = gotham
-# theme = dark:cyanotype-slate-dark,light:cyanotype-slate-light
+theme = London Moquette
 
 # ─── type ─────────────────────────────────────────────────────────────────
 font-family = JetBrainsMono Nerd Font
@@ -44,3 +44,7 @@ keybind = cmd+opt+up=goto_split:up
 keybind = cmd+opt+down=goto_split:down
 keybind = cmd+shift+enter=toggle_split_zoom
 keybind = cmd+k=clear_screen
+
+# >>> subway-seat >>>
+theme = London Moquette
+# <<< subway-seat <<<

@@ -1,0 +1,35 @@
+# ─── codex ────────────────────────────────────────────────────────────────
+# Managed by polkadot: ~/Code/polkadot/config/codex/config.toml
+#
+# Codex writes back to this file — `[projects.*]` trust levels as you approve
+# them, and TUI state. That churn is tracked on purpose: which directories you
+# have trusted an agent to write in is worth seeing in a diff.
+
+model = "gpt-5.5-codex"
+model_reasoning_effort = "high"
+
+# Ask before anything outside the workspace, and before the network. The
+# defaults are looser than this machine's git hooks assume.
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+[sandbox_workspace_write]
+# Agents here run cargo, pnpm and uv, all of which fetch.
+network_access = true
+exclude_tmpdir_env_var = false
+
+[tui]
+notifications = true
+
+[shell_environment_policy]
+# fish is the login shell; codex should see the same PATH a terminal does.
+inherit = "all"
+
+# ─── trusted projects ─────────────────────────────────────────────────────
+
+[projects."/Users/oddurs/Code/prime-hunter"]
+trust_level = "trusted"
+[projects."/Users/oddurs/Code/savaos"]
+trust_level = "trusted"
+[projects."/Users/oddurs/Code/sava-logo"]
+trust_level = "trusted"

@@ -18,13 +18,23 @@ var links = []struct{ from, to string }{
 	{"config/starship.toml", ".config/starship.toml"},
 	{"config/ghostty/themes", ".config/ghostty/themes"},
 	{"config/ghostty/config", ".config/ghostty/config"},
-	{"config/nvim", ".config/nvim"},
 	{"config/lazygit", ".config/lazygit"},
 	{"config/bat", ".config/bat"},
 	{"config/atuin", ".config/atuin"},
 	{"config/mise", ".config/mise"},
 	{"config/btop", ".config/btop"},
 	{"config/herdr", ".config/herdr"},
+	// Only config.yml: hosts.yml beside it holds the OAuth token.
+	{"config/gh/config.yml", ".config/gh/config.yml"},
+	{"config/codex/config.toml", ".codex/config.toml"},
+	{"config/claude/settings.json", ".claude/settings.json"},
+	// Instructions, not state: CLAUDE.md loads every session, rules/ load when
+	// a matching file is touched, skills/ load on demand. Everything else
+	// under ~/.claude — history, projects, plugins, auto memory — is state
+	// this machine writes, and stays out of the repo.
+	{"config/claude/CLAUDE.md", ".claude/CLAUDE.md"},
+	{"config/claude/rules", ".claude/rules"},
+	{"config/claude/skills", ".claude/skills"},
 	{"config/ripgrep", ".config/ripgrep"},
 	{"config/vscode/settings.json", "Library/Application Support/Code/User/settings.json"},
 	{"home/zshrc", ".zshrc"},
@@ -187,7 +197,7 @@ func doTools(t *tally) {
 		{"atuin", "history"}, {"fzf", "fuzzy"}, {"rg", "search"},
 		{"fd", "find"}, {"bat", "cat"}, {"eza", "ls"}, {"delta", "diff"},
 		{"lazygit", "git"}, {"lazydocker", "docker"}, {"btop", "monitor"},
-		{"nvim", "editor"}, {"gh", "github"},
+		{"fresh", "editor"}, {"gh", "github"},
 	} {
 		if step.Has(tool.bin) {
 			ui.Result(tool.bin, "already", tool.note)
@@ -230,6 +240,54 @@ func doAgents(t *tally) {
 	ui.Blank()
 }
 
+// doTheme keeps the colour scheme out of this repo. Subway Seat generates a
+// theme file per app per flavor; vendoring 117 of those here would mean
+// regenerating them whenever the palette moves. Instead its own installer
+// places absolute symlinks into ~/Code/subway-seat, which is why .gitignore
+// excludes every directory it writes into.
+func doTheme(t *tally) {
+	ui.Section("theme")
+
+	home, _ := os.UserHomeDir()
+	repo := filepath.Join(home, "Code", "subway-seat")
+
+	if _, err := os.Stat(repo); err != nil {
+		if *dryRun {
+			ui.Result("subway-seat", "would", "clone into ~/Code/subway-seat")
+			t.done++
+			ui.Blank()
+			return
+		}
+		ui.Note("cloning subway-seat…")
+		if err := step.Stream("git", "clone", "--quiet",
+			"git@github.com:oddurs/subway-seat.git", repo); err != nil {
+			ui.Result("subway-seat", "failed", err.Error())
+			t.fail++
+			ui.Blank()
+			return
+		}
+		ui.Result("subway-seat", "cloned", "~/Code/subway-seat")
+		t.done++
+	} else {
+		ui.Result("subway-seat", "already", "~/Code/subway-seat")
+		t.skip++
+	}
+
+	args := "install --flavor " + themeFlavor + " --yes"
+	if *dryRun {
+		args += " --dry-run"
+	}
+	if err := step.Stream("/bin/sh", "-c",
+		"cd "+repo+" && sh install.sh "+args+" >/dev/null"); err != nil {
+		ui.Result(themeFlavor, "failed", err.Error())
+		t.fail++
+	} else {
+		ui.Result(themeFlavor, "linked", "themes placed into the apps present")
+		t.done++
+	}
+	ui.Blank()
+}
+
 func doDoctor(home, root string) {
 	ui.Section("links")
 	for _, m := range links {
@@ -251,7 +309,7 @@ func doDoctor(home, root string) {
 	}
 	ui.Blank()
 	ui.Section("binaries")
-	for _, b := range []string{"brew", "fish", "starship", "mise", "zoxide", "atuin", "nvim", "lazygit", "lazydocker", "btop", "gh", "claude", "codex", "opencode", "herdr"} {
+	for _, b := range []string{"brew", "fish", "starship", "mise", "zoxide", "atuin", "lazygit", "lazydocker", "btop", "gh", "fresh", "claude", "codex", "opencode", "herdr"} {
 		if step.Has(b) {
 			ui.Result(b, "already", "")
 		} else {
@@ -263,3 +321,8 @@ func doDoctor(home, root string) {
 	ui.Result("login shell", "already", os.Getenv("SHELL"))
 	ui.Blank()
 }
+
+// The flavor everything is themed with. `sh ~/Code/subway-seat/install.sh
+// switch <flavor>` changes it for the apps already installed; changing it here
+// is what a fresh machine gets.
+const themeFlavor = "moquette"
