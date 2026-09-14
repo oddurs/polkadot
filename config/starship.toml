@@ -75,8 +75,8 @@ read_only = ' ro '
 read_only_style = 'fg:bright-black bg:color_bg3'
 
 [directory.substitutions]
-'~/Code' = ' code'
-'~/Notes' = ' notes'
+# Only where the icon earns its space. ~/Code is most of this machine, and
+# `</> code/polkadot` reads as markup rather than as a path.
 'Documents' = ' docs'
 'Downloads' = ' dl'
 
@@ -162,18 +162,29 @@ format = '[ $symbol$context( \($namespace\)) ]($style)'
 # Below the bar, on the terminal background: what is about the last command
 # rather than about where you are.
 
-# The exit code, only when there was one. A ^C reads differently from a
-# segfault, so signals keep their own symbols.
+# The exit code, and nothing else.
+#
+# `map_symbol` prints starship's own wording for the common codes — a typo'd
+# command becomes "? NOTFOUND", which is jargon for a thing the three red
+# chevrons have already said. The number is the part you cannot get anywhere
+# else, so that is what is shown: `✗ 127`. Signals keep their name, because
+# `✗ SIGSEGV` and `✗ 1` are different news.
 [status]
 disabled = false
-style = 'red'
+style = 'bold red'
 symbol = '✗'
-sigint_symbol = '^C'
-signal_symbol = '⚡'
-not_found_symbol = '?'
-not_executable_symbol = '🚫'
-format = '[$symbol $common_meaning$signal_name$maybe_int]($style) '
+not_found_symbol = '✗'
+not_executable_symbol = '✗'
+sigint_symbol = '✗'
+signal_symbol = '✗'
 map_symbol = true
+# `$maybe_int` is empty whenever map_symbol resolves a code, which is most of
+# the time — `$status` always carries the number. Signals add their name after
+# it, because 139 and SEGV are the same fact said twice only if you know the
+# table by heart. Ctrl-C still reports, as `✗ 130 INT`: it is not an error, but
+# a command that died on a signal you sent is still worth seeing.
+recognize_signal_code = true
+format = '[$symbol $status( $signal_name)]($style) '
 pipestatus = true
 pipestatus_format = '[$pipestatus]($style) '
 

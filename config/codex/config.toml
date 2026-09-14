@@ -36,3 +36,6 @@ trust_level = "trusted"
 trust_level = "trusted"
 [projects."/Users/oddurs/Code/sava-logo"]
 trust_level = "trusted"
+
+[features]
+hooks = true
