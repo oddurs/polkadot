@@ -21,6 +21,8 @@ binary either.
 | `polkadot link` | symlinks only |
 | `polkadot brew` | Homebrew and the Brewfile only |
 | `polkadot theme` | Subway Seat only |
+| `polkadot sync` | fast-forward the repos, relink what moved |
+| `polkadot timer` | install the weekly launchd agent that runs `sync` |
 | `polkadot doctor` | report what is and isn't in place, change nothing |
 
 Flags go **before** the command — `polkadot --dry-run install`, not
@@ -107,6 +109,29 @@ because the point of those is that they apply when you are *not* looking.
 
 `XDG_CONFIG_HOME` is exported, which is what makes lazygit read `~/.config`
 instead of `~/Library/Application Support`.
+
+## Staying current
+
+The configuration is three repositories — this one, `subway-seat` for the
+theme, `fresh-config` for the editor. `polkadot sync` fast-forwards all three
+and relinks only if something actually moved.
+
+```sh
+polkadot sync      # once
+polkadot timer     # and then never again: Mondays at 09:00
+```
+
+Two rules make it safe to run unattended. It is **fast-forward only** — a repo
+that has diverged is reported and skipped, never forced. And it **will not
+touch a dirty tree**, so work in progress is never merged over or stashed
+behind your back. A sync with nothing to do prints three lines and writes
+nothing.
+
+It deliberately does not run `brew bundle`. Installing software in the
+background while you are working is not a thing a timer should do; `polkadot
+brew` is there when you want it.
+
+Log: `~/Library/Logs/polkadot-sync.log`.
 
 ## Runtimes
 

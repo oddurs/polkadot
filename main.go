@@ -25,7 +25,7 @@ import (
 
 var (
 	dryRun = flag.Bool("dry-run", false, "show what would change, touch nothing")
-	only   = flag.String("only", "", "run one step: brew, link, shell, tools, agents, theme")
+	only   = flag.String("only", "", "run one step: brew, link, shell, tools, agents, theme, timer")
 )
 
 type tally struct{ done, skip, fail int }
@@ -76,12 +76,17 @@ func main() {
 		runIf("tools", func() { doTools(t) })
 		runIf("agents", func() { doAgents(t) })
 		runIf("theme", func() { doTheme(t) })
+		runIf("timer", func() { doTimer(t) })
 	case "link":
 		doLink(l, t)
 	case "brew":
 		doBrew(t)
 	case "theme":
 		doTheme(t)
+	case "sync":
+		doSync(l, t)
+	case "timer":
+		doTimer(t)
 	case "doctor":
 		doDoctor(home, root)
 		return
