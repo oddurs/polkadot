@@ -1,6 +1,11 @@
 # ─── lazygit ──────────────────────────────────────────────────────────────
 # Managed by polkadot. Found here because $XDG_CONFIG_HOME is exported in
 # fish; without that, lazygit reads ~/Library/Application Support/lazygit.
+#
+# Colours are not set here. `polkadot theme` places Subway Seat's lazygit
+# files beside this one and exports LG_CONFIG_FILE so that both are read,
+# this first and the flavor second — so switching flavor never means editing
+# this file.
 
 gui:
   nerdFontsVersion: "3"
@@ -8,7 +13,6 @@ gui:
   showRandomTip: false
   showCommandLog: false
   showBottomLine: false
-  nerdFontsVersion: "3"
   scrollHeight: 4
   sidePanelWidth: 0.3
   mainPanelSplitMode: flexible
@@ -17,25 +21,14 @@ gui:
   shortTimeFormat: "15:04"
   commitLength:
     show: true
-  # Gotham.
-  theme:
-    activeBorderColor: ["#26a98b", bold]
-    inactiveBorderColor: ["#245361"]
-    searchingActiveBorderColor: ["#edb54b", bold]
-    optionsTextColor: ["#599caa"]
-    selectedLineBgColor: ["#093748"]
-    inactiveViewSelectedLineBgColor: ["#081f2d"]
-    cherryPickedCommitBgColor: ["#093748"]
-    cherryPickedCommitFgColor: ["#edb54b"]
-    markedBaseCommitBgColor: ["#093748"]
-    markedBaseCommitFgColor: ["#d26939"]
-    unstagedChangesColor: ["#c33027"]
-    defaultFgColor: ["#98d1ce"]
+  # The diff is the reason to be here; give it the room.
+  expandFocusedSidePanel: true
+  filterMode: fuzzy
 
 git:
   paging:
-    # delta is already the git pager; reuse it here so diffs look identical
-    # whichever tool you are reading them in.
+    # delta is already the git pager; reuse it here so a diff looks identical
+    # whichever tool you are reading it in.
     colorArg: always
     pager: delta --dark --paging=never
   commit:
@@ -51,12 +44,14 @@ git:
   autoFetch: true
   autoRefresh: true
   fetchAll: false
+  # Never rewrite somebody else's history by reflex.
+  skipHookPrefix: WIP
+  mainBranches: [main, master, trunk]
 
 os:
-  editPreset: "nvim"
-  # Open files at the right line when you press `e`.
-  edit: "nvim {{filename}}"
-  editAtLine: "nvim +{{line}} {{filename}}"
+  editPreset: "fresh"
+  edit: "fresh {{filename}}"
+  editAtLine: "fresh +{{line}} {{filename}}"
 
 refresher:
   refreshInterval: 10
@@ -74,3 +69,26 @@ keybinding:
     return: "<esc>"
   files:
     commitChangesWithEditor: "C"
+
+# Custom commands for the workflow this machine actually uses: one unit of
+# work, one worktree, one branch, one pull request.
+customCommands:
+  - key: "W"
+    context: "localBranches"
+    description: "worktree + branch for a new unit of work"
+    prompts:
+      - type: "input"
+        title: "branch (<type>/<slug>)"
+        initialValue: ""
+    command: "scripts/agent start {{index .PromptResponses 0}}"
+    subprocess: true
+  - key: "P"
+    context: "localBranches"
+    description: "check, push, open the pull request"
+    command: "scripts/agent pr"
+    subprocess: true
+  - key: "c"
+    context: "commits"
+    description: "checks for the PR this commit is on"
+    command: "gh pr checks --watch"
+    subprocess: true

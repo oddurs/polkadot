@@ -22,7 +22,7 @@ command -v mise >/dev/null && eval "$(mise activate zsh)"
 export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.bun/bin:$HOME/go/bin:$PATH"
 
 # Environment, matching fish's conf.d/10-env.fish.
-export EDITOR=nvim VISUAL=nvim
+export EDITOR=fresh VISUAL=fresh
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_CACHE_HOME="$HOME/.cache"
@@ -45,7 +45,7 @@ alias ll="eza --icons --group-directories-first -la --git"
 alias tree="eza --icons --tree --git-ignore"
 alias lg=lazygit
 alias ld=lazydocker
-alias v=nvim
+alias v=fresh
 alias g=git
 alias rm="rm -i"
 alias mv="mv -i"
@@ -64,3 +64,7 @@ supabase_token() {
 
 # fish, if you want it from inside zsh.
 alias f=fish
+
+# >>> subway-seat >>>
+source ~/.config/zsh/london-moquette.zsh
+# <<< subway-seat <<<

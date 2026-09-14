@@ -206,3 +206,35 @@ disabled = true
 disabled = true
 [cmake]
 disabled = true
+
+# >>> subway-seat >>>
+# Subway Seat — generated from palette.py by build.py. Edit the palette, not this file.
+[palettes.london_moquette]
+color_fg0      = '#121826'
+color_fg_dark  = '#C1C9D8'
+color_bg1      = '#303F61'
+color_bg3      = '#3D4F72'
+color_orange   = '#DB6052'
+color_yellow   = '#DE8946'
+color_aqua     = '#F2C03F'
+color_blue     = '#77C581'
+color_green    = '#9AD2A0'
+color_red      = '#FE8474'
+color_purple   = '#E5AA7F'
+black          = '#303F61'
+red            = '#DB6052'
+green          = '#77C581'
+yellow         = '#F2C03F'
+blue           = '#7595DA'
+purple         = '#DE8946'
+cyan           = '#54B4B5'
+white          = '#C1C9D8'
+bright-black   = '#73819C'
+bright-red     = '#FE8474'
+bright-green   = '#9AD2A0'
+bright-yellow  = '#FFD36C'
+bright-blue    = '#8BB0FF'
+bright-purple  = '#E5AA7F'
+bright-cyan    = '#72D1D3'
+bright-white   = '#E9EDF5'
+# <<< subway-seat <<<

@@ -20,10 +20,14 @@ binary either.
 | `polkadot install` | everything: Homebrew, the Brewfile, symlinks, shell, agents |
 | `polkadot link` | symlinks only |
 | `polkadot brew` | Homebrew and the Brewfile only |
+| `polkadot theme` | Subway Seat only |
 | `polkadot doctor` | report what is and isn't in place, change nothing |
 
-Flags: `--dry-run` prints the plan without writing anything, `--only=<step>`
-runs one part (`brew`, `link`, `shell`, `tools`, `agents`).
+Flags go **before** the command — `polkadot --dry-run install`, not
+`polkadot install --dry-run`. Go stops parsing flags at the first positional
+argument, so a flag after the command is silently ignored. `--dry-run` prints
+the plan without writing anything; `--only=<step>` runs one part (`brew`,
+`link`, `shell`, `tools`, `agents`, `theme`).
 
 ## What it will not do
 
@@ -42,29 +46,46 @@ config/     → ~/.config/*        fish, starship, nvim, lazygit, ghostty,
                                  herdr, atuin, mise, btop, bat, ripgrep
 home/       → ~/*                gitconfig, gitignore_global, commit template
 config/vscode/settings.json      → ~/Library/Application Support/Code/User/
+config/claude/                   → ~/.claude/*   CLAUDE.md, rules/, skills/,
+                                 settings.json — instructions, never state
 Brewfile                         formulae, casks, VS Code extensions
 ```
 
 Everything is symlinked, not copied. Edit in the repo, it is live immediately;
 edit in place, it is already staged.
 
-## Gotham
+## Subway Seat
 
-[Andrea Leopardi's palette](https://github.com/whatyouhide/vim-gotham), carried
-across the whole stack — Ghostty, Neovim, fish, starship, lazygit, delta, bat,
-fzf, btop, herdr and VS Code.
+[Subway Seat](https://github.com/oddurs/subway-seat), riding **London
+Moquette** — the Tube's Corporate Blue turned right down, with brick, hazard
+yellow and the standard red. Dark.
 
-Three of those get it for free. `bat`, `delta` and `herdr` are set to render
-through the terminal's own sixteen colours (`base16`, `theme = "terminal"`),
-so they are Gotham because Ghostty is, and they follow automatically if the
-terminal theme ever changes. The rest carry the hex values, which live in one
-place: [`config/gotham/palette.md`](config/gotham/palette.md).
+The theme files are not in this repo. Subway Seat generates one per app per
+flavor across 118 ports; vendoring those here would mean regenerating them
+every time the palette moves. `polkadot theme` clones it to `~/Code/subway-seat`
+and runs its own installer, which places absolute symlinks into the apps
+present — which is why `.gitignore` excludes every directory it writes into.
 
-The previous theme, Halide, is still here. Its twelve computed Ghostty themes
-are in `config/ghostty/themes/`, its Neovim colorschemes in
-`config/nvim/colors/`, and its VS Code extension is still installed. Switching
-back is one line in `config/ghostty/config` and one in
-`config/nvim/lua/plugins/gotham.lua`.
+```sh
+sh ~/Code/subway-seat/install.sh switch deep      # another flavor
+sh ~/Code/subway-seat/install.sh status           # what drifted
+```
+
+`bat`, `delta` and `herdr` render through the terminal's own sixteen colours
+(`base16`, `theme = "terminal"`), so they are London Moquette because Ghostty
+is, and they follow automatically if the terminal theme ever changes.
+
+The flavor a fresh machine gets is `themeFlavor` in `steps.go`, in one place.
+
+## Editor
+
+[Fresh](https://getfresh.dev), a terminal IDE, is `$EDITOR` and `$VISUAL` —
+for git, for `gh`, for lazygit's `e`, and for the `v` abbreviation. Its config
+is a repo of its own at `~/.config/fresh`
+([fresh-config](https://github.com/oddurs/fresh-config)), because it carries a
+Prolog grammar and LSP wiring that has nothing to do with dotfiles.
+
+Neovim is gone. One editor, configured properly, beats two configured halfway.
 
 ## Shell
 
@@ -95,7 +116,14 @@ a few milliseconds at shell start instead of a few hundred.
 
 ## Agents
 
-`claude`, `codex`, `opencode` and `herdr`. Herdr hosts the other three in
+`claude`, `codex`, `opencode` and `herdr`, each with its config under
+`config/` — for Claude Code that means `CLAUDE.md`, the path-scoped
+`rules/` and the `skills/`, which are instructions rather than state and so
+belong in a repo. History, projects, plugins and auto memory stay out.
+
+`gh` is here too, with aliases for the loop these repos actually run: `gh mine`,
+`gh cs` to watch checks, `gh done` to squash-merge and delete the branch.
+`gh dash` (a gh extension, not a formula) is the same view without a browser. Herdr hosts the other three in
 persistent sessions that survive sleep, network drops and restarts, and can be
 reattached from another machine. Its prefix is `ctrl+a` so it does not fight
 tmux, and its panes open `fish -l` so an agent's shell is the same shell you get
@@ -103,6 +131,8 @@ everywhere else.
 
 ## Notes
 
+- Flags come before the command. `polkadot install --dry-run` silently ignores
+  the flag and installs for real.
 - `brew bundle check` reports installed-but-outdated as unmet. That is expected
   on a machine that has been running a while; it is only a true failure on a
   fresh one.

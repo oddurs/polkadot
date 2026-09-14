@@ -1,0 +1,42 @@
+# ─── gh ───────────────────────────────────────────────────────────────────
+# Managed by polkadot: ~/Code/polkadot/config/gh/config.yml
+#
+# Hosts and OAuth tokens live in hosts.yml beside this file, which is NOT
+# managed — it is a credential, and it stays out of the repo.
+
+version: 1
+
+# ssh, to match how every repo here is cloned. https would prompt for a token
+# on push in a shell that has a key loaded.
+git_protocol: ssh
+
+# Blank means "use $EDITOR", which is fresh. Naming it twice is how the two
+# drift apart.
+editor:
+
+prompt: enabled
+prefer_editor_prompt: disabled
+
+# Blank means $PAGER. Set to "cat" to disable paging entirely.
+pager:
+
+browser:
+
+# Label colours are the fastest way to read `gh issue list` on a repo that
+# uses them, and every terminal here is truecolor.
+color_labels: enabled
+accessible_colors: disabled
+accessible_prompter: disabled
+spinner: enabled
+
+aliases:
+    co: pr checkout
+    # What am I waiting on, and what is waiting on me.
+    mine: pr list --author "@me" --state open
+    rv: pr list --search "review-requested:@me" --state open
+    # The loop after `scripts/agent pr`: watch it go green, then merge it the
+    # only way these repos allow.
+    cs: pr checks --watch
+    done: pr merge --squash --delete-branch
+    # The backlog, without a browser.
+    todo: issue list --assignee "@me" --state open

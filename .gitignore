@@ -1,3 +1,20 @@
 bin/
 # mise writes resolved versions here; the pins in config.toml are the source
 .mise.lock
+
+# Theme files placed by Subway Seat's installer. They are absolute symlinks
+# into ~/Code/subway-seat/dist, so they are machine-local by construction and
+# would be broken on any other clone. `polkadot theme` puts them back.
+config/*/themes/
+config/nvim/colors/
+config/nvim/doc/subway-seat.txt
+config/nvim/lua/subway-seat/
+config/nvim/lua/lualine/themes/
+config/lazygit/*.yml
+config/delta/
+config/eza/
+config/atuin/themes/
+
+# herdr writes session state beside its config.
+config/herdr/session*.json
+config/herdr/.plugins.lock

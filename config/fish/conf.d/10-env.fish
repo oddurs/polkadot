@@ -1,7 +1,7 @@
 # ─── environment ──────────────────────────────────────────────────────────
 
-set -gx EDITOR nvim
-set -gx VISUAL nvim
+set -gx EDITOR fresh
+set -gx VISUAL fresh
 set -gx PAGER less
 set -gx LESS '-R --mouse'
 set -gx MANPAGER 'sh -c "col -bx | bat -l man -p"'
