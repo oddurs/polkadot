@@ -318,9 +318,15 @@ func doDoctor(home, root string) {
 	ui.Blank()
 	ui.Section("binaries")
 	for _, b := range []string{"brew", "fish", "starship", "mise", "zoxide", "atuin", "lazygit", "lazydocker", "btop", "gh", "fresh", "claude", "codex", "opencode", "herdr"} {
-		if step.Has(b) {
+		switch {
+		case step.Runs(b):
 			ui.Result(b, "already", "")
-		} else {
+		case step.Has(b):
+			// On PATH but cannot start: a half-installed package, or a shim
+			// whose real binary went missing. Worth saying loudly, because
+			// everything else about it looks fine.
+			ui.Result(b, "failed", "on PATH but will not run — reinstall it")
+		default:
 			ui.Result(b, "skipped", "absent")
 		}
 	}

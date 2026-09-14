@@ -25,6 +25,11 @@ binary either.
 | `polkadot timer` | install the weekly launchd agent that runs `sync` |
 | `polkadot doctor` | report what is and isn't in place, change nothing |
 
+`doctor` runs each binary rather than looking for it on PATH. The two are not
+the same: a half-installed npm package leaves its launcher on PATH while the
+platform binary it execs is missing, which is exactly how `codex` sat here
+looking installed and failing on every invocation.
+
 Flags go **before** the command — `polkadot --dry-run install`, not
 `polkadot install --dry-run`. Go stops parsing flags at the first positional
 argument, so a flag after the command is silently ignored. `--dry-run` prints
@@ -156,6 +161,14 @@ belong in a repo. History, projects, plugins and auto memory stay out.
 `gh` is here too, with aliases for the loop these repos actually run: `gh mine`,
 `gh cs` to watch checks, `gh done` to squash-merge and delete the branch.
 `gh dash` (a gh extension, not a formula) is the same view without a browser.
+
+Codex is configured against its own strict validator rather than against
+memory — `codex --strict-config exec --help` fails on any key the installed
+version does not recognise, and that is how a change to `config/codex/` is
+checked. Four MCP servers; the two remote ones need `codex mcp login` once,
+because OAuth needs a browser. Its `rules/` file stays out of this repo: it is
+accumulated per-command approvals, and it accumulates hostnames and
+credentials along with them.
 
 opencode carries the most configuration, because it has the most to say: seven
 models behind short names that show what each costs per million tokens, a
