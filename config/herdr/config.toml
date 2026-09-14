@@ -20,21 +20,6 @@ onboarding = false
 name = "catppuccin"
 auto_switch = false
 
-surface0 = "#263451"
-surface1 = "#303F61"
-overlay0 = "#576685"
-overlay1 = "#73819C"
-text = "#D8DEEA"
-subtext0 = "#A9B2C4"
-accent = "#DE8946"
-mauve = "#AE9EDC"
-peach = "#E5AA7F"
-yellow = "#F2C03F"
-green = "#77C581"
-red = "#FE8474"
-blue = "#7595DA"
-teal = "#54B4B5"
-
 [terminal]
 # New panes get fish as a login shell, so conf.d and PATH are correct inside
 # an agent's terminal exactly as they are in a normal one.
