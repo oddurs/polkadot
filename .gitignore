@@ -27,3 +27,6 @@ config/opencode/package*.json
 
 # herdr writes release notes beside its config too.
 config/herdr/release-notes.json
+
+# herdr downloads plugins here; they are clones, not configuration.
+config/herdr/plugins/
