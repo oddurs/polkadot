@@ -30,7 +30,8 @@ complete -c poptop -n '__fish_seen_argument -l read -l report' -f -a '(__poptop_
 complete -c poptop -n '__fish_seen_argument -l export' -f -a 'json line' -d 'format'
 
 # ── settings ─────────────────────────────────────────────────────────────────
-complete -c poptop -l glyphs   -x -a 'braille block ascii' -d 'Timeline drawing'
+complete -c poptop -l graph    -x -a 'block braille line ascii' -d 'How the timeline is drawn'
+complete -c poptop -l glyphs   -x -a 'block braille line ascii' -d 'How the timeline is drawn (old name for --graph)'
 complete -c poptop -l color    -x -a 'auto mono 16 256 true' -d 'Colour tier (honours NO_COLOR)'
 complete -c poptop -l theme    -x -a 'safe classic auto' -d 'Built-in name or a file in ~/.config/poptop/themes'
 complete -c poptop -l interval -x -a '500ms 1s 2s 5s 10m' -d 'Time between samples'

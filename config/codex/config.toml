@@ -1,41 +1,120 @@
 # ─── codex ────────────────────────────────────────────────────────────────
 # Managed by polkadot: ~/Code/polkadot/config/codex/config.toml
 #
-# Codex writes back to this file — `[projects.*]` trust levels as you approve
-# them, and TUI state. That churn is tracked on purpose: which directories you
-# have trusted an agent to write in is worth seeing in a diff.
+# Codex writes back to this file — project trust levels as you approve them,
+# and hook hashes. That churn is tracked on purpose: which directories you have
+# let an agent write in is worth seeing in a diff.
+#
+#   codex                     start in the current project
+#   codex exec "<task>"       one shot, no TUI
+#   codex review              review the working tree
+#   codex resume --last       pick the last session back up
+#   codex doctor              install, config, auth and sandbox health
+#
+# Validate a change to this file with:
+#
+#   codex --strict-config exec --help
+#
+# which fails on any key this version of Codex does not recognise. Silence is
+# the success case.
+
+# ─── model ────────────────────────────────────────────────────────────────
 
 model = "gpt-5.5-codex"
+# minimal | low | medium | high | xhigh. The work here is mostly not easy, and
+# the cheap answer to a hard question costs more than it saves.
 model_reasoning_effort = "high"
 
-# Ask before anything outside the workspace, and before the network. The
-# defaults are looser than this machine's git hooks assume.
+# Reasoning is the most useful thing on the screen when a plan is wrong, and
+# the cheapest moment to catch it.
+hide_agent_reasoning = false
+
+# ─── sandbox and approval ─────────────────────────────────────────────────
+# The agent writes inside the workspace and asks before anything outside it.
+# `danger-full-access` exists; nothing here is worth it.
+
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 
 [sandbox_workspace_write]
-# Agents here run cargo, pnpm and uv, all of which fetch.
+# cargo, pnpm and uv all fetch. A sandbox that blocks the network turns every
+# build into an approval prompt, and a prompt you answer by reflex is not a
+# control.
 network_access = true
 exclude_tmpdir_env_var = false
 
-[tui]
-notifications = true
-# The theme files are symlinked into ~/.codex/themes by `polkadot theme`;
-# this is the line that actually selects one.
-theme = "london-moquette"
+# ─── shell ────────────────────────────────────────────────────────────────
 
 [shell_environment_policy]
-# fish is the login shell; codex should see the same PATH a terminal does.
+# fish is the login shell and PATH is assembled in its conf.d. Inheriting
+# anything less means the agent cannot find the tools a terminal can.
 inherit = "all"
 
-# ─── trusted projects ─────────────────────────────────────────────────────
+# ─── interface ────────────────────────────────────────────────────────────
+
+[tui]
+notifications = true
+# Subway Seat London Moquette, linked into ~/.codex/themes by `polkadot theme`.
+# Switch with: sh ~/Code/subway-seat/install.sh switch <flavor>
+theme = "london-moquette"
+
+# vscode | vscode-insiders | windsurf | cursor | none — and no `fresh`, which
+# is this machine's $EDITOR. VS Code is installed and opens a file:line
+# citation at the right line, so it is the one that works rather than the one
+# that matches.
+file_opener = "vscode"
+
+[tui.model_availability_nux]
+gpt-6-astra = 1
+
+# ─── history ──────────────────────────────────────────────────────────────
+
+[history]
+persistence = "save-all"
+
+# ─── mcp ──────────────────────────────────────────────────────────────────
+# Written by `codex mcp add`, which is the only way to be sure of the shape.
+# The two remote servers need a browser once:
+#
+#   codex mcp login supabase
+#   codex mcp login vercel
+#
+# `codex mcp list` shows which are still `Not logged in`.
+
+[mcp_servers.context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp"]
+
+[mcp_servers.github]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-github"]
+
+[mcp_servers.github.env]
+GITHUB_PERSONAL_ACCESS_TOKEN = "{env:GITHUB_TOKEN}"
+
+[mcp_servers.supabase]
+url = "https://mcp.supabase.com/mcp"
+
+[mcp_servers.vercel]
+url = "https://mcp.vercel.com"
+
+# ─── state ────────────────────────────────────────────────────────────────
+# Below this line Codex writes and this repository only records. Trust levels
+# are the directories you have approved; hook hashes are what it has seen.
 
 [projects."/Users/oddurs/Code/prime-hunter"]
 trust_level = "trusted"
+
 [projects."/Users/oddurs/Code/savaos"]
 trust_level = "trusted"
+
 [projects."/Users/oddurs/Code/sava-logo"]
 trust_level = "trusted"
 
-[features]
-hooks = true
+[projects."/Users/oddurs/Code/polkadot"]
+trust_level = "trusted"
+
+[hooks.state]
+
+[hooks.state."/Users/oddurs/.codex/hooks.json:session_start:0:0"]
+trusted_hash = "sha256:840d3d0ea976c645541c610135d14e67fc64ab0b27e1a7a9829ac6be9b749f84"

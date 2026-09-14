@@ -13,6 +13,27 @@ func Has(bin string) bool {
 	return err == nil
 }
 
+// Runs reports whether a binary is on PATH *and* can actually execute.
+//
+// The two are not the same, and the gap is not theoretical: a partially
+// installed npm package leaves its launcher shim on PATH while the platform
+// binary it execs is missing, so `codex` resolved, `Has` said yes, and every
+// invocation died with ENOENT. A doctor that reports such a tool as present is
+// worse than one that does not check at all, because it answers the question
+// you were asking with the wrong fact.
+//
+// `--version` is the cheapest thing that proves a process started. A tool that
+// does not support it is reported on PATH rather than guessed at.
+func Runs(bin string) bool {
+	if !Has(bin) {
+		return false
+	}
+	cmd := exec.Command(bin, "--version")
+	cmd.Env = os.Environ()
+	cmd.Stdin = nil
+	return cmd.Run() == nil
+}
+
 // Run executes a command, returning combined output.
 func Run(name string, args ...string) (string, error) {
 	cmd := exec.Command(name, args...)
