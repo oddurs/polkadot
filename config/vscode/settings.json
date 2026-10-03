@@ -1,7 +1,7 @@
 {
   // ─── theme ──────────────────────────────────────────────────────────────
-  // Gotham. Halide's themes are still installed; switch with Cmd+K Cmd+T.
-  "workbench.colorTheme": "Gotham",
+  // Subway Seat. Every flavor ships in the one extension; Cmd+K Cmd+T switches.
+  "workbench.colorTheme": "Paris Guimard",
   "workbench.iconTheme": null,
   "window.autoDetectColorScheme": false,
 

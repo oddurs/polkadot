@@ -8,7 +8,6 @@ gui:
   showRandomTip: false
   showCommandLog: false
   showBottomLine: false
-  nerdFontsVersion: "3"
   scrollHeight: 4
   sidePanelWidth: 0.3
   mainPanelSplitMode: flexible
@@ -17,27 +16,14 @@ gui:
   shortTimeFormat: "15:04"
   commitLength:
     show: true
-  # Gotham.
-  theme:
-    activeBorderColor: ["#26a98b", bold]
-    inactiveBorderColor: ["#245361"]
-    searchingActiveBorderColor: ["#edb54b", bold]
-    optionsTextColor: ["#599caa"]
-    selectedLineBgColor: ["#093748"]
-    inactiveViewSelectedLineBgColor: ["#081f2d"]
-    cherryPickedCommitBgColor: ["#093748"]
-    cherryPickedCommitFgColor: ["#edb54b"]
-    markedBaseCommitBgColor: ["#093748"]
-    markedBaseCommitFgColor: ["#d26939"]
-    unstagedChangesColor: ["#c33027"]
-    defaultFgColor: ["#98d1ce"]
-
+  # The theme is Subway Seat's, layered on by LG_CONFIG_FILE (set in
+  # fish/conf.d/10-env.fish) so the colours stay generated, not copied here.
 git:
-  paging:
-    # delta is already the git pager; reuse it here so diffs look identical
-    # whichever tool you are reading them in.
-    colorArg: always
-    pager: delta --dark --paging=never
+  pagers:
+    - # delta is already the git pager; reuse it here so diffs look identical
+      # whichever tool you are reading them in.
+      colorArg: always
+      pager: delta --dark --paging=never
   commit:
     signOff: false
   merging:
@@ -51,22 +37,20 @@ git:
   autoFetch: true
   autoRefresh: true
   fetchAll: false
-
 os:
-  editPreset: "nvim"
-  # Open files at the right line when you press `e`.
-  edit: "nvim {{filename}}"
-  editAtLine: "nvim +{{line}} {{filename}}"
-
+  # No editPreset: lazygit ships presets for vim, helix, vscode and the
+  # rest, and fresh is not among them, so the commands are given outright.
+  # Open files at the right line when you press `e`. `file:line` is
+  # fresh's own location syntax.
+  edit: "fresh {{filename}}"
+  editAtLine: "fresh {{filename}}:{{line}}"
 refresher:
   refreshInterval: 10
   fetchInterval: 60
-
 confirmOnQuit: false
 disableStartupPopups: true
 notARepository: "skip"
 promptToReturnFromSubprocess: false
-
 keybinding:
   universal:
     # `q` quits, but only from the top level; nested views should just close.

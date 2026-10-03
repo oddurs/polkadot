@@ -1,7 +1,7 @@
 # ─── environment ──────────────────────────────────────────────────────────
 
-set -gx EDITOR nvim
-set -gx VISUAL nvim
+set -gx EDITOR fresh
+set -gx VISUAL fresh
 set -gx PAGER less
 set -gx LESS '-R --mouse'
 set -gx MANPAGER 'sh -c "col -bx | bat -l man -p"'
@@ -14,9 +14,10 @@ set -gx XDG_DATA_HOME $HOME/.local/share
 set -gx XDG_CACHE_HOME $HOME/.cache
 set -gx XDG_STATE_HOME $HOME/.local/state
 
-# bat's base16 theme reads the terminal's own 16 colours, so it is Gotham
-# wherever Gotham is loaded and follows the terminal if that changes.
-set -gx BAT_THEME base16
+# lazygit merges a comma-separated list left to right, so ours comes first and
+# Subway Seat's generated theme layers on top. The flavor follows themeFlavor
+# in steps.go; `polkadot doctor` says so if it stops.
+set -gx LG_CONFIG_FILE $HOME/.config/lazygit/config.yml,$HOME/.config/lazygit/paris-guimard.yml
 
 # ripgrep respects a global config file for the flags worth always having.
 set -gx RIPGREP_CONFIG_PATH $HOME/.config/ripgrep/config

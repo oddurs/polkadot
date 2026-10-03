@@ -38,5 +38,5 @@ if status is-interactive
             set -l body (string replace -r '^alias [^=]+="?([^"]*)"?$' '$1' -- $line)
             test -n "$name" -a -n "$body"; and alias $name="$body"
         end
-end
+    end
 end

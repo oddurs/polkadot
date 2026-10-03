@@ -72,7 +72,7 @@ require("lazy").setup({
   -- `false`, which forced every plugin that had not declared its own trigger
   -- to load during startup whether the session needed it or not.
   defaults = { lazy = true, version = false },
-  install = { colorscheme = { "gotham", "habamax" } },
+  install = { colorscheme = { "paris-guimard", "habamax" } },
   -- The update check is a network round trip on every start, to tell you
   -- something you can ask for with :Lazy whenever you feel like it.
   checker = { enabled = false },

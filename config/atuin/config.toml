@@ -33,3 +33,8 @@ cwd_filter = ["^/private/tmp"]
 
 [stats]
 common_subcommands = ["git", "docker", "npm", "cargo", "brew", "gh", "mise"]
+
+# ─── theme ────────────────────────────────────────────────────────────────
+# Subway Seat, from ./themes/. Generated, and not tracked by polkadot.
+[theme]
+name = "paris-guimard"

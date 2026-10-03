@@ -4,6 +4,10 @@
 tap "supabase/tap"
 # Simple, modern, secure file encryption
 brew "age"
+# Spell checker. Backend for fresh's spellcheck plugin, which probes for
+# hunspell first and aspell second - do not install hunspell, whose bottle
+# carries no dictionaries, or it wins the probe and finds nothing.
+brew "aspell"
 # Improved shell history for zsh, bash, fish and nushell
 brew "atuin"
 # Clone of cat(1) with syntax highlighting and Git integration
@@ -20,6 +24,8 @@ brew "fd"
 brew "ffmpeg"
 # User-friendly command-line shell for UNIX-like operating systems
 brew "fish"
+# Terminal text editor with multi-cursor support
+brew "fresh-editor"
 # Monitor a directory for changes and run a shell command
 brew "fswatch"
 # Command-line fuzzy finder written in Go
@@ -90,10 +96,7 @@ cask "iterm2"
 cask "orbstack"
 # Open-source code editor
 cask "visual-studio-code"
-vscode "alireza94.theme-gotham"
-vscode "dooez.alt-catppuccin-vsc"
 vscode "github.copilot-chat"
-vscode "halide.halide-themes"
 vscode "ziglang.vscode-zig"
 cargo "zinex-cli"
 npm "@openai/codex"

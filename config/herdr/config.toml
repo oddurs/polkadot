@@ -12,20 +12,12 @@
 onboarding = false
 
 [theme]
-# "terminal" inherits the host palette, so Herdr is Gotham wherever Ghostty is
-# — and follows automatically if the terminal theme ever changes. The overrides
-# below only pin the chrome that the terminal palette does not cover.
+# "terminal" inherits the host palette, so Herdr is whatever Ghostty is and
+# follows `subway-seat switch` for free. The chrome that the terminal palette
+# does not cover is pinned by Subway Seat, in the marked block at the end of
+# this file.
 name = "terminal"
 auto_switch = false
-
-[theme.custom]
-sidebar_bg = "#0a0f14"
-panel_bg = "reset"
-active_row_bg = "#081f2d"
-selection_bg = "#093748"
-accent = "#26a98b"
-red = "#c33027"
-green = "#26a98b"
 
 [terminal]
 # New panes get fish as a login shell, so conf.d and PATH are correct inside
@@ -44,3 +36,64 @@ manifest_check = true
 # ctrl+b is tmux's prefix and this machine runs tmux too. ctrl+a keeps the two
 # from fighting over the same chord.
 prefix = "ctrl+a"
+
+# lazygit and btop as session-modal popups. They close when you quit them and
+# leave the tab layout untouched — the right shape for tools you open twenty
+# times an hour and never want to think about closing.
+[[keys.command]]
+key = "prefix+alt+g"
+type = "popup"
+command = "lazygit"
+width = "90%"
+height = "90%"
+
+[[keys.command]]
+key = "prefix+alt+t"
+type = "popup"
+command = "btop"
+width = "90%"
+height = "90%"
+
+# >>> subway-seat >>>
+# Subway Seat — generated from palette.py by build.py. Edit the palette, not this file.
+# Paris Guimard; base theme: catppuccin
+[theme.custom]
+panel_bg = "#1E2E26"
+sidebar_bg = "#18241D"
+active_row_bg = "#263930"
+selection_bg = "#30463B"
+surface_dim = "#18241D"
+surface0 = "#263930"
+surface1 = "#30463B"
+overlay0 = "#586B61"
+overlay1 = "#74857C"
+text = "#D9E1DB"
+subtext0 = "#A9B5AE"
+accent = "#CA9245"
+mauve = "#FAB49C"
+peach = "#DFAA61"
+yellow = "#F1BF4B"
+green = "#70CAA9"
+red = "#E7877B"
+blue = "#709BC8"
+teal = "#549B9F"
+# <<< subway-seat <<<
+
+# >>> namesync begin (managed block -- `namesync setup --undo` removes it)
+# Added by namesync. $project, $branch, $worktree, $locked, $since and $n are
+# published by the plugin; herdr has no built-in token for any of them.
+# $locked marks a name namesync has been told to leave alone; $stale marks
+# one the agent appears to have stopped maintaining. $since is time in the
+# current agent state; $age is how long the intent has been the current one.
+[ui.sidebar.agents]
+rows = [
+  ["state_icon", { token = "$n", fg = "#33859d", bold = true }, { token = "$project", fg = "#d3ebe9", bold = true }, { token = "$worktree", fg = "#d26939" }, { token = "$locked", fg = "#d26939" }, { token = "$stale", fg = "#888ba5" }, { token = "$since", fg = "#888ba5" }],
+  [{ token = "terminal_title_stripped", fg = "#599caa" }],
+]
+
+[ui.sidebar.spaces]
+rows = [
+  ["state_icon", { token = "$n", fg = "#33859d", bold = true }, { token = "$project", fg = "#d3ebe9", bold = true }, { token = "$worktree", fg = "#d26939" }, { token = "$locked", fg = "#d26939" }, { token = "branch", fg = "#888ba5" }, { token = "git_status", fg = "#edb54b" }, { token = "$age", fg = "#888ba5" }],
+  [{ token = "workspace", fg = "#599caa" }],
+]
+# <<< namesync end

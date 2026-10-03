@@ -25,7 +25,7 @@ return {
   { "mfussenegger/nvim-dap-python", enabled = false },
 
   -- LazyVim ships these so a fresh install has a theme before you choose
-  -- one. This config has chosen one: colors/gotham.lua.
+  -- one. This config has chosen one: Subway Seat, in colors/.
   { "catppuccin/nvim", enabled = false },
   { "folke/tokyonight.nvim", enabled = false },
 }

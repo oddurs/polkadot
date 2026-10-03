@@ -1,0 +1,156 @@
+[
+  {
+    "plugin_id": "namesync",
+    "name": "Namesync",
+    "version": "0.2.0",
+    "min_herdr_version": "0.8.0",
+    "description": "Keeps workspace, tab and agent names in step with the work as it changes, and holds off when it should not. Works with no model; can use one when you want.",
+    "manifest_path": "/Users/oddurs/Code/polkadot/config/herdr/plugins/github/namesync-a86ec994d142/herdr-plugin.toml",
+    "plugin_root": "/Users/oddurs/Code/polkadot/config/herdr/plugins/github/namesync-a86ec994d142",
+    "enabled": true,
+    "platforms": [
+      "linux",
+      "macos",
+      "windows"
+    ],
+    "startup": [
+      {
+        "command": [
+          "node",
+          "src/cli.js",
+          "startup"
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "id": "dry-run",
+        "title": "Preview what would be renamed",
+        "contexts": [
+          "workspace"
+        ],
+        "command": [
+          "node",
+          "src/cli.js",
+          "dry-run"
+        ]
+      },
+      {
+        "id": "group",
+        "title": "Preview grouping spaces by project",
+        "contexts": [
+          "workspace"
+        ],
+        "command": [
+          "node",
+          "src/cli.js",
+          "group"
+        ]
+      },
+      {
+        "id": "lock",
+        "title": "Lock this workspace name",
+        "contexts": [
+          "workspace"
+        ],
+        "command": [
+          "node",
+          "src/cli.js",
+          "lock"
+        ]
+      },
+      {
+        "id": "reformat",
+        "title": "Re-render owned labels",
+        "contexts": [
+          "workspace"
+        ],
+        "command": [
+          "node",
+          "src/cli.js",
+          "reformat"
+        ]
+      },
+      {
+        "id": "rename-all",
+        "title": "Rename every workspace",
+        "contexts": [
+          "workspace"
+        ],
+        "command": [
+          "node",
+          "src/cli.js",
+          "rename-all"
+        ]
+      },
+      {
+        "id": "rename-now",
+        "title": "Rename this workspace now",
+        "contexts": [
+          "workspace"
+        ],
+        "command": [
+          "node",
+          "src/cli.js",
+          "rename-now"
+        ]
+      },
+      {
+        "id": "restart",
+        "title": "Restart the namer watcher",
+        "contexts": [
+          "workspace"
+        ],
+        "command": [
+          "node",
+          "src/cli.js",
+          "restart"
+        ]
+      },
+      {
+        "id": "setup",
+        "title": "Show the sidebar rows to add",
+        "contexts": [
+          "workspace"
+        ],
+        "command": [
+          "node",
+          "src/cli.js",
+          "setup"
+        ]
+      },
+      {
+        "id": "status",
+        "title": "Namesync status",
+        "contexts": [
+          "workspace"
+        ],
+        "command": [
+          "node",
+          "src/cli.js",
+          "status"
+        ]
+      },
+      {
+        "id": "unlock",
+        "title": "Unlock this workspace name",
+        "contexts": [
+          "workspace"
+        ],
+        "command": [
+          "node",
+          "src/cli.js",
+          "unlock"
+        ]
+      }
+    ],
+    "source": {
+      "kind": "github",
+      "owner": "oddurs",
+      "repo": "herdr-namesync",
+      "resolved_commit": "44e4c066838d38cc50cf7f014d6ba6d8e06d734c",
+      "managed_path": "/Users/oddurs/.config/herdr/plugins/github/namesync-a86ec994d142",
+      "installed_unix_ms": 1789876566885
+    }
+  }
+]

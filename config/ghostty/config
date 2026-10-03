@@ -3,13 +3,11 @@
 
 # Theme.
 #
-# Gotham is a single dark palette — there is no light counterpart, so it is set
-# unconditionally. Halide's computed themes are still in ./themes/ and follow
-# macOS appearance in pairs; swap the commented line back in to use them.
+# Set by Subway Seat, in the marked block at the end of this file — it is last
+# so it wins, and `subway-seat switch <flavor>` rewrites it in place. Every
+# flavor's palette is in ./themes/, which is generated and not tracked.
 #
 #   ghostty +list-themes    browse everything with live preview
-theme = gotham
-# theme = dark:cyanotype-slate-dark,light:cyanotype-slate-light
 
 # ─── type ─────────────────────────────────────────────────────────────────
 font-family = JetBrainsMono Nerd Font
@@ -26,8 +24,23 @@ window-save-state = always
 macos-titlebar-style = tabs
 macos-option-as-alt = true
 
+# The Mac panel is wider than sRGB, and the palette is hand-picked, so hand
+# Ghostty the wider space rather than letting it clamp.
+window-colorspace = display-p3
+
+# The dimensions popup on every drag is noise once you know the font size.
+resize-overlay = never
+
+# Homebrew installed this as a cask, so let `brew upgrade` own the binary.
+# An app that updates itself would be writing to a file brew believes it
+# manages — the same trade `fresh` makes in its own config.
+auto-update = off
+
 # ─── behaviour ────────────────────────────────────────────────────────────
-scrollback-limit = 100000
+# Bytes, not lines — the default is 10_000_000, so the old 100000 here was a
+# hundredth of stock rather than a large buffer. Allocation is lazy and per
+# surface, so a high ceiling costs nothing until it is actually filled.
+scrollback-limit = 100000000
 copy-on-select = clipboard
 confirm-close-surface = false
 shell-integration = detect
@@ -44,6 +57,17 @@ keybind = cmd+opt+up=goto_split:up
 keybind = cmd+opt+down=goto_split:down
 keybind = cmd+shift+enter=toggle_split_zoom
 keybind = cmd+k=clear_screen
+
+# Reload after editing this file, without losing the session. Useful while
+# changing flavors, since `subway-seat switch` rewrites the block below.
+keybind = cmd+shift+comma=reload_config
+
+# A drop-down terminal over whatever is in front. cmd+shift+` rather than
+# plain cmd+` — global bindings are taken from every other app, and cmd+`
+# is macOS's own cycle-windows-in-app.
+keybind = global:cmd+shift+backquote=toggle_quick_terminal
+quick-terminal-position = top
+quick-terminal-animation-duration = 0.1
 
 # Mac shortcuts, forwarded into the editor.
 #
@@ -63,3 +87,7 @@ keybind = cmd+shift+f=text:\x1b[102;10u
 keybind = cmd+p=text:\x1b[112;9u
 keybind = cmd+b=text:\x1b[98;9u
 keybind = cmd+slash=text:\x1b[47;9u
+
+# >>> subway-seat >>>
+theme = Paris Guimard
+# <<< subway-seat <<<

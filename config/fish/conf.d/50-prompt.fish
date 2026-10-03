@@ -13,7 +13,9 @@ if status is-interactive; and type -q starship
     function starship_transient_rprompt_func
         # Keep the clock in history: scrollback doubles as a log of when you
         # ran what.
-        set_color 245361
+        # brblack, not a hex: it comes from the terminal's own palette, so the
+        # clock follows `subway-seat switch` with nothing to update here.
+        set_color brblack
         date "+%H:%M"
         set_color normal
     end

@@ -3,12 +3,33 @@
 -- One spec per plugin. The previous layout configured lualine, snacks and
 -- which-key from two files each, and whichever lazy.nvim merged last won.
 
-local P = require("gotham.palette")
+-- The flavor. One line; the colorscheme and the statusline below both follow
+-- it, and `polkadot theme` sets the rest of the machine to match.
+local FLAVOR = "guimard"
+
+local SS = require("subway-seat")
+local SCHEME = SS.prefix[FLAVOR] .. "-" .. FLAVOR
+
+-- Subway Seat names its colors after the layer they sit on. The statusline was
+-- written against role names and reads better for keeping them, so map once
+-- here rather than spelling out `C.surface0` at every use.
+local C = SS.colors(FLAVOR)
+local P = {
+  bg = C.base,
+  panel = C.surface0,
+  subtle = C.subtext0,
+  comment = C.overlay1,
+  muted = C.overlay0,
+  green = C.green,
+  orange = C.orange,
+  red = C.red,
+  yellow = C.yellow,
+}
 
 return {
   -- The colorscheme is a file in colors/, not a plugin, so there is nothing
   -- to install and nothing to load — LazyVim just names it.
-  { "LazyVim/LazyVim", opts = { colorscheme = "gotham" } },
+  { "LazyVim/LazyVim", opts = { colorscheme = SCHEME } },
 
   -- The statusline. LazyVim's default is good; this trims the noise and adds
   -- the two things it leaves out — which language server is attached, and how
@@ -143,7 +164,7 @@ return {
       -- Big files: turn off the expensive things rather than refusing to open.
       bigfile = { enabled = true, size = 1.5 * 1024 * 1024 },
       lazygit = {
-        configure = false, -- our own config.yml is already Gotham
+        configure = false, -- Subway Seat already themed config.yml
         win = { style = "lazygit" },
       },
     },

@@ -11,7 +11,10 @@
 [core]
 	pager = delta
 	excludesfile = ~/.gitignore_global
-	editor = nvim
+	# fresh blocks until the buffer is closed, which is all git asks of an
+	# editor. To reuse an already-running session instead of starting one:
+	#   editor = fresh --cmd daemon open-file . --wait
+	editor = fresh
 	# Treat these as binary so a stray CRLF never becomes a 400-file diff.
 	autocrlf = input
 	fsmonitor = true
@@ -24,28 +27,17 @@
 [interactive]
 	diffFilter = delta --color-only
 
+[include]
+	# Every Subway Seat flavor, as a delta feature. Generated; `features` below
+	# names the one in use and follows `polkadot theme`.
+	path = ~/.config/delta/subway-seat-flavors.gitconfig
+
 [delta]
 	navigate = true
 	side-by-side = true
 	line-numbers = true
 	hyperlinks = true
-	# base16 reads the terminal's own 16 colours, so diffs are Gotham wherever
-	# Gotham is loaded — and follow the terminal if that ever changes.
-	syntax-theme = base16
-	file-style = "#599caa" bold
-	file-decoration-style = "#245361" ul
-	hunk-header-style = syntax
-	hunk-header-decoration-style = "#245361" box
-	line-numbers-left-style = "#245361"
-	line-numbers-right-style = "#245361"
-	line-numbers-zero-style = "#4e5165"
-	line-numbers-minus-style = "#c33027"
-	line-numbers-plus-style = "#26a98b"
-	minus-style = syntax "#2a1416"
-	minus-emph-style = syntax "#4d1f22"
-	plus-style = syntax "#0d2b26"
-	plus-emph-style = syntax "#14453c"
-	blame-palette = "#0a0f14 #10151b #081f2d #093748"
+	features = paris-guimard
 
 [merge]
 	conflictstyle = zdiff3

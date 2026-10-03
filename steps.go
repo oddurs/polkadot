@@ -18,6 +18,7 @@ var links = []struct{ from, to string }{
 	{"config/starship.toml", ".config/starship.toml"},
 	{"config/ghostty/themes", ".config/ghostty/themes"},
 	{"config/ghostty/config", ".config/ghostty/config"},
+	{"config/fresh/config.json", ".config/fresh/config.json"},
 	{"config/nvim", ".config/nvim"},
 	{"config/lazygit", ".config/lazygit"},
 	{"config/bat", ".config/bat"},
@@ -26,6 +27,7 @@ var links = []struct{ from, to string }{
 	{"config/btop", ".config/btop"},
 	{"config/herdr", ".config/herdr"},
 	{"config/ripgrep", ".config/ripgrep"},
+	{"config/tmux/tmux.conf", ".config/tmux/tmux.conf"},
 	{"config/vscode/settings.json", "Library/Application Support/Code/User/settings.json"},
 	{"home/zshrc", ".zshrc"},
 	{"home/gitconfig", ".gitconfig"},
@@ -188,6 +190,7 @@ func doTools(t *tally) {
 		{"fd", "find"}, {"bat", "cat"}, {"eza", "ls"}, {"delta", "diff"},
 		{"lazygit", "git"}, {"lazydocker", "docker"}, {"btop", "monitor"},
 		{"nvim", "editor"}, {"gh", "github"},
+		{"fresh", "editor"}, {"tmux", "multiplexer"},
 	} {
 		if step.Has(tool.bin) {
 			ui.Result(tool.bin, "already", tool.note)
@@ -230,6 +233,111 @@ func doAgents(t *tally) {
 	ui.Blank()
 }
 
+// themeFlavor is the Subway Seat flavor this machine rides. `subway-seat
+// switch <flavor>` changes it day to day; this is what a fresh machine starts
+// as, and what `doctor` compares against.
+const themeFlavor = "guimard"
+
+// subwaySeat is where the installer keeps itself once it has run once.
+func subwaySeat(home string) string {
+	return filepath.Join(home, ".local", "share", "subway-seat", "install.sh")
+}
+
+// doTheme hands theming to oddurs/subway-seat rather than carrying palettes
+// here. It generates every app's theme file from one palette, writes them into
+// the config dirs this repo links, and turns each one on between marker
+// comments — so the colours are build output, and this repo keeps the
+// declaration. The generated files are in .gitignore.
+func doTheme(home string, t *tally) {
+	ui.Section("theme")
+
+	local := subwaySeat(home)
+	_, installed := os.Stat(local)
+
+	if *dryRun {
+		what := "install Subway Seat, flavor " + themeFlavor
+		if installed == nil {
+			what = "switch Subway Seat to " + themeFlavor
+		}
+		ui.Result("subway-seat", "would", what)
+		t.done++
+		ui.Blank()
+		return
+	}
+
+	cmd := "curl -fsSL https://oddurs.github.io/subway-seat/install.sh | sh -s -- --flavor " + themeFlavor + " --yes"
+	if installed == nil {
+		cmd = "sh " + local + " --flavor " + themeFlavor + " --yes"
+	}
+	ui.Note("theming " + themeFlavor + "…")
+	if err := step.Stream("/bin/sh", "-c", cmd); err != nil {
+		ui.Result("subway-seat", "failed", err.Error())
+		t.fail++
+	} else {
+		ui.Result("subway-seat", "installed", themeFlavor)
+		t.done++
+	}
+	ui.Blank()
+}
+
+// themed are the tracked configs that name the flavor themselves, because
+// Subway Seat's installer leaves each of them to a person. The spelling
+// differs per file — guimard, paris-guimard, paris_guimard, Paris Guimard —
+// so flavorDrift matches on the flavor word and ignores the rest.
+var themed = []string{
+	"config/nvim/lua/plugins/ui.lua",
+	"config/tmux/tmux.conf",
+	"config/starship.toml",
+	"config/btop/btop.conf",
+	"config/fish/conf.d/10-env.fish",
+	"config/vscode/settings.json",
+	"home/gitconfig",
+}
+
+// allFlavors is every Subway Seat flavor, so drift is found by seeing one of
+// them that is not themeFlavor rather than by knowing each file's format.
+var allFlavors = []string{"walnut", "tunnel", "enamel", "moquette", "deep",
+	"portland", "guimard", "catacombes", "carrelage"}
+
+// flavorDrift returns the tracked configs naming a flavor other than the
+// declared one — the failure mode of `subway-seat switch`, which rewrites its
+// own marker blocks but cannot touch the lines a person wrote.
+func flavorDrift(root string) map[string]string {
+	out := map[string]string{}
+	for _, rel := range themed {
+		b, err := os.ReadFile(filepath.Join(root, rel))
+		if err != nil {
+			continue
+		}
+		body := strings.ToLower(string(b))
+		for _, f := range allFlavors {
+			if f == themeFlavor {
+				continue
+			}
+			if strings.Contains(body, f) {
+				out[rel] = f
+				break
+			}
+		}
+	}
+	return out
+}
+
+// currentFlavor reads the flavor the installer last applied, so doctor can say
+// when the machine has drifted from the one declared above.
+func currentFlavor(home string) string {
+	b, err := os.ReadFile(filepath.Join(home, ".config", "subway-seat", "config"))
+	if err != nil {
+		return ""
+	}
+	for _, line := range strings.Split(string(b), "\n") {
+		if v, ok := strings.CutPrefix(strings.TrimSpace(line), "flavor="); ok {
+			return v
+		}
+	}
+	return ""
+}
+
 func doDoctor(home, root string) {
 	ui.Section("links")
 	for _, m := range links {
@@ -251,7 +359,7 @@ func doDoctor(home, root string) {
 	}
 	ui.Blank()
 	ui.Section("binaries")
-	for _, b := range []string{"brew", "fish", "starship", "mise", "zoxide", "atuin", "nvim", "lazygit", "lazydocker", "btop", "gh", "claude", "codex", "opencode", "herdr"} {
+	for _, b := range []string{"brew", "fish", "starship", "mise", "zoxide", "atuin", "nvim", "lazygit", "lazydocker", "btop", "gh", "fresh", "tmux", "claude", "codex", "opencode", "herdr"} {
 		if step.Has(b) {
 			ui.Result(b, "already", "")
 		} else {
@@ -261,5 +369,22 @@ func doDoctor(home, root string) {
 	ui.Blank()
 	ui.Section("shell")
 	ui.Result("login shell", "already", os.Getenv("SHELL"))
+	ui.Blank()
+	ui.Section("theme")
+	switch cur := currentFlavor(home); {
+	case cur == "":
+		ui.Result("subway-seat", "skipped", "not installed — run `polkadot install`")
+	case cur == themeFlavor:
+		ui.Result("subway-seat", "already", cur)
+	default:
+		ui.Result("subway-seat", "failed", "riding "+cur+", declared "+themeFlavor)
+	}
+	if drift := flavorDrift(root); len(drift) == 0 {
+		ui.Result("configs", "already", "all naming "+themeFlavor)
+	} else {
+		for rel, f := range drift {
+			ui.Result(rel, "failed", "names "+f+", declared "+themeFlavor)
+		}
+	}
 	ui.Blank()
 }

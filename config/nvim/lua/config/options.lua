@@ -38,7 +38,7 @@ opt.splitkeep = "screen"
 opt.splitright = true
 opt.splitbelow = true
 opt.termguicolors = true
--- Gotham is a dark palette and has no light counterpart, so say so rather
+-- Paris Guimard is a dark flavor, so say so rather
 -- than making Neovim ask the terminal and wait for an answer.
 opt.background = "dark"
 

@@ -1,0 +1,99 @@
+{
+  // ─── fresh ────────────────────────────────────────────────────────────────
+  // Managed by polkadot: ~/Code/polkadot/config/fresh/config.json
+  //
+  // Only what differs from `fresh --cmd config show` is written here, so this
+  // file reads as a list of decisions rather than a copy of the defaults that
+  // will quietly drift out of date. Comments are allowed; the parser is JSONC.
+
+  // ─── theme ────────────────────────────────────────────────────────────────
+  // The theme, for free. `terminal` renders through the terminal's own sixteen
+  // colours, so fresh is whatever Ghostty is and follows `subway-seat switch`
+  // without carrying a palette. The same trade herdr makes.
+  "theme": "terminal",
+
+  // Homebrew owns this binary. An editor that updates itself would be writing
+  // to a file `brew upgrade` believes it manages, and the check is also what
+  // carries the telemetry.
+  "check_for_updates": false,
+  "self_update": false,
+
+  "editor": {
+    // ─── type ───────────────────────────────────────────────────────────────
+    // Ghostty is JetBrainsMono Nerd Font, so the glyphs resolve to shapes
+    // rather than to boxes.
+    "nerd_font_icons": true,
+
+    // Take the terminal's background instead of painting one. Ghostty's
+    // window padding and the editor then read as a single surface, with no
+    // seam where one ends.
+    "use_terminal_bg": true,
+
+    // Nothing moves that was not asked to move.
+    "animations": false,
+    "cursor_jump_animation": false,
+    "cursor_style": "steady_block",
+
+    // ─── editing ────────────────────────────────────────────────────────────
+    // Long lines run off the side rather than folding, so the line you are
+    // looking at is the line the compiler is.
+    "line_wrap": false,
+
+    "tab_size": 2,
+    "use_tabs": false,
+    "indentation_guide": "all",
+
+    // Whitespace at the boundaries, never between words: leading indentation
+    // and trailing spaces are the two kinds that mean something.
+    "whitespace_spaces_leading": true,
+    "whitespace_spaces_inner": false,
+    "whitespace_spaces_trailing": true,
+
+    "trim_trailing_whitespace_on_save": true,
+    "ensure_final_newline_on_save": true
+  },
+
+  // ─── explorer ─────────────────────────────────────────────────────────────
+  "file_explorer": {
+    // A directory with one child in it is still a directory.
+    "compact_directories": false,
+    "follow_active_buffer": true
+  },
+
+  // ─── terminal ─────────────────────────────────────────────────────────────
+  // fish, as a login shell, so an editor terminal is the same shell as every
+  // other one on the machine.
+  "terminal": {
+    "shell": { "command": "/opt/homebrew/bin/fish", "args": ["-l"] }
+  },
+
+  // ─── languages ────────────────────────────────────────────────────────────
+  // Two spaces is right for everything here except C and C++, which are four
+  // everywhere they are written.
+  "languages": {
+    "c": { "tab_size": 4 },
+    "cpp": { "tab_size": 4 },
+
+    // Code does not wrap, because a wrapped line is a lie about what the
+    // compiler sees. Prose is the opposite case, and now that fresh is the
+    // editor git hands COMMIT_EDITMSG to, the commit message is prose: 72 is
+    // the width `git log` can indent by four and still sit inside eighty.
+    "git-commit": { "line_wrap": true, "wrap_column": 72 },
+    "markdown": { "line_wrap": true, "wrap_column": 80 }
+  },
+
+  // ─── lsp ──────────────────────────────────────────────────────────────────
+  // `auto_start` is false by default, which means a server that is installed
+  // and configured still sits there waiting to be asked. These two are on the
+  // machine, so ask for them:
+  //
+  //   clangd          /usr/bin/clangd        (Xcode command line tools)
+  //   rust-analyzer   ~/.cargo/bin/rust-analyzer
+  //
+  // Partial entries merge, so root_markers and the rest keep their defaults.
+  "lsp": {
+    "c": [{ "command": "clangd", "auto_start": true }],
+    "cpp": [{ "command": "clangd", "auto_start": true }],
+    "rust": [{ "command": "rust-analyzer", "auto_start": true }]
+  }
+}

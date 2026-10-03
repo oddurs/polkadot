@@ -3,6 +3,7 @@
 //	polkadot install     everything: brew, packages, links, shell, tools
 //	polkadot link        symlinks only
 //	polkadot brew        Brewfile only
+//	polkadot theme       colour scheme only
 //	polkadot doctor      report what is and isn't in place
 //
 // Flags: --dry-run to see the plan, --only=<step> to run one part.
@@ -25,7 +26,7 @@ import (
 
 var (
 	dryRun = flag.Bool("dry-run", false, "show what would change, touch nothing")
-	only   = flag.String("only", "", "run one step: brew, link, shell, tools, agents")
+	only   = flag.String("only", "", "run one step: brew, link, shell, tools, agents, theme")
 )
 
 type tally struct{ done, skip, fail int }
@@ -75,10 +76,13 @@ func main() {
 		runIf("shell", func() { doShell(home, t) })
 		runIf("tools", func() { doTools(t) })
 		runIf("agents", func() { doAgents(t) })
+		runIf("theme", func() { doTheme(home, t) })
 	case "link":
 		doLink(l, t)
 	case "brew":
 		doBrew(t)
+	case "theme":
+		doTheme(home, t)
 	case "doctor":
 		doDoctor(home, root)
 		return

@@ -20,10 +20,11 @@ binary either.
 | `polkadot install` | everything: Homebrew, the Brewfile, symlinks, shell, agents |
 | `polkadot link` | symlinks only |
 | `polkadot brew` | Homebrew and the Brewfile only |
+| `polkadot theme` | the colour scheme only |
 | `polkadot doctor` | report what is and isn't in place, change nothing |
 
 Flags: `--dry-run` prints the plan without writing anything, `--only=<step>`
-runs one part (`brew`, `link`, `shell`, `tools`, `agents`).
+runs one part (`brew`, `link`, `shell`, `tools`, `agents`, `theme`).
 
 ## What it will not do
 
@@ -48,36 +49,50 @@ Brewfile                         formulae, casks, VS Code extensions
 Everything is symlinked, not copied. Edit in the repo, it is live immediately;
 edit in place, it is already staged.
 
-## Gotham
+## Theme
 
-[Andrea Leopardi's palette](https://github.com/whatyouhide/vim-gotham), carried
-across the whole stack — Ghostty, Neovim, fish, starship, lazygit, delta, bat,
-fzf, btop, herdr and VS Code.
+[Subway Seat](https://github.com/oddurs/subway-seat), currently **Paris
+Guimard** — cast iron off a Metro entrance, with brass leading. It generates
+every app's theme file from one `palette.py`, so the colours here are build
+output rather than something this repo carries.
 
-Three of those get it for free. `bat`, `delta` and `herdr` are set to render
-through the terminal's own sixteen colours (`base16`, `theme = "terminal"`),
-so they are Gotham because Ghostty is, and they follow automatically if the
-terminal theme ever changes. The rest carry the hex values, which live in one
-place: [`config/gotham/palette.md`](config/gotham/palette.md).
+That split is the point. Palettes used to live in this repo, which meant a
+theme change was a commit touching thirty files, and two abandoned schemes were
+still sitting in `config/` long after they stopped being used. Now:
 
-The previous theme, Halide, is still here. Its twelve computed Ghostty themes
-are in `config/ghostty/themes/`, its Neovim colorschemes in
-`config/nvim/colors/`, and its VS Code extension is still installed. Switching
-back is one line in `config/ghostty/config` and one in
-`config/nvim/lua/plugins/gotham.lua`.
+- **The flavor is declared once**, as `themeFlavor` in `steps.go`. `polkadot
+  theme` applies it, `polkadot install` runs it last, and `polkadot doctor`
+  says so if the machine has drifted from it.
+- **The generated files are not tracked.** `config/*/themes/`, the Neovim
+  colorschemes and the rest are in `.gitignore`; a fresh clone gets them from
+  `polkadot theme`, not from history.
+- **The lines that switch each app on** are written between `# >>> subway-seat
+  >>>` markers in the configs that *are* tracked, so they show up in a diff and
+  `subway-seat uninstall` takes out exactly what it put in.
+
+Day to day, `subway-seat switch <flavor>` re-points every app at once — nine
+flavors across three cities, dark and light. If you keep one, change
+`themeFlavor` to match so a new machine starts there too.
+
+Neovim is the one place that reads the palette directly: `lua/plugins/ui.lua`
+names the flavor at the top and maps Subway Seat's colours onto the role names
+the statusline is written against, so the statusline follows the flavor without
+hardcoding a hex anywhere.
 
 ## Shell
 
 fish, with starship as the prompt. `conf.d/` is split by concern and sourced in
-name order:
+name order; Subway Seat adds its own `subway-seat.fish` at the end, which is
+where the fish, fzf, bat and eza colours come from:
 
 | | |
 |---|---|
 | `00-path.fish` | Homebrew, then PATH in priority order |
 | `10-env.fish` | editor, pager, XDG, tool defaults |
-| `20-gotham.fish` | fish's own syntax colours, and fzf's |
 | `30-tools.fish` | mise, starship, zoxide, atuin, fzf, direnv, 1Password |
 | `40-abbr.fish` | abbreviations and the three safety aliases |
+| `50-prompt.fish` | transient prompt — past commands collapse to `❯ cmd` |
+| `60-keys.fish` | the bindings fish leaves free |
 
 Abbreviations rather than aliases for anything non-destructive: fish expands
 them in place as you type, so what runs is what you can see and history stays
