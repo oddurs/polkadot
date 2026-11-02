@@ -88,3 +88,29 @@ func (l *Linker) Link(src, target string) (Status, error) {
 	}
 	return status, nil
 }
+
+// Unlink removes target only when it is the exact symlink this linker would
+// create. It never removes plain files or links owned by another checkout.
+// The boolean reports whether the target was managed by this linker.
+func (l *Linker) Unlink(src, target string) (bool, error) {
+	cur, err := os.Readlink(target)
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	if err != nil {
+		if _, statErr := os.Lstat(target); os.IsNotExist(statErr) {
+			return false, nil
+		}
+		return false, fmt.Errorf("reading %s: %w", target, err)
+	}
+	if cur != src {
+		return false, nil
+	}
+	if l.DryRun {
+		return true, nil
+	}
+	if err := os.Remove(target); err != nil {
+		return true, fmt.Errorf("removing %s: %w", target, err)
+	}
+	return true, nil
+}

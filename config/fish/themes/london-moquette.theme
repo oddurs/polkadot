@@ -1,0 +1,37 @@
+# name: 'London Moquette'
+# London Moquette for Polkadot. Update from the bundled theme source.
+# preferred_background: 1E2941
+
+fish_color_normal D8DEEA
+fish_color_command F2C03F
+fish_color_keyword DE8946
+fish_color_param C1C9D8
+fish_color_option 54B4B5
+fish_color_quote 77C581
+fish_color_redirection AE9EDC
+fish_color_end DE8946
+fish_color_operator AE9EDC
+fish_color_escape AE9EDC
+fish_color_comment 73819C --italics
+fish_color_error FE8474
+fish_color_cancel DB6052
+fish_color_autosuggestion 73819C
+fish_color_gray 576685
+fish_color_valid_path --underline
+fish_color_selection E9EDF5 --bold --background=3D4F72
+fish_color_search_match --bold --background=303F61
+fish_color_history_current --bold
+fish_color_cwd F2C03F
+fish_color_cwd_root FE8474
+fish_color_user DE8946
+fish_color_host C1C9D8
+fish_color_host_remote 77C581
+fish_color_status FE8474
+fish_pager_color_progress 121826 --background=DE8946
+fish_pager_color_prefix F2C03F --bold
+fish_pager_color_completion D8DEEA
+fish_pager_color_description 73819C --italics
+fish_pager_color_selected_background --background=303F61
+fish_pager_color_selected_prefix F2C03F --bold
+fish_pager_color_selected_completion E9EDF5
+fish_pager_color_selected_description C1C9D8 --italics

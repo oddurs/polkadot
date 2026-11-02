@@ -41,7 +41,10 @@ These override any convention from a template, tool, or your own defaults.
    code comments, docs, changelogs, or release notes. No co-author trailers naming a
    model, no "generated with" footers, no robot emoji. The work is published under the
    owner's name. If a tool inserts attribution by default, strip it before it reaches a
-   git object or the GitHub API.
+   git object or the GitHub API. This covers paths too: no tracked file or directory is
+   named after a tool (`CLAUDE.md`, `.claude/`, `.cursor/`, …) — those stay local to the
+   clone (§4). The only exception is the attribution guard and its tests, which must name
+   what they reject.
 2. **`main` only ever advances through a merged pull request.** Enforced by branch
    protection on the server and by a local hook, not by discipline.
 3. **One unit of work → one worktree → one branch → one PR.** Parallel agents never
@@ -104,11 +107,30 @@ Create these, with real content — no `TODO` placeholders:
 - `.github/CODEOWNERS` — `* @<owner>`.
 - `.github/dependabot.yml` — `github-actions` weekly, plus the stack's ecosystem
   weekly, grouped minor+patch into a single PR.
-- `CLAUDE.md` — the contract for agents working in this repo: the workflow, the
+- `AGENTS.md` — the contract for agents working in this repo: the workflow, the
   `scripts/task` seam, the commit convention, and the attribution ban. Written as
-  instructions to an agent, not as prose about the project. Keep it under 200 lines;
-  put anything task-specific in `.claude/skills/` and anything language-specific in
-  `.claude/rules/` with `paths:` frontmatter instead.
+  instructions to an agent, not as prose about the project, and naming no tool. Keep it
+  under 200 lines. Project conventions a human also needs (numeric, physical, API) go in
+  `docs/conventions.md`, linked from `AGENTS.md` and `CONTRIBUTING.md`.
+
+Then, **untracked**, in the primary checkout only:
+
+- `.git/info/exclude` lists each tool's own files, directories without a trailing slash
+  (a worktree gets a symlink, and `dir/` would not match it):
+  ```
+  /CLAUDE.md
+  /CLAUDE.local.md
+  /.claude
+  ```
+  Never put these in `.gitignore` — that would name the tool in the tracked tree.
+- `CLAUDE.md` is a shim that imports the tracked files:
+  ```
+  @AGENTS.md
+  @docs/conventions.md
+  ```
+- Task-specific skills go in `.claude/skills/`, language rules in `.claude/rules/` with
+  `paths:` frontmatter — both local, both reaching worktrees through `scripts/agent
+  start`.
 
 ## 5. The agentic git workflow
 
@@ -127,7 +149,7 @@ about to do, and fails loudly with a non-zero exit and an actionable message.
 | Command | Behaviour |
 |---|---|
 | `doctor` | Verify `git`, `gh`, auth, toolchain, hooks path, clean tree. Report every problem, not just the first. |
-| `start <type>/<slug>` | Validate the branch name against `^(feat\|fix\|chore\|docs\|perf\|refactor\|test)/[a-z0-9][a-z0-9._-]*$`. `git fetch origin`, create the branch from `origin/<default>`, add the worktree, print the `cd` path. Refuse if the branch or worktree already exists. |
+| `start <type>/<slug>` | Validate the branch name against `^(feat\|fix\|chore\|docs\|perf\|refactor\|test)/[a-z0-9][a-z0-9._-]*$`. `git fetch origin`, create the branch from `origin/<default>`, add the worktree, link in the primary checkout's local files (below), print the `cd` path. Refuse if the branch or worktree already exists. |
 | `check` | `scripts/task check`. |
 | `commit <msg>` | Validate Conventional Commits, then `git commit`. Never `--no-verify`. |
 | `pr [--draft]` | Run `check`, push with `-u`, `gh pr create --fill` (body from the template; strip any attribution), print the URL. |
@@ -137,6 +159,34 @@ about to do, and fails loudly with a non-zero exit and an actionable message.
 
 Never `cd` for the caller — print the path and let them move. Resolve the default
 branch dynamically; do not hardcode `main` in the script.
+
+Untracked local files exist only in the primary checkout, so `start` links them into
+each new worktree. It reads `$(git rev-parse --git-common-dir)/info/exclude` and names
+no tool itself:
+
+```sh
+link_local() {
+  exclude=$common/info/exclude
+  [ -f "$exclude" ] || return 0
+  grep -v '^[[:space:]]*#' "$exclude" | while IFS= read -r entry; do
+    path=${entry#/}
+    path=${path%/}
+    # A pattern names no file that exists, so only literal paths are linked.
+    if [ ! -e "$root/$path" ] || [ -e "$1/$path" ] || [ -L "$1/$path" ]; then
+      continue
+    fi
+    mkdir -p "$(dirname "$1/$path")"
+    ln -s "$root/$path" "$1/$path"
+    say "linked $path from the primary checkout"
+  done
+}
+```
+
+Test it against a scratch clone with a bare origin: a literal path and a directory are
+linked, a glob and an absent path are not, a tracked file is never replaced, the
+worktree's `git status` is clean, and `git worktree remove` leaves the primary
+checkout's files intact. Strip `GIT_*` from the test's environment — hooks set
+`GIT_DIR`.
 
 ### Hooks
 
@@ -222,6 +272,8 @@ Do not report success from having written files. Actually exercise the loop:
    and remote branch are all gone.
 7. `git log --oneline` on the default branch shows exactly the initial commit and the
    squashed PR — and contains no attribution anywhere.
+8. `git ls-files | grep -iE 'claude|cursor|copilot|gemini'` prints nothing, and the
+   worktree from step 2 had the local `CLAUDE.md` shim linked in.
 
 If any step fails, fix the cause and rerun it. A checklist item is only done once you
 have watched it pass.

@@ -65,9 +65,12 @@ supabase_token() {
 # fish, if you want it from inside zsh.
 alias f=fish
 
-# lazygit: ours first, then Subway Seat's colours (see the fish copy).
-export LG_CONFIG_FILE=~/.config/lazygit/config.yml,~/.config/lazygit/london-moquette-delta.yml
+# lazygit: ours first, then London Moquette's colors (see the Fish copy).
+export LG_CONFIG_FILE=~/.config/lazygit/config.yml,~/.config/polkadot-theme/lazygit/london-moquette-delta.yml
 
-# >>> subway-seat >>>
-source ~/.config/zsh/london-moquette.zsh
-# <<< subway-seat <<<
+# London Moquette
+source ~/.config/polkadot-theme/zsh/london-moquette.zsh
+
+
+# Added by Antigravity CLI installer
+export PATH="/Users/oddurs/.local/bin:$PATH"

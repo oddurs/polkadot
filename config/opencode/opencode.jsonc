@@ -82,8 +82,7 @@
   },
 
   // ─── display ────────────────────────────────────────────────────────────
-  // Subway Seat London Moquette, linked into ./themes by `polkadot theme`.
-  // Switch with: sh ~/Code/subway-seat/install.sh switch <flavor>
+  // London Moquette, linked into ./themes by `polkadot theme`.
 
   "theme": "london-moquette",
   "tui": {

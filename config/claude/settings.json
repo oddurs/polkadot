@@ -92,7 +92,7 @@
     ],
     "defaultMode": "auto"
   },
-  "model": "opus[1m]",
+  "model": "opus",
   "hooks": {
     "SessionStart": [
       {
@@ -115,22 +115,48 @@
   "enabledPlugins": {
     "frontend-design@claude-plugins-official": true,
     "vercel-plugin@vercel": true,
-    "vercel@claude-plugins-official": true,
-    "subway-seat@subway-seat": true
-  },
-  "extraKnownMarketplaces": {
-    "subway-seat": {
-      "source": {
-        "source": "github",
-        "repo": "oddurs/subway-seat"
-      }
-    }
+    "vercel@claude-plugins-official": true
   },
   "spinnerTipsEnabled": false,
   "effortLevel": "high",
-  "autoUpdatesChannel": "stable",
+  "modelSettings": {
+    "claude-opus-5-5": {
+      "effortLevel": "high"
+    }
+  },
+  "autoUpdatesChannel": "latest",
+  "tui": "fullscreen",
   "autoMemoryEnabled": true,
   "skipDangerousModePermissionPrompt": true,
+  "theme": "dark-ansi",
   "agentPushNotifEnabled": true,
-  "tui": "fullscreen"
+  "autoMode": {
+    "environment": [
+      "### Org-wide",
+      "**Organization**: None configured",
+      "**Cloud provider(s)**: None configured",
+      "**Repository visibility**: private (oddurs/rim, confirmed via gh)",
+      "**Internal sharing / snippet hosting**: None configured — treat public paste/gist services as outside the trust boundary",
+      "**Secrets management**: None configured",
+      "**Default / protected branches**: Default branch main; no classic branch protection listed, rulesets not queryable here — treat main as protected by policy (CLAUDE.md: never commit to default branch, only via merged PR)",
+      "**CI/CD deploy targets**: None configured",
+      "**Network posture**: None configured",
+      "**Host containment**: None configured — assume Claude Code runs on an ordinary developer machine or CI runner with open internet",
+      "**Source control**: The trusted repo (oddurs/rim) and its remote (https://github.com/oddurs/rim) only — no additional orgs configured",
+      "**Trusted internal domains**: None configured",
+      "**Trusted cloud buckets**: None configured",
+      "**Key internal services**: None configured",
+      "**Internal package registry**: None configured",
+      "**Sensitive data locations & audiences**: any file or store holding personal data, confidential business data, credentials, regulated data, or similarly sensitive material; preserve exact handles when known and share only with audiences cleared at the [named+specifics] bar",
+      "**Data retention / declassification**: None configured",
+      "**Sensitive remote targets**: any namespace, host, or container whose name carries `prod` or `production` as a whole word or name segment (hyphen/underscore/dot-delimited)",
+      "**Protected deployment namespaces / environments**: None configured — fall back to the Sensitive remote targets heuristic",
+      "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
+      "### User-specific",
+      "**Primary use of Claude Code**: software development (rim, a plugin-first 2D colony sim, Rust/Luau)",
+      "**Trusted repo**: /Users/oddurs/Code/rim (working directory) and its remote origin https://github.com/oddurs/rim — private repo, so confidential material is fine here but secrets/regulated data are never cleared by visibility alone",
+      "**Org-specific CLIs**: cairn (roadmap/issue tracker used routinely in this repo, per CLAUDE.md and 24× usage)",
+      "routine under /Users/oddurs/Code/rim/ prefix: cargo, scripts/task, scripts/agent, cairn commands"
+    ]
+  }
 }

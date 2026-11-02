@@ -1,0 +1,110 @@
+# ─── herdr ────────────────────────────────────────────────────────────────
+# Managed by polkadot. Persistent terminal sessions for coding agents —
+# claude, codex and opencode keep running across sleep, network drops and
+# restarts, and can be reattached from another machine.
+#
+#   herdr                       start / attach in the current project
+#   herdr --session <name>      a named session
+#   herdr session attach <n>    reattach
+#   herdr --remote <ssh>        drive a session on another box
+#   herdr server reload-config  pick up edits to this file
+
+onboarding = false
+
+[theme]
+# London Moquette maps Herdr's chrome against catppuccin as its base, so the
+# name has to match or the overrides land on the wrong roles. The override
+# block itself is appended by `polkadot theme` and rewritten in place; there is
+# deliberately no [theme.custom] here, because a second one is not a merge —
+# it is invalid TOML, and herdr refuses to start.
+name = "catppuccin"
+auto_switch = false
+
+[terminal]
+# New panes get fish as a login shell, so conf.d and PATH are correct inside
+# an agent's terminal exactly as they are in a normal one.
+default_shell = "/opt/homebrew/bin/fish"
+shell_mode = "login"
+# New panes open beside the pane you split from, not at $HOME.
+new_cwd = "follow"
+
+[update]
+channel = "stable"
+version_check = true
+manifest_check = true
+
+[keys]
+# ctrl+b is tmux's prefix and this machine runs tmux too. ctrl+a keeps the two
+# from fighting over the same chord.
+prefix = "ctrl+a"
+
+
+# London Moquette
+# London Moquette; base theme: catppuccin
+[theme.custom]
+panel_bg = "#1E2941"
+sidebar_bg = "#172032"
+active_row_bg = "#263451"
+selection_bg = "#303F61"
+surface_dim = "#172032"
+surface0 = "#263451"
+surface1 = "#303F61"
+overlay0 = "#576685"
+overlay1 = "#73819C"
+text = "#D8DEEA"
+subtext0 = "#A9B2C4"
+accent = "#DE8946"
+mauve = "#AE9EDC"
+peach = "#E5AA7F"
+yellow = "#F2C03F"
+green = "#77C581"
+red = "#FE8474"
+blue = "#7595DA"
+teal = "#54B4B5"
+
+# >>> namesync begin (managed block -- `namesync setup --undo` removes it)
+# Added by namesync. $project, $branch, $worktree, $locked, $since and $n are
+# published by the plugin; herdr has no built-in token for any of them.
+# $locked marks a name namesync has been told to leave alone; $stale marks
+# one the agent appears to have stopped maintaining. $since is time in the
+# current agent state; $age is how long the intent has been the current one.
+[ui.sidebar.agents]
+rows = [
+  ["state_icon", { token = "$n", fg = "#54B4B5", bold = true }, { token = "$project", fg = "#D8DEEA", bold = true }, { token = "$worktree", fg = "#DE8946" }, { token = "$acct", fg = "#AE9EDC" }, { token = "$locked", fg = "#DE8946" }, { token = "$stale", fg = "#73819C" }, { token = "$since", fg = "#73819C" }],
+  [{ token = "terminal_title_stripped", fg = "#7595DA" }],
+]
+
+[ui.sidebar.spaces]
+rows = [
+  ["state_icon", { token = "$n", fg = "#54B4B5", bold = true }, { token = "$project", fg = "#D8DEEA", bold = true }, { token = "$worktree", fg = "#DE8946" }, { token = "$locked", fg = "#DE8946" }, { token = "branch", fg = "#73819C" }, { token = "git_status", fg = "#F2C03F" }, { token = "$age", fg = "#73819C" }],
+  [{ token = "workspace", fg = "#7595DA" }],
+]
+# <<< namesync end
+
+# >>> plugin keybindings >>>
+# prefix is ctrl+a, and t/u/i are unbound in herdr's defaults.
+[[keys.command]]
+key = "prefix+t"
+type = "plugin_action"
+command = "herdr-navigator.open"
+description = "jump to anything"
+
+[[keys.command]]
+key = "prefix+u"
+type = "plugin_action"
+command = "herdr-navigator.jump-back"
+description = "last workspace"
+
+[[keys.command]]
+key = "prefix+i"
+type = "plugin_action"
+command = "rcosteira.account-switch.open"
+description = "switch account"
+
+# cmd chords reach herdr; many macOS terminals swallow alt+ themselves.
+[[keys.command]]
+key = "cmd+r"
+type = "plugin_action"
+command = "persiyanov.reviewr.toggle"
+description = "review the diff"
+# <<< plugin keybindings <<<

@@ -1,0 +1,102 @@
+# London Moquette runtime bundle for Polkadot. Upstream attribution is in SUBWAY-SEAT-LICENSE.
+# London Moquette for eza 0.20+.
+colourful: true
+filekinds:
+  normal: {foreground: "#D8DEEA"}
+  directory: {foreground: "#F2C03F", is_bold: true}
+  symlink: {foreground: "#54B4B5"}
+  pipe: {foreground: "#AE9EDC"}
+  block_device: {foreground: "#E5AA7F", is_bold: true}
+  char_device: {foreground: "#E5AA7F"}
+  socket: {foreground: "#AE9EDC", is_bold: true}
+  special: {foreground: "#AE9EDC"}
+  executable: {foreground: "#77C581", is_bold: true}
+  mount_point: {foreground: "#FFD36C", is_bold: true, is_underline: true}
+perms:
+  user_read: {foreground: "#F2C03F", is_bold: true}
+  user_write: {foreground: "#DE8946", is_bold: true}
+  user_execute_file: {foreground: "#77C581", is_bold: true}
+  user_execute_other: {foreground: "#77C581", is_bold: true}
+  group_read: {foreground: "#F2C03F"}
+  group_write: {foreground: "#DE8946"}
+  group_execute: {foreground: "#77C581"}
+  other_read: {foreground: "#F2C03F"}
+  other_write: {foreground: "#DE8946"}
+  other_execute: {foreground: "#77C581"}
+  special_user_file: {foreground: "#AE9EDC"}
+  special_other: {foreground: "#73819C"}
+  attribute: {foreground: "#73819C"}
+size:
+  major: {foreground: "#54B4B5"}
+  minor: {foreground: "#72D1D3"}
+  number_byte: {foreground: "#A9B2C4"}
+  number_kilo: {foreground: "#77C581"}
+  number_mega: {foreground: "#F2C03F"}
+  number_giga: {foreground: "#DE8946"}
+  number_huge: {foreground: "#FE8474"}
+  unit_byte: {foreground: "#7F899D"}
+  unit_kilo: {foreground: "#5C966E"}
+  unit_mega: {foreground: "#B29340"}
+  unit_giga: {foreground: "#A46C44"}
+  unit_huge: {foreground: "#BB6965"}
+users:
+  user_you: {foreground: "#F2C03F"}
+  user_root: {foreground: "#FE8474"}
+  user_other: {foreground: "#A9B2C4"}
+  group_yours: {foreground: "#C1C9D8"}
+  group_other: {foreground: "#8F9AB0"}
+  group_root: {foreground: "#FE8474"}
+links:
+  normal: {foreground: "#54B4B5"}
+  multi_link_file: {foreground: "#DE8946"}
+git:
+  new: {foreground: "#77C581"}
+  modified: {foreground: "#F2C03F"}
+  deleted: {foreground: "#FE8474"}
+  renamed: {foreground: "#54B4B5"}
+  typechange: {foreground: "#AE9EDC"}
+  ignored: {foreground: "#576685"}
+  conflicted: {foreground: "#DB6052", is_bold: true}
+git_repo:
+  branch_main: {foreground: "#C1C9D8"}
+  branch_other: {foreground: "#DE8946"}
+  git_clean: {foreground: "#77C581"}
+  git_dirty: {foreground: "#F2C03F"}
+security_context:
+  none: {foreground: "#73819C"}
+  selinux:
+    colon: {foreground: "#576685"}
+    user: {foreground: "#A9B2C4"}
+    role: {foreground: "#54B4B5"}
+    typ: {foreground: "#8F9AB0"}
+    range: {foreground: "#AE9EDC"}
+file_type:
+  image: {foreground: "#AE9EDC"}
+  video: {foreground: "#DE8946"}
+  music: {foreground: "#E5AA7F"}
+  lossless: {foreground: "#E5AA7F", is_bold: true}
+  crypto: {foreground: "#DB6052"}
+  document: {foreground: "#7595DA"}
+  compressed: {foreground: "#FE8474"}
+  temp: {foreground: "#576685"}
+  compiled: {foreground: "#73819C"}
+  build: {foreground: "#F2C03F", is_underline: true}
+  source: {foreground: "#54B4B5"}
+punctuation: {foreground: "#576685"}
+date: {foreground: "#A9B2C4"}
+inode: {foreground: "#73819C"}
+blocks: {foreground: "#73819C"}
+header: {foreground: "#C1C9D8", is_underline: true}
+octal: {foreground: "#AE9EDC"}
+flags: {foreground: "#8F9AB0"}
+symlink_path: {foreground: "#A9B2C4"}
+control_char: {foreground: "#AE9EDC"}
+broken_symlink: {foreground: "#FE8474"}
+broken_path_overlay: {is_underline: true}
+filenames:
+  "README.md": {filename: {foreground: "#FFD36C", is_bold: true}}
+  "README": {filename: {foreground: "#FFD36C", is_bold: true}}
+  "LICENSE": {filename: {foreground: "#8F9AB0"}}
+extensions:
+  lock: {filename: {foreground: "#73819C"}}
+  log: {filename: {foreground: "#73819C"}}

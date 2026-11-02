@@ -1,10 +1,6 @@
 # ─── git ──────────────────────────────────────────────────────────────────
 # Managed by polkadot: ~/Code/polkadot/home/gitconfig
 
-[user]
-	name = Oddur Sigurdsson
-	email = oddurs@gmail.com
-
 [init]
 	defaultBranch = main
 
@@ -24,11 +20,11 @@
 [interactive]
 	diffFilter = delta --color-only
 
-# Subway Seat generates delta's colours; this file names behaviour only. The
+# London Moquette supplies delta's colors; this file names behavior only. The
 # include below is what selects the flavor, and `polkadot theme` keeps the file
 # it points at in step with everything else.
 [include]
-	path = ~/.config/delta/london-moquette.gitconfig
+	path = ~/.config/polkadot-theme/delta/london-moquette.gitconfig
 
 [delta]
 	navigate = true
@@ -111,11 +107,13 @@
 	stale = "!git branch --merged main | grep -v '^\\*\\|main' | xargs -r git branch -d"
 	root = rev-parse --show-toplevel
 
-[url "git@github.com:"]
-	insteadOf = https://github.com/
-
 [credential]
 	helper = osxkeychain
 
 [gpg]
 	format = ssh
+
+# This file is deliberately not managed by polkadot. It is where a fork, a
+# work identity, or a second computer can override the shared defaults.
+[include]
+	path = ~/.gitconfig.local

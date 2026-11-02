@@ -1,0 +1,39 @@
+name: Bug report
+description: Report a reproducible problem with the supported macOS workflow.
+title: "bug: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please remove credentials, hostnames, and private paths. For security-sensitive reports, use a private security advisory instead.
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Include the command you ran and the actual behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: Smallest sequence that reproduces the problem.
+      placeholder: |
+        1. Run ...
+        2. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: macOS version, hardware architecture, and sanitized `polkadot doctor` output.
+    validations:
+      required: true

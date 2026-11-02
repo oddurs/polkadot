@@ -1,0 +1,7 @@
+# London Moquette runtime bundle for Polkadot. Upstream attribution is in SUBWAY-SEAT-LICENSE.
+# London Moquette: lazygit's diff pane through delta, with the delta port's london-moquette feature.
+# Needs delta, the delta port's include in your gitconfig, and the bat theme.
+git:
+  diffRenderers:
+    - colorArg: always
+      command: delta --features london-moquette --paging=never

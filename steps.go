@@ -13,10 +13,11 @@ import (
 
 // links maps repo paths to where they belong. config/* goes to ~/.config/*,
 // home/* goes to ~/*.
-var links = []struct{ from, to string }{
+type linkMap struct{ from, to string }
+
+var links = []linkMap{
 	{"config/fish", ".config/fish"},
 	{"config/starship.toml", ".config/starship.toml"},
-	{"config/ghostty/themes", ".config/ghostty/themes"},
 	{"config/ghostty/config", ".config/ghostty/config"},
 	{"config/lazygit", ".config/lazygit"},
 	{"config/bat", ".config/bat"},
@@ -47,14 +48,50 @@ var links = []struct{ from, to string }{
 	{"config/vscode/settings.json", "Library/Application Support/Code/User/settings.json"},
 	{"home/zshrc", ".zshrc"},
 	{"home/gitconfig", ".gitconfig"},
+	{"home/gitconfig.local", ".gitconfig.local"},
 	{"home/gitignore_global", ".gitignore_global"},
 	{"home/git_commit_template", ".git_commit_template"},
 }
 
-func doLink(l *link.Linker, t *tally) {
+// doUnlink removes only links that point back into this checkout. It leaves
+// ordinary files and somebody else's links alone, so it is safe for retiring
+// a machine or moving the repository.
+func doUnlink(l *link.Linker, t *tally) {
 	ui.Section("dotfiles")
 	home, _ := os.UserHomeDir()
-	for _, m := range links {
+	for _, m := range append(links, themeLinks...) {
+		src := filepath.Join(l.Root, m.from)
+		dst := filepath.Join(home, m.to)
+		managed, err := l.Unlink(src, dst)
+		if err != nil {
+			ui.Result("~/"+m.to, "failed", err.Error())
+			t.fail++
+			continue
+		}
+		if !managed {
+			ui.Result("~/"+m.to, "skipped", "not managed")
+			t.skip++
+			continue
+		}
+		if *dryRun {
+			ui.Result("~/"+m.to, "would", "remove link")
+		} else {
+			ui.Result("~/"+m.to, "removed", "link only")
+		}
+		t.done++
+	}
+	ui.Blank()
+}
+
+func doLink(l *link.Linker, t *tally) {
+	ui.Section("dotfiles")
+	linkMappings(l, t, append(links, themeLinks...))
+	ui.Blank()
+}
+
+func linkMappings(l *link.Linker, t *tally, mappings []linkMap) {
+	home, _ := os.UserHomeDir()
+	for _, m := range mappings {
 		src := filepath.Join(l.Root, m.from)
 		dst := filepath.Join(home, m.to)
 		if _, err := os.Stat(src); err != nil {
@@ -80,7 +117,6 @@ func doLink(l *link.Linker, t *tally) {
 		}
 		t.count(st)
 	}
-	ui.Blank()
 }
 
 func doBrew(t *tally) {
@@ -92,9 +128,16 @@ func doBrew(t *tally) {
 			ui.Blank()
 			return
 		}
+		installer := `NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
+		if !confirmInstaller("Homebrew", installer) {
+			ui.Result("homebrew", "skipped", "installer not approved")
+			t.skip++
+			ui.Blank()
+			return
+		}
 		ui.Note("installing homebrew…")
 		if err := step.Stream("/bin/bash", "-c",
-			`NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`); err != nil {
+			installer); err != nil {
 			ui.Result("homebrew", "failed", err.Error())
 			t.fail++
 			ui.Blank()
@@ -236,6 +279,11 @@ func doAgents(t *tally) {
 			t.done++
 			continue
 		}
+		if !confirmInstaller(a.bin, a.how) {
+			ui.Result(a.bin, "skipped", "installer not approved")
+			t.skip++
+			continue
+		}
 		ui.Note("installing " + a.bin + "…")
 		if err := step.Stream("/bin/sh", "-c", a.how); err != nil {
 			ui.Result(a.bin, "failed", err.Error())
@@ -248,57 +296,9 @@ func doAgents(t *tally) {
 	ui.Blank()
 }
 
-// doTheme keeps the colour scheme out of this repo. Subway Seat generates a
-// theme file per app per flavor; vendoring 117 of those here would mean
-// regenerating them whenever the palette moves. Instead its own installer
-// places absolute symlinks into ~/Code/subway-seat, which is why .gitignore
-// excludes every directory it writes into.
-func doTheme(t *tally) {
-	ui.Section("theme")
-
-	home, _ := os.UserHomeDir()
-	repo := filepath.Join(home, "Code", "subway-seat")
-
-	if _, err := os.Stat(repo); err != nil {
-		if *dryRun {
-			ui.Result("subway-seat", "would", "clone into ~/Code/subway-seat")
-			t.done++
-			ui.Blank()
-			return
-		}
-		ui.Note("cloning subway-seat…")
-		if err := step.Stream("git", "clone", "--quiet",
-			"git@github.com:oddurs/subway-seat.git", repo); err != nil {
-			ui.Result("subway-seat", "failed", err.Error())
-			t.fail++
-			ui.Blank()
-			return
-		}
-		ui.Result("subway-seat", "cloned", "~/Code/subway-seat")
-		t.done++
-	} else {
-		ui.Result("subway-seat", "already", "~/Code/subway-seat")
-		t.skip++
-	}
-
-	args := "install --flavor " + themeFlavor + " --yes"
-	if *dryRun {
-		args += " --dry-run"
-	}
-	if err := step.Stream("/bin/sh", "-c",
-		"cd "+repo+" && sh install.sh "+args+" >/dev/null"); err != nil {
-		ui.Result(themeFlavor, "failed", err.Error())
-		t.fail++
-	} else {
-		ui.Result(themeFlavor, "linked", "themes placed into the apps present")
-		t.done++
-	}
-	ui.Blank()
-}
-
 func doDoctor(home, root string) {
 	ui.Section("links")
-	for _, m := range links {
+	for _, m := range append(links, themeLinks...) {
 		dst := filepath.Join(home, m.to)
 		want := filepath.Join(root, m.from)
 		got, err := os.Readlink(dst)
@@ -333,156 +333,5 @@ func doDoctor(home, root string) {
 	ui.Blank()
 	ui.Section("shell")
 	ui.Result("login shell", "already", os.Getenv("SHELL"))
-	ui.Blank()
-}
-
-// The flavor everything is themed with. `sh ~/Code/subway-seat/install.sh
-// switch <flavor>` changes it for the apps already installed; changing it here
-// is what a fresh machine gets.
-const themeFlavor = "moquette"
-
-// The repositories this machine's configuration is actually made of. polkadot
-// holds the dotfiles, subway-seat generates the theme, fresh-config is the
-// editor. Keeping them in one list is what lets `sync` be one command rather
-// than three things you have to remember.
-var repos = []struct{ name, path, url string }{
-	{"polkadot", "Code/polkadot", "git@github.com:oddurs/polkadot.git"},
-	{"subway-seat", "Code/subway-seat", "git@github.com:oddurs/subway-seat.git"},
-	{"fresh-config", ".config/fresh", "git@github.com:oddurs/fresh-config.git"},
-}
-
-// doSync fast-forwards each of them and puts back anything new.
-//
-// Fast-forward only, and never over a dirty tree: this runs unattended from a
-// launchd timer, and the one thing it must never do is touch work in progress
-// or leave a merge conflict in a config file that a shell is about to read.
-// A repo it cannot advance is reported and skipped, not forced.
-func doSync(l *link.Linker, t *tally) {
-	ui.Section("sync")
-	home, _ := os.UserHomeDir()
-	changed := false
-
-	for _, r := range repos {
-		dir := filepath.Join(home, r.path)
-		if _, err := os.Stat(filepath.Join(dir, ".git")); err != nil {
-			ui.Result(r.name, "skipped", "not cloned")
-			t.skip++
-			continue
-		}
-		if out, err := step.Sh(fmt.Sprintf("git -C %q status --porcelain", dir)); err == nil && strings.TrimSpace(out) != "" {
-			ui.Result(r.name, "skipped", "uncommitted changes")
-			t.skip++
-			continue
-		}
-		// A feature branch with no upstream is the normal state of a repo
-		// somebody is working in, not a problem to report every Monday.
-		if _, err := step.Sh(fmt.Sprintf("git -C %q rev-parse --abbrev-ref --symbolic-full-name @{u}", dir)); err != nil {
-			ui.Result(r.name, "skipped", "branch has no upstream")
-			t.skip++
-			continue
-		}
-		before, _ := step.Sh(fmt.Sprintf("git -C %q rev-parse HEAD", dir))
-		if *dryRun {
-			ui.Result(r.name, "would", "git pull --ff-only")
-			t.done++
-			continue
-		}
-		if _, err := step.Sh(fmt.Sprintf("git -C %q pull --ff-only --quiet 2>&1", dir)); err != nil {
-			ui.Result(r.name, "failed", "cannot fast-forward — diverged, or no network")
-			t.fail++
-			continue
-		}
-		after, _ := step.Sh(fmt.Sprintf("git -C %q rev-parse HEAD", dir))
-		if before == after {
-			ui.Result(r.name, "already", "current")
-			t.skip++
-			continue
-		}
-		short, _ := step.Sh(fmt.Sprintf("git -C %q log --oneline %s..%s | head -3", dir, strings.TrimSpace(before), strings.TrimSpace(after)))
-		ui.Result(r.name, "updated", strings.TrimSpace(strings.SplitN(short, "\n", 2)[0]))
-		t.done++
-		changed = true
-	}
-	ui.Blank()
-
-	// Only relink when something moved. A sync that changed nothing should
-	// print three lines and touch no files.
-	if changed {
-		doLink(l, t)
-		doTheme(t)
-	}
-}
-
-// The launchd agent that runs the above. Weekly rather than daily: these
-// repositories change when I change them, and a timer that fires more often
-// than the thing it watches is just noise in the log.
-const syncPlist = `<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-	<key>Label</key><string>dev.polkadot.sync</string>
-	<key>ProgramArguments</key>
-	<array>
-		<string>/bin/sh</string>
-		<string>-lc</string>
-		<string>cd %s && %s run . sync</string>
-	</array>
-	<key>StartCalendarInterval</key>
-	<dict>
-		<key>Weekday</key><integer>1</integer>
-		<key>Hour</key><integer>9</integer>
-		<key>Minute</key><integer>0</integer>
-	</dict>
-	<key>RunAtLoad</key><false/>
-	<key>StandardOutPath</key><string>%s/Library/Logs/polkadot-sync.log</string>
-	<key>StandardErrorPath</key><string>%s/Library/Logs/polkadot-sync.log</string>
-</dict>
-</plist>
-`
-
-func doTimer(t *tally) {
-	ui.Section("timer")
-	home, _ := os.UserHomeDir()
-	root, _ := repoRoot()
-	dst := filepath.Join(home, "Library", "LaunchAgents", "dev.polkadot.sync.plist")
-
-	goBin, err := step.Run("/bin/sh", "-c", "command -v go")
-	if err != nil {
-		ui.Result("go", "failed", "not on PATH; the timer needs it to run `go run .`")
-		t.fail++
-		ui.Blank()
-		return
-	}
-	body := fmt.Sprintf(syncPlist, root, strings.TrimSpace(goBin), home, home)
-
-	if *dryRun {
-		ui.Result("dev.polkadot.sync", "would", "install, Mondays at 09:00")
-		t.done++
-		ui.Blank()
-		return
-	}
-	if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
-		ui.Result("LaunchAgents", "failed", err.Error())
-		t.fail++
-		ui.Blank()
-		return
-	}
-	if err := os.WriteFile(dst, []byte(body), 0o644); err != nil {
-		ui.Result(dst, "failed", err.Error())
-		t.fail++
-		ui.Blank()
-		return
-	}
-	// bootout first so a changed plist is actually reloaded; it fails
-	// harmlessly when nothing is loaded yet.
-	uid := os.Getuid()
-	_, _ = step.Sh(fmt.Sprintf("launchctl bootout gui/%d/dev.polkadot.sync 2>/dev/null", uid))
-	if _, err := step.Sh(fmt.Sprintf("launchctl bootstrap gui/%d %q", uid, dst)); err != nil {
-		ui.Result("dev.polkadot.sync", "failed", "written, but launchctl refused it")
-		t.fail++
-	} else {
-		ui.Result("dev.polkadot.sync", "loaded", "Mondays at 09:00")
-		t.done++
-	}
 	ui.Blank()
 }
