@@ -6,14 +6,16 @@
 # The live prompt is unaffected — it still carries everything.
 
 if status is-interactive; and type -q starship
+    # starship hands the last exit status in as arguments; passing them on is
+    # what keeps a failed command's chevrons red once the prompt collapses.
     function starship_transient_prompt_func
-        starship module character
+        starship module character $argv
     end
 
     function starship_transient_rprompt_func
         # Keep the clock in history: scrollback doubles as a log of when you
         # ran what.
-        set_color 245361
+        set_color brblack
         date "+%H:%M"
         set_color normal
     end

@@ -8,13 +8,13 @@ function fish_command_not_found
     if type -q brew
         set -l hit (brew formulae 2>/dev/null | string match -e $cmd | head -3)
         if test -n "$hit"
-            echo (set_color 4e5165)"  brew install "(string join ' | ' $hit)(set_color normal)
+            echo (set_color brblack)"  brew install "(string join ' | ' $hit)(set_color normal)
             return 127
         end
     end
 
     # A near-miss on something already installed is more often the real cause.
     set -l near (string match -r ".*$cmd.*" -- (builtin complete -C "" 2>/dev/null | string split \t)[1] 2>/dev/null | head -3)
-    test -n "$near"; and echo (set_color 4e5165)"  did you mean: "(string join ', ' $near)(set_color normal)
+    test -n "$near"; and echo (set_color brblack)"  did you mean: "(string join ', ' $near)(set_color normal)
     return 127
 end
