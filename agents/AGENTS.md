@@ -13,6 +13,8 @@ before it is committed or posted.
 - Act. If the request is clear, do it. Don't write a plan and stop.
 - Ask once, batched, and only for what changes the output.
 - Verify before claiming. Run the check; show what it printed. "Should work" is not a result.
+- Look at a page you built. Where the `webshot` command exists, run `webshot <url>` and read
+  the picture it names; `-m` gives a phone-sized one. Say so when you could not look.
 - Say what you skipped and why. Never report a step you didn't watch pass.
 - Disagree once, with the reason. Then do what I asked — repeating the ask is the decision.
 - Write short sentences and concrete nouns. Cut any sentence that restates the one before it.
