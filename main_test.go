@@ -212,10 +212,15 @@ func TestEveryAgentReadsTheSharedInstructions(t *testing.T) {
 }
 
 func TestParseMissing(t *testing.T) {
-	got, err := parseMissing([]byte(`{"ripgrep":[{"version":"15.2.0"}],"fd":[{"version":"10.5.2"}]}`))
+	got, err := parseMissing([]byte(`{
+		"ripgrep":[{"version":"15.2.0","source":{"type":"mise.toml","path":"/home/a/.config/mise/config.toml"}}],
+		"fd":[{"version":"10.5.2","source":{"type":"mise.toml","path":"/home/a/.config/mise/config.toml"}}],
+		"node":[{"version":"26.13.1","source":null}]
+	}`))
 	if err != nil {
 		t.Fatal(err)
 	}
+	// node has no source: no configuration asks for that version.
 	if strings.Join(got, ",") != "fd,ripgrep" {
 		t.Fatalf("parseMissing = %v", got)
 	}
