@@ -50,3 +50,5 @@ jobs:
       - run: ./bootstrap.sh --yes install
       - run: ./bootstrap.sh --yes install
       - run: ./bootstrap.sh doctor
+      # As root, so the tests that write a root-owned file run here.
+      - run: go test ./...

@@ -154,17 +154,17 @@ func doSystem(t *tally) {
 	} else if *dryRun {
 		ui.Result("inotify limit", "would", "write "+inotifyConf)
 		t.done++
+	} else if err := writeRootFile(inotifyConf, inotifyBody); err != nil {
+		ui.Result("inotify limit", "failed", err.Error())
+		t.fail++
+	} else if _, err := step.Sh(sudo() + "sysctl -q -p " + inotifyConf); err != nil {
+		// The file is in place for the next boot. A container shares the
+		// kernel of its host and may not change the live value.
+		ui.Result("inotify limit", "skipped", "written, but this system does not allow the live change")
+		t.skip++
 	} else {
-		line := fmt.Sprintf("printf '%%s' %q | %stee %s >/dev/null && %ssysctl -q --system",
-			inotifyBody, sudo(), inotifyConf, sudo())
-		if _, err := step.Sh(line); err != nil {
-			// A container shares the kernel of its host and may not set it.
-			ui.Result("inotify limit", "skipped", "this system does not allow the change")
-			t.skip++
-		} else {
-			ui.Result("inotify limit", "set", "1048576")
-			t.done++
-		}
+		ui.Result("inotify limit", "set", "1048576")
+		t.done++
 	}
 
 	if !systemdRunning() {
@@ -235,14 +235,38 @@ Persistent=true
 WantedBy=timers.target
 `
 
-// systemdQuote quotes one value for a unit file, where a space would
-// otherwise split the path into two words.
+// systemdQuote quotes one word of a command line in a unit file, where a
+// space would otherwise split the path into two words.
 func systemdQuote(s string) string {
 	return `"` + strings.NewReplacer(`\`, `\\`, `"`, `\"`, `%`, `%%`).Replace(s) + `"`
 }
 
+// buildSyncService fills the unit. WorkingDirectory takes the rest of its
+// line as one path and rejects a quoted value, so only % is escaped there.
+// ExecStart is a command line, so its program path is quoted.
 func buildSyncService(root, goBin string) string {
-	return fmt.Sprintf(syncService, systemdQuote(root), systemdQuote(goBin))
+	return fmt.Sprintf(syncService, strings.ReplaceAll(root, "%", "%%"), systemdQuote(goBin))
+}
+
+// writeRootFile puts body at a path that only root may write. The body goes
+// through a file and not through a shell string: a shell does not turn the
+// two characters \n into a line break, and sysctl then rejects the value.
+func writeRootFile(path, body string) error {
+	tmp, err := os.CreateTemp("", "polkadot-*")
+	if err != nil {
+		return err
+	}
+	defer os.Remove(tmp.Name())
+	if _, err := tmp.WriteString(body); err != nil {
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		return err
+	}
+	if out, err := step.Sh(fmt.Sprintf("%sinstall -m 0644 %q %q", sudo(), tmp.Name(), path)); err != nil {
+		return fmt.Errorf("%s: %s", err, out)
+	}
+	return nil
 }
 
 func doTimerLinux(root, goBin, home string, t *tally) {

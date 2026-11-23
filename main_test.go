@@ -125,8 +125,9 @@ func TestAgentInstallersPerSystem(t *testing.T) {
 
 func TestSyncServiceQuotesPaths(t *testing.T) {
 	body := buildSyncService("/home/a b/polkadot", "/usr/bin/go")
-	if !strings.Contains(body, `WorkingDirectory="/home/a b/polkadot"`) {
-		t.Fatalf("working directory is not quoted:\n%s", body)
+	// systemd rejects a quoted WorkingDirectory with "path is not absolute".
+	if !strings.Contains(body, "WorkingDirectory=/home/a b/polkadot\n") {
+		t.Fatalf("working directory must be the bare path:\n%s", body)
 	}
 	if !strings.Contains(body, `ExecStart="/usr/bin/go" run . sync`) {
 		t.Fatalf("ExecStart is wrong:\n%s", body)
@@ -222,5 +223,35 @@ func TestParseMissing(t *testing.T) {
 		if got, err := parseMissing([]byte(empty)); err != nil || len(got) != 0 {
 			t.Fatalf("parseMissing(%q) = %v, %v", empty, got, err)
 		}
+	}
+}
+
+// sysctl reads one setting per line. A body without a real line break, or
+// with the two characters backslash and n, is rejected as an invalid value.
+func TestInotifyBodyIsOneValidLine(t *testing.T) {
+	if !strings.HasSuffix(inotifyBody, "\n") || strings.Count(inotifyBody, "\n") != 1 {
+		t.Fatalf("inotify body must end with one line break: %q", inotifyBody)
+	}
+	if strings.Contains(inotifyBody, `\n`) {
+		t.Fatalf("inotify body holds a literal backslash-n: %q", inotifyBody)
+	}
+}
+
+func TestWriteRootFileKeepsTheBody(t *testing.T) {
+	// The debian CI job runs the tests as root. A developer machine would
+	// need a sudo password here.
+	if os.Getuid() != 0 {
+		t.Skip("needs root")
+	}
+	path := t.TempDir() + "/60-test.conf"
+	if err := writeRootFile(path, inotifyBody); err != nil {
+		t.Fatal(err)
+	}
+	got, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != inotifyBody {
+		t.Fatalf("file holds %q, want %q", got, inotifyBody)
 	}
 }
