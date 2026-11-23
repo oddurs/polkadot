@@ -120,6 +120,11 @@ func TestAgentInstallersPerSystem(t *testing.T) {
 	if find("opencode") != mac || strings.Contains(mac, "brew") {
 		t.Fatalf("opencode installers differ or use Homebrew: %q", mac)
 	}
+	// The installer must not write to a shell file: polkadot owns PATH, and
+	// the installer would bring back the ~/.zshrc that polkadot retired.
+	if !strings.Contains(mac, "--no-modify-path") {
+		t.Fatalf("the opencode installer may edit shell files: %q", mac)
+	}
 	for _, bin := range []string{"hc", "agy"} {
 		if find(bin) == "" {
 			t.Fatalf("no installer for %s", bin)
