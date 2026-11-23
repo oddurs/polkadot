@@ -26,6 +26,12 @@ config/delta/
 config/eza/
 config/atuin/themes/
 
+# fish stores its universal variables beside its configuration.
+config/fish/fish_variables
+
+# Herdr's plugin list names each plugin by a full path on one machine.
+config/herdr/plugins.json
+
 # herdr writes session state beside its config.
 config/herdr/session*.json
 config/herdr/.plugins.lock
