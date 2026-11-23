@@ -1,9 +1,10 @@
 # ─── codex ────────────────────────────────────────────────────────────────
 # Managed by polkadot: ~/Code/polkadot/config/codex/config.toml
 #
-# Codex writes back to this file — project trust levels as you approve them,
-# and hook hashes. That churn is tracked on purpose: which directories you have
-# let an agent write in is worth seeing in a diff.
+# This file is a starting point. polkadot copies it to ~/.codex/config.toml
+# when a machine has none, and the machine owns that copy from then on. Codex
+# writes into the copy: the projects you trust and the hooks it has seen. None
+# of that belongs here, because each line names a path on one machine.
 #
 #   codex                     start in the current project
 #   codex exec "<task>"       one shot, no TUI
@@ -64,9 +65,6 @@ theme = "london-moquette"
 file_opener = "vscode"
 screen_reader_detection_done = true
 
-[tui.model_availability_nux]
-gpt-6-astra = 4
-"gpt-6.1-sol" = 2
 
 # ─── history ──────────────────────────────────────────────────────────────
 
@@ -98,39 +96,3 @@ url = "https://mcp.supabase.com/mcp"
 
 [mcp_servers.vercel]
 url = "https://mcp.vercel.com"
-
-# ─── state ────────────────────────────────────────────────────────────────
-# Below this line Codex writes and this repository only records. Trust levels
-# are the directories you have approved; hook hashes are what it has seen.
-
-[projects."/Users/oddurs/Code/prime-hunter"]
-trust_level = "trusted"
-
-[projects."/Users/oddurs/Code/savaos"]
-trust_level = "trusted"
-
-[projects."/Users/oddurs/Code/sava-logo"]
-trust_level = "trusted"
-
-[projects."/Users/oddurs/Code/polkadot"]
-trust_level = "trusted"
-
-[projects."/Users/oddurs/Code/x-post"]
-trust_level = "trusted"
-
-[projects."/Users/oddurs/Code/ruler"]
-trust_level = "trusted"
-
-[projects."/Users/oddurs/Code/NetherC"]
-trust_level = "trusted"
-
-[projects."/Users/oddurs/Code/twerp"]
-trust_level = "trusted"
-
-[projects."/Users/oddurs/Code/eastereggs"]
-trust_level = "trusted"
-
-[hooks.state]
-
-[hooks.state."/Users/oddurs/.codex/hooks.json:session_start:0:0"]
-trusted_hash = "sha256:840d3d0ea976c645541c610135d14e67fc64ab0b27e1a7a9829ac6be9b749f84"

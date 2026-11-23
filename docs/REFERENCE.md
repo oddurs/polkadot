@@ -24,8 +24,9 @@ Polkadot puts a file on a machine in one of two ways.
   links a file only when no tool writes to it.
 - **Seeded.** Polkadot copies the file once, when the machine has none. The
   machine owns the file from then on. `~/.claude/settings.json`,
-  `~/.config/gh/config.yml`, `~/.codex/config.toml` and
-  `~/.config/herdr/config.toml` are seeded, because their tools rewrite them.
+  `~/.config/gh/config.yml`, `~/.codex/config.toml`,
+  `~/.config/herdr/config.toml` and the two Antigravity files under
+  `~/.gemini/` are seeded, because their tools rewrite them.
 
 A change to a seeded file reaches a new machine only. To change it on a
 machine that has the file, edit the file there.
@@ -83,6 +84,23 @@ Claude keeps its path rules and skills. OpenCode loads `STACK.md` after the
 shared file. Histories, auth state, downloaded plugins, and local approvals
 remain on the machine. Agent executables are installed only through an
 explicit agent command or `--with-agents` during installation.
+
+### The same posture in four agents
+
+Each agent may read and build without asking, asks before it changes history
+or leaves the workspace, and is refused the commands that skip a hook or
+force a push.
+
+| Agent | Default model | How it is held |
+|---|---|---|
+| Claude Code | `claude-fable-5-2[1m]`, high effort | Auto mode, with the allow and deny lists in `settings.json` |
+| Codex | `gpt-6-astra`, high reasoning | `on-request` approval inside a `workspace-write` sandbox with network |
+| OpenCode | `openrouter/sonnet`; `openrouter/haiku` for titles and summaries | `ask` by default, with an allowlist of read-only and build commands |
+| Antigravity | The CLI's own default | `accept-edits` in the terminal sandbox, with the same allow and deny lists |
+
+OpenCode reaches its models through OpenRouter and needs a key in the
+environment. `openrouter-key` asks for the key, checks it with OpenRouter and
+saves it in `conf.d/90-local.fish` on that machine. Run it once per machine.
 
 ## Packages
 

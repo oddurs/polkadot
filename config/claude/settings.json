@@ -135,14 +135,14 @@
       "### Org-wide",
       "**Organization**: None configured",
       "**Cloud provider(s)**: None configured",
-      "**Repository visibility**: private (oddurs/rim, confirmed via gh)",
+      "**Repository visibility**: None configured — check the repository before treating it as private",
       "**Internal sharing / snippet hosting**: None configured — treat public paste/gist services as outside the trust boundary",
       "**Secrets management**: None configured",
       "**Default / protected branches**: Default branch main; no classic branch protection listed, rulesets not queryable here — treat main as protected by policy (CLAUDE.md: never commit to default branch, only via merged PR)",
       "**CI/CD deploy targets**: None configured",
       "**Network posture**: None configured",
       "**Host containment**: None configured — assume Claude Code runs on an ordinary developer machine or CI runner with open internet",
-      "**Source control**: The trusted repo (oddurs/rim) and its remote (https://github.com/oddurs/rim) only — no additional orgs configured",
+      "**Source control**: None configured — the repository in the working directory and its own remote only",
       "**Trusted internal domains**: None configured",
       "**Trusted cloud buckets**: None configured",
       "**Key internal services**: None configured",
@@ -153,10 +153,8 @@
       "**Protected deployment namespaces / environments**: None configured — fall back to the Sensitive remote targets heuristic",
       "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
       "### User-specific",
-      "**Primary use of Claude Code**: software development (rim, a plugin-first 2D colony sim, Rust/Luau)",
-      "**Trusted repo**: /Users/oddurs/Code/rim (working directory) and its remote origin https://github.com/oddurs/rim — private repo, so confidential material is fine here but secrets/regulated data are never cleared by visibility alone",
-      "**Org-specific CLIs**: cairn (roadmap/issue tracker used routinely in this repo, per CLAUDE.md and 24× usage)",
-      "routine under /Users/oddurs/Code/rim/ prefix: cargo, scripts/task, scripts/agent, cairn commands"
+      "**Primary use of Claude Code**: software development",
+      "**Org-specific CLIs**: cairn (roadmap and issue tracker), scripts/task and scripts/agent in each repository"
     ]
   }
 }

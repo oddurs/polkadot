@@ -60,7 +60,8 @@ var links = []linkMap{
 
 // seeds are files that their own tool rewrites. Claude writes its theme into
 // settings.json, gh rewrites config.yml at each sign-in, Codex records the
-// projects it trusts, and Herdr writes its hooks and sidebar rules. A link
+// projects it trusts, Herdr writes its hooks and sidebar rules, and
+// Antigravity rewrites its settings at each start. A link
 // would send every one of those writes into the checkout. polkadot copies
 // each file once, and the machine owns it from then on. A change to a seed
 // reaches a new machine, not one that already has the file.
@@ -69,6 +70,10 @@ var seeds = []linkMap{
 	{"config/gh/config.yml", ".config/gh/config.yml"},
 	{"config/codex/config.toml", ".codex/config.toml"},
 	{"config/herdr/config.toml", ".config/herdr/config.toml"},
+	// Antigravity rewrites its settings at each start and adds the folders
+	// you trust. Its MCP list sits beside the sign-in tokens.
+	{"config/antigravity/settings.json", ".gemini/antigravity-cli/settings.json"},
+	{"config/antigravity/mcp_config.json", ".gemini/config/mcp_config.json"},
 }
 
 // herdrSocket answers while a Herdr server runs.
@@ -471,10 +476,9 @@ type agent struct{ bin, how string }
 // for this system. herdr is the terminal client; hc is herdr-core, the
 // server that the desktop and mobile apps attach to.
 func agentInstallers() []agent {
-	opencode := "brew install sst/tap/opencode"
-	if goos != "darwin" {
-		opencode = "curl -fsSL https://opencode.ai/v2/install | bash"
-	}
+	// The same installer on both systems, so both run the same major
+	// version. Homebrew gave a Mac version 1 while Linux had version 2.
+	opencode := "curl -fsSL https://opencode.ai/v2/install | bash"
 	return []agent{
 		{"claude", "curl -fsSL https://claude.ai/install.sh | bash"},
 		{"codex", "npm i -g @openai/codex"},
