@@ -295,3 +295,54 @@ func TestMiseConfigPinsNode(t *testing.T) {
 		}
 	}
 }
+
+// herdr-core passes its environment to every terminal. An installer run with
+// NO_COLOR=1 once started it, and every agent on that machine then ran
+// without colour, under bash, with no node on PATH.
+func TestHerdrCoreStartsFromACleanLogin(t *testing.T) {
+	t.Setenv("NO_COLOR", "1")
+	args := cleanStart([]string{"HOME=/home/a", "LANG=en_US.UTF-8"})
+	if args[0] != "-i" {
+		t.Fatalf("env must start empty, got %v", args)
+	}
+	joined := strings.Join(args, " ")
+	if strings.Contains(joined, "NO_COLOR") {
+		t.Fatalf("NO_COLOR reached herdr-core: %s", joined)
+	}
+	if !strings.Contains(joined, "SHELL=") || !strings.HasSuffix(joined, "fish -l -c hc server start") {
+		t.Fatalf("herdr-core must start from a fish login shell: %s", joined)
+	}
+}
+
+// The server prompt repeats the modules of the main one, because starship
+// has no include. This keeps the copy honest: outside the parts that give
+// the server its look, the two files are the same text.
+func TestServerPromptDiffersOnlyInItsLook(t *testing.T) {
+	look := map[string]bool{"[character]": true, "[username]": true, "[hostname]": true}
+	body := func(path string) string {
+		data, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var out []string
+		skip := false
+		for _, line := range strings.Split(string(data), "\n") {
+			trimmed := strings.TrimSpace(line)
+			switch {
+			case strings.HasPrefix(trimmed, "[palettes."):
+				return strings.Join(out, "\n")
+			case strings.HasPrefix(trimmed, "["):
+				skip = look[trimmed]
+			}
+			if skip || trimmed == "" || strings.HasPrefix(trimmed, "#") ||
+				strings.HasPrefix(trimmed, "palette = ") || strings.HasPrefix(trimmed, "$username") {
+				continue
+			}
+			out = append(out, trimmed)
+		}
+		return strings.Join(out, "\n")
+	}
+	if a, b := body("config/starship.toml"), body("config/starship-server.toml"); a != b {
+		t.Fatal("config/starship-server.toml has drifted from config/starship.toml outside its look")
+	}
+}

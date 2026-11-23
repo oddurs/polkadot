@@ -6,5 +6,6 @@ ca-certificates
 curl
 fish
 git
+locales
 unzip
 xz-utils

@@ -14,6 +14,12 @@ set -gx XDG_DATA_HOME $HOME/.local/share
 set -gx XDG_CACHE_HOME $HOME/.cache
 set -gx XDG_STATE_HOME $HOME/.local/state
 
+# A server wears a different prompt, so a glance says which machine a
+# terminal is on. 90-local.fish can set STARSHIP_CONFIG to choose otherwise.
+if test (uname) = Linux
+    set -gx STARSHIP_CONFIG $HOME/.config/starship-server.toml
+end
+
 # bat's base16 theme reads the terminal's own 16 colours, so it wears whatever
 # palette the terminal has loaded and follows it when that changes.
 set -gx BAT_THEME base16
