@@ -293,6 +293,17 @@ func doTimerLinux(root, goBin, home string, t *tally) {
 		"polkadot-sync.service": buildSyncService(root, goBin),
 		"polkadot-sync.timer":   syncTimer,
 	}
+	current := true
+	for name, body := range files {
+		if got, _ := os.ReadFile(filepath.Join(dir, name)); string(got) != body {
+			current = false
+		}
+	}
+	if _, err := step.Sh("systemctl --user is-enabled --quiet polkadot-sync.timer"); current && err == nil {
+		ui.Result("polkadot-sync.timer", "already", "Mondays at 09:00")
+		t.skip++
+		return
+	}
 	for name, body := range files {
 		if err := os.WriteFile(filepath.Join(dir, name), []byte(body), 0o644); err != nil {
 			ui.Result(name, "failed", err.Error())
