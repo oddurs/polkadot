@@ -60,6 +60,8 @@ func Result(name, verb, detail string) {
 		mark, v = Dim("·"), Dim(verb)
 	case "would":
 		mark, v = Yellow("~"), Yellow(verb)
+	case "warning":
+		mark, v = Yellow("!"), Yellow(verb)
 	case "failed":
 		mark, v = Red("✗"), Red(verb)
 	}

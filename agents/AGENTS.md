@@ -32,8 +32,9 @@ before it is committed or posted.
 - Handle an error where you can act on it; otherwise propagate. Never swallow one.
 - A bug fix arrives with the test that would have caught it.
 
-Language rules live in `~/.claude/rules/` and load when you touch those files.
-Formatting is the formatter's job — don't discuss it.
+Language rules load beside this file where the agent supports them: Claude Code
+reads `~/.claude/rules/` when you touch a matching file. Formatting is the
+formatter's job — don't discuss it.
 
 ## Git
 

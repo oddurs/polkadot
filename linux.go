@@ -11,9 +11,9 @@ import (
 	"github.com/oddurs/polkadot/internal/ui"
 )
 
-// doPackages installs what the system package manager owns. On macOS that is
-// the Brewfile. On Linux it is a short apt list and the mise binary; mise
-// then installs the tools in the runtimes step.
+// doPackages installs what the system package manager owns: a short
+// Brewfile on macOS, a short apt list and the mise binary on Linux. mise
+// then installs the command-line tools in the runtimes step.
 func doPackages(t *tally) {
 	if goos == "darwin" {
 		doBrew(t)
@@ -96,11 +96,8 @@ func doMise(t *tally) {
 
 // doRuntimes asks mise to install every tool in the linked global
 // configuration. It runs after the link step, because the link step puts
-// that configuration in place. macOS skips it: Homebrew owns the tools there.
+// that configuration in place.
 func doRuntimes(home string, t *tally) {
-	if goos == "darwin" {
-		return
-	}
 	ui.Section("runtimes")
 	defer ui.Blank()
 	if !step.Has("mise") {
@@ -110,7 +107,7 @@ func doRuntimes(home string, t *tally) {
 	}
 	// Run from $HOME so that mise reads the global configuration and not a
 	// mise.toml in the directory that started polkadot.
-	if out, err := step.RunDir(home, "mise", "ls", "--missing"); err == nil && strings.TrimSpace(out) == "" {
+	if missing, err := missingTools(home); err == nil && len(missing) == 0 {
 		ui.Result("mise install", "already", "all present")
 		t.skip++
 		return
