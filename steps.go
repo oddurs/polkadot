@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -266,8 +267,7 @@ func doShell(home string, t *tally) {
 		ui.Result("login shell", "would", "chsh -s "+fishPath)
 		t.done++
 	default:
-		ui.Note("changing the login shell — chsh will ask for your password")
-		if err := step.Stream("chsh", "-s", fishPath); err != nil {
+		if err := changeShell(fishPath); err != nil {
 			ui.Result("login shell", "failed", "run by hand: chsh -s "+fishPath)
 			t.fail++
 		} else {
@@ -343,6 +343,21 @@ func checkTools(home string) int {
 		ui.Result("mise tools", "already", "all present")
 	}
 	return failed
+}
+
+// changeShell makes fish the login shell. On macOS chsh asks for the user's
+// password. On Linux it runs through sudo: a cloud image creates a user that
+// has sudo and no password, and plain chsh cannot authenticate that user.
+func changeShell(fishPath string) error {
+	if goos == "darwin" {
+		ui.Note("changing the login shell — chsh will ask for your password")
+		return step.Stream("chsh", "-s", fishPath)
+	}
+	name := "root"
+	if u, err := user.Current(); err == nil {
+		name = u.Username
+	}
+	return step.Stream("/bin/sh", "-c", sudo()+"chsh -s "+fishPath+" "+name)
 }
 
 func doTools(home string, t *tally) {

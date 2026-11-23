@@ -21,6 +21,9 @@ fish_add_path -g $HOME/go/bin
 # current, so fish loads the function from the clone.
 test -d $HOME/.local/share/polkadot/mcdir; and set -g fish_function_path $fish_function_path $HOME/.local/share/polkadot/mcdir
 
+# OrbStack's command-line tools, on a Mac that has it.
+test -f $HOME/.orbstack/shell/init2.fish; and source $HOME/.orbstack/shell/init2.fish
+
 # The OpenCode installer uses its own directory on Linux.
 test -d $HOME/.opencode/bin; and fish_add_path -g $HOME/.opencode/bin
 fish_add_path -g $HOME/.local/bin
