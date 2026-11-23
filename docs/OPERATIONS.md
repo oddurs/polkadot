@@ -78,7 +78,7 @@ absolute machine paths in tracked configuration.
 London Moquette is bundled under `theme/london-moquette`; it is not cloned or
 generated during installation. `polkadot theme` links the assets that need
 app-specific discovery paths and creates `~/.config/polkadot-theme` for the
-shared files used by fish, fzf, eza, lazygit, delta, tmux, and zsh.
+shared files used by fish, fzf, eza, lazygit, and delta.
 
 The bundle is a focused runtime subset of Subway Seat, with the upstream MIT
 license preserved at `theme/SUBWAY-SEAT-LICENSE`. Update it deliberately from

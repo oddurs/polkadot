@@ -8,7 +8,7 @@ the operational contract lives in [OPERATIONS.md](OPERATIONS.md).
 | Source | Destination | Purpose |
 |---|---|---|
 | `config/` | `~/.config/` | Shell, terminal, CLI, agent, and editor settings |
-| `home/` | `~/` | Git, Zsh, ignore rules, and commit template |
+| `home/` | `~/` | Git, ignore rules, and commit template |
 | `theme/` | `~/.config/polkadot-theme` | London Moquette runtime assets |
 | `Brewfile` | Homebrew | Formulae, casks, and VS Code extensions |
 
@@ -18,7 +18,7 @@ plugin caches, local Git identity, and per-machine paths stay out of the repo.
 ## Theme
 
 London Moquette is the single bundled theme. It supplies Ghostty, Fish, fzf,
-eza, lazygit, delta, tmux, Codex, OpenCode, and zsh syntax highlighting.
+eza, lazygit, delta, Codex, and OpenCode.
 Starship and Herdr carry their palette directly in tracked configuration; bat
 uses the terminal's Base16 colors. `polkadot theme` restores the discovery
 links required by Ghostty, Codex, and OpenCode.
@@ -35,7 +35,7 @@ order:
 |---|---|
 | `00-path.fish` | Homebrew and executable search path |
 | `10-env.fish` | Editor, XDG, pager, and tool defaults |
-| `20-gotham.fish` | Fish and fzf presentation defaults |
+| `20-fzf.fish` | Fish and fzf presentation defaults |
 | `30-tools.fish` | mise, zoxide, atuin, fzf, direnv, 1Password, lazygit |
 | `40-abbr.fish` | Everyday command abbreviations and safety aliases |
 | `50-prompt.fish` | Starship initialization |
