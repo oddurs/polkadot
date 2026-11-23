@@ -30,6 +30,7 @@ var links = []linkMap{
 	{"agents/AGENTS.md", ".gemini/AGENTS.md"},
 	{"config/fish", ".config/fish"},
 	{"config/starship.toml", ".config/starship.toml"},
+	{"config/starship-server.toml", ".config/starship-server.toml"},
 	{"config/ghostty/config", ".config/ghostty/config"},
 	{"config/lazygit", ".config/lazygit"},
 	{"config/bat", ".config/bat"},

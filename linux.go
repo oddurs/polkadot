@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"os/user"
 	"path/filepath"
 	"strings"
@@ -127,6 +128,59 @@ func doRuntimes(home string, t *tally) {
 	t.done++
 }
 
+// loginEnv is the small environment of a new login: who, where, the locale
+// and the session bus that the systemd user manager listens on.
+func loginEnv() []string {
+	name, home := "root", os.Getenv("HOME")
+	if u, err := user.Current(); err == nil {
+		name, home = u.Username, u.HomeDir
+	}
+	run := fmt.Sprintf("/run/user/%d", os.Getuid())
+	return []string{
+		"HOME=" + home, "USER=" + name, "LOGNAME=" + name,
+		"LANG=en_US.UTF-8", "TERM=xterm-256color", "COLORTERM=truecolor",
+		"XDG_RUNTIME_DIR=" + run, "DBUS_SESSION_BUS_ADDRESS=unix:path=" + run + "/bus",
+	}
+}
+
+// cleanStart builds the arguments for `env` that start herdr-core from a
+// login shell with nothing inherited. herdr-core hands its own environment
+// to every terminal it opens, for as long as it runs. Started from this
+// process, it would pass on NO_COLOR, a PATH without the mise tools and
+// whatever SHELL the installer ran under: every agent would then run without
+// colour, in the wrong shell, and would not find node.
+func cleanStart(env []string) []string {
+	fish := "/usr/bin/fish"
+	if path, err := exec.LookPath("fish"); err == nil {
+		fish = path
+	}
+	args := append([]string{"-i"}, env...)
+	return append(args, "SHELL="+fish, fish, "-l", "-c", "hc server start")
+}
+
+// ensureLocale makes en_US.UTF-8 exist. A Mac sends that name over SSH, and
+// a Debian cloud image has only C.UTF-8, so each program warned about it.
+func ensureLocale(t *tally) {
+	if out, _ := step.Run("locale", "-a"); strings.Contains(strings.ToLower(out), "en_us.utf8") {
+		ui.Result("locale", "already", "en_US.UTF-8")
+		t.skip++
+		return
+	}
+	if *dryRun {
+		ui.Result("locale", "would", "generate en_US.UTF-8")
+		t.done++
+		return
+	}
+	line := fmt.Sprintf("%[1]ssed -i 's/^# *en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && %[1]slocale-gen >/dev/null && %[1]supdate-locale LANG=en_US.UTF-8", sudo())
+	if _, err := step.Sh(line); err != nil {
+		ui.Result("locale", "failed", "could not generate en_US.UTF-8")
+		t.fail++
+		return
+	}
+	ui.Result("locale", "generated", "en_US.UTF-8")
+	t.done++
+}
+
 func hcRunning() bool {
 	_, err := step.Run("hc", "server", "status")
 	return err == nil
@@ -172,6 +226,8 @@ func doSystem(t *tally) {
 		t.done++
 	}
 
+	ensureLocale(t)
+
 	if !systemdRunning() {
 		ui.Result("lingering", "skipped", "systemd is not running here")
 		ui.Result("herdr-core", "skipped", "systemd is not running here")
@@ -212,7 +268,7 @@ func doSystem(t *tally) {
 		ui.Result("herdr-core", "already", "running")
 		t.skip++
 	default:
-		if _, err := step.Run("hc", "server", "start"); err != nil {
+		if _, err := step.Run("env", cleanStart(loginEnv())...); err != nil {
 			ui.Result("herdr-core", "failed", "hc server start: "+err.Error())
 			t.fail++
 		} else {

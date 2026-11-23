@@ -1,0 +1,273 @@
+# ─── starship, on a server ────────────────────────────────────────────────
+# Managed by polkadot. This is config/starship.toml with a different look, so
+# a glance at the prompt says which machine a terminal is on: a phosphor-green
+# bar, the host name beside the user, and a `>>_` prompt character.
+#
+# starship reads one file and has no include, so the modules are repeated
+# here. A test holds the two files together: they may differ only in the
+# header, the palette, [character], [username] and [hostname].
+#
+# fish selects this file on Linux through STARSHIP_CONFIG (conf.d/10-env.fish).
+#
+# A powerline prompt: every segment carries a background, and the divider
+# between two of them is a  drawn in the previous background on top of the
+# next one. That is the whole trick, and it is why the order of the format
+# string matters more than usual — a segment that can vanish has to hand its
+# background to whatever follows, or the bar tears.
+#
+# Three prompts, not one:
+#
+#   format            the live prompt — who, where, what git thinks
+#   right_format      how long the last thing took, and the clock
+#   transient         what the prompt collapses to once the command has run
+#
+# Transience is why scrollback stays readable: a screen of history is a column
+# of `❯❯❯ command` with a timestamp on the right, not the same bar forty times.
+#
+# The glyphs are Nerd Font — JetBrainsMono Nerd Font, in the Brewfile. Without
+# one, every separator and icon renders as tofu.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+[](blue)\
+$username$hostname\
+[](fg:blue bg:color_bg3)\
+$directory\
+[](fg:color_bg3 bg:purple)\
+$git_branch$git_status$git_state$git_metrics\
+[](fg:purple bg:cyan)\
+$nodejs$python$golang$rust$php\
+$container$docker_context$kubernetes\
+[](fg:cyan)\
+$line_break\
+$status$jobs$character"""
+
+right_format = """$cmd_duration$battery$time"""
+
+add_newline = true
+# node --version can exceed the 500ms default on a cold cache, and a runtime
+# segment that flickers takes its background with it.
+command_timeout = 1500
+palette = 'phosphor'
+
+# Two marks and a cursor, brightening left to right. A failed command turns
+# all three red, legible in a screen of scrollback without reading the exit
+# code.
+[character]
+success_symbol = '[>](green)[>](bright-green)[_](bold bright-white)'
+error_symbol = '[>](red)[>](red)[_](bold bright-red)'
+vimcmd_symbol = '[<](green)[<](bright-green)[_](bold bright-white)'
+vimcmd_replace_symbol = '[<](yellow)[<](yellow)[_](bold bright-white)'
+vimcmd_visual_symbol = '[<](cyan)[<](bright-cyan)[_](bold bright-white)'
+
+# Always here: it is where the bar starts. The host name follows in the same
+# segment, because on a server "which machine" is the first question.
+[username]
+disabled = false
+show_always = true
+style_user = 'fg:color_fg0 bg:blue bold'
+style_root = 'fg:color_fg0 bg:red bold'
+format = '[ $user]($style)'
+
+[directory]
+style = 'fg:bright-white bg:color_bg3'
+format = '[ $path ]($style)[$read_only]($read_only_style)'
+# Not truncate_to_repo: two directories deep in a monorepo looks identical to
+# its root when all you print is the repo name.
+truncation_length = 3
+truncate_to_repo = false
+truncation_symbol = '…/'
+read_only = ' ro '
+read_only_style = 'fg:bright-black bg:color_bg3'
+
+[directory.substitutions]
+# Only where the icon earns its space. ~/Code is most of this machine, and
+# `</> code/polkadot` reads as markup rather than as a path.
+'Documents' = ' docs'
+'Downloads' = ' dl'
+
+[git_branch]
+style = 'fg:color_fg0 bg:purple'
+symbol = ' '
+format = '[ $symbol$branch ]($style)'
+truncation_length = 24
+truncation_symbol = '…'
+
+[git_status]
+style = 'fg:color_fg0 bg:purple'
+format = '([$all_status$ahead_behind]($style))'
+conflicted = '≠${count} '
+ahead = '↑${count} '
+behind = '↓${count} '
+diverged = '↕↑${ahead_count}↓${behind_count} '
+untracked = '?${count} '
+stashed = '≡${count} '
+modified = '!${count} '
+staged = '+${count} '
+renamed = '»${count} '
+deleted = '−${count} '
+
+# Lines changed, so the size of what you are about to commit is visible
+# without running a diff.
+[git_metrics]
+disabled = false
+added_style = 'fg:color_fg0 bg:purple bold'
+deleted_style = 'fg:color_fg0 bg:purple'
+format = '([+$added]($added_style))([−$deleted]($deleted_style))[ ](bg:purple)'
+only_nonzero_diffs = true
+
+[git_state]
+style = 'fg:color_fg0 bg:purple bold'
+format = '[ \($state( $progress_current/$progress_total)\) ]($style)'
+
+# Runtimes share one cyan segment, so two of them read as a single block
+# rather than two bars.
+[nodejs]
+style = 'fg:color_fg0 bg:cyan'
+symbol = ' '
+format = '[ $symbol($version) ]($style)'
+detect_files = ['package.json', '.nvmrc', '.node-version', '.tool-versions', 'mise.toml']
+
+[python]
+style = 'fg:color_fg0 bg:cyan'
+symbol = ' '
+format = '[ $symbol($version)(\($virtualenv\)) ]($style)'
+
+[golang]
+style = 'fg:color_fg0 bg:cyan'
+symbol = ' '
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+style = 'fg:color_fg0 bg:cyan'
+symbol = ' '
+format = '[ $symbol($version) ]($style)'
+
+[php]
+style = 'fg:color_fg0 bg:cyan'
+symbol = ' '
+format = '[ $symbol($version) ]($style)'
+
+[container]
+style = 'fg:color_fg0 bg:cyan'
+format = '[ ⬢ $name ]($style)'
+
+[docker_context]
+style = 'fg:color_fg0 bg:cyan'
+symbol = ' '
+format = '[ $symbol$context ]($style)'
+only_with_files = true
+
+[kubernetes]
+disabled = false
+style = 'fg:color_fg0 bg:cyan'
+symbol = '☸ '
+format = '[ $symbol$context( \($namespace\)) ]($style)'
+
+# ─── the second line ──────────────────────────────────────────────────────
+# Below the bar, on the terminal background: what is about the last command
+# rather than about where you are.
+
+# The exit code, and nothing else.
+#
+# `map_symbol` prints starship's own wording for the common codes — a typo'd
+# command becomes "? NOTFOUND", which is jargon for a thing the three red
+# chevrons have already said. The number is the part you cannot get anywhere
+# else, so that is what is shown: `✗ 127`. Signals keep their name, because
+# `✗ SIGSEGV` and `✗ 1` are different news.
+[status]
+disabled = false
+style = 'bold red'
+symbol = '✗'
+not_found_symbol = '✗'
+not_executable_symbol = '✗'
+sigint_symbol = '✗'
+signal_symbol = '✗'
+map_symbol = true
+# `$maybe_int` is empty whenever map_symbol resolves a code, which is most of
+# the time — `$status` always carries the number. Signals add their name after
+# it, because 139 and SEGV are the same fact said twice only if you know the
+# table by heart. Ctrl-C still reports, as `✗ 130 INT`: it is not an error, but
+# a command that died on a signal you sent is still worth seeing.
+recognize_signal_code = true
+format = '[$symbol $status( $signal_name)]($style) '
+pipestatus = true
+pipestatus_format = '[$pipestatus]($style) '
+
+[jobs]
+style = 'purple'
+symbol = '⏵'
+format = '[$symbol$number]($style) '
+number_threshold = 1
+symbol_threshold = 1
+
+# ─── right side ───────────────────────────────────────────────────────────
+
+[cmd_duration]
+style = 'bright-black'
+min_time = 2000
+format = '[$duration]($style) '
+show_milliseconds = false
+
+# Only when it matters.
+[battery]
+format = '[$symbol$percentage]($style) '
+disabled = false
+[[battery.display]]
+threshold = 20
+style = 'red'
+[[battery.display]]
+threshold = 40
+style = 'yellow'
+
+[time]
+disabled = false
+style = 'bright-black'
+format = '[$time]($style)'
+time_format = '%H:%M'
+
+[hostname]
+ssh_only = false
+style = 'fg:color_fg0 bg:blue bold'
+format = '[@$hostname ]($style)'
+
+# Off: always true, or never interesting.
+[package]
+disabled = true
+[aws]
+disabled = true
+[cmake]
+disabled = true
+
+# Phosphor: the green of an old terminal tube, with amber for what needs a
+# second look. The role names are the ones config/starship.toml uses, so
+# every module above reads the same in both files.
+[palettes.phosphor]
+color_fg0      = '#04130A'
+color_fg_dark  = '#A8E6B0'
+color_bg1      = '#0B2114'
+color_bg3      = '#12331F'
+color_orange   = '#FF6B5E'
+color_yellow   = '#FFB000'
+color_aqua     = '#FFD166'
+color_blue     = '#39D353'
+color_green    = '#7CF08D'
+color_red      = '#FF6B5E'
+color_purple   = '#FFB000'
+black          = '#0B2114'
+red            = '#FF5F56'
+green          = '#39D353'
+yellow         = '#FFB000'
+blue           = '#39D353'
+purple         = '#1F9D55'
+cyan           = '#0F7A4D'
+white          = '#A8E6B0'
+bright-black   = '#4F8F63'
+bright-red     = '#FF8A80'
+bright-green   = '#7CF08D'
+bright-yellow  = '#FFD166'
+bright-blue    = '#7CF08D'
+bright-purple  = '#5AD08A'
+bright-cyan    = '#3DBE86'
+bright-white   = '#D9FBE0'
