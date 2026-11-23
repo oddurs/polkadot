@@ -40,8 +40,6 @@ brew "lazygit"
 brew "mise"
 # Search tool like grep and The Silver Searcher
 brew "ripgrep"
-# AI coding agent, built for the terminal
-brew "opencode"
 # PDF rendering library (based on the xpdf-3.0 code base)
 brew "poppler"
 # Develop and deploy code with zero configuration
@@ -54,12 +52,8 @@ brew "sops"
 brew "starship"
 # Open source continuous file synchronization application
 brew "syncthing", restart_service: :changed
-# Simplified and community-driven man pages
-brew "tldr", link: false
 # Official tldr client written in Rust
 brew "tlrc"
-# Terminal multiplexer
-brew "tmux"
 # Command-line unarchiving tools supporting multiple formats
 brew "unar"
 # Command-line interface for Vercel
@@ -107,13 +101,9 @@ cask "1password-cli"
 cask "font-jetbrains-mono-nerd-font"
 # The terminal
 cask "ghostty"
-# Kept as a fallback terminal
-cask "iterm2"
 # Replacement for Docker Desktop
 cask "orbstack"
 # Open-source code editor
 cask "visual-studio-code"
-vscode "dooez.alt-catppuccin-vsc"
 vscode "ziglang.vscode-zig"
-npm "@openai/codex"
 npm "openclaw"

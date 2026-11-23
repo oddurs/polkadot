@@ -34,8 +34,8 @@ version_check = true
 manifest_check = true
 
 [keys]
-# ctrl+b is tmux's prefix and this machine runs tmux too. ctrl+a keeps the two
-# from fighting over the same chord.
+# ctrl+b is tmux's prefix, and a remote machine may still run tmux. ctrl+a
+# keeps the two from fighting over the same chord.
 prefix = "ctrl+a"
 
 

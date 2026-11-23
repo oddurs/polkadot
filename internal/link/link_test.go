@@ -147,3 +147,25 @@ func TestUnlinkLeavesForeignTargetAlone(t *testing.T) {
 		t.Fatalf("target = %q, %v; want unchanged foreign link", got, err)
 	}
 }
+
+// A retired link points at a source that the checkout no longer has. Unlink
+// must still recognise it as managed, or the dangling link stays forever.
+func TestUnlinkRemovesDanglingManagedLink(t *testing.T) {
+	root, home := t.TempDir(), t.TempDir()
+	src := filepath.Join(root, "home", "zshrc")
+	target := filepath.Join(home, ".zshrc")
+	if err := os.Symlink(src, target); err != nil {
+		t.Fatal(err)
+	}
+
+	managed, err := New(root, home, false).Unlink(src, target)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !managed {
+		t.Fatal("dangling link into the checkout was not recognised as managed")
+	}
+	if _, err := os.Lstat(target); !os.IsNotExist(err) {
+		t.Fatalf("dangling link still present: %v", err)
+	}
+}

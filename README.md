@@ -72,5 +72,5 @@ London Moquette is bundled as a small runtime subset of
 [Subway Seat](https://github.com/oddurs/subway-seat); its upstream MIT license
 is preserved at [`theme/SUBWAY-SEAT-LICENSE`](theme/SUBWAY-SEAT-LICENSE).
 
-Polkadot is MIT licensed. See [CONTRIBUTING.md](CONTRIBUTING.md),
-[SECURITY.md](SECURITY.md), and [SUPPORT.md](SUPPORT.md) for project guidance.
+Polkadot is MIT licensed. See [SECURITY.md](SECURITY.md) to report a
+vulnerability.

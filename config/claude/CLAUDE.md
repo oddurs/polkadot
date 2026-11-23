@@ -16,6 +16,11 @@ before it is committed or posted.
 - Say what you skipped and why. Never report a step you didn't watch pass.
 - Disagree once, with the reason. Then do what I asked — repeating the ask is the decision.
 - Write short sentences and concrete nouns. Cut any sentence that restates the one before it.
+- Write about 80% of the way to ASD-STE100 (Simplified Technical English) in reports, issues,
+  pull requests, comments and docs: one idea per sentence, active voice, one meaning per word,
+  the same word for the same thing, no idioms, and a noun instead of a vague "it" or "this".
+  Keep technical names exact. Skip the standard's restricted dictionary. Public marketing copy
+  follows that project's own voice rules instead.
 
 ## Code
 

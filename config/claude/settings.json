@@ -92,7 +92,7 @@
     ],
     "defaultMode": "auto"
   },
-  "model": "opus",
+  "model": "claude-fable-5-2[1m]",
   "hooks": {
     "SessionStart": [
       {
@@ -121,7 +121,7 @@
   "effortLevel": "high",
   "modelSettings": {
     "claude-opus-5-5": {
-      "effortLevel": "high"
+      "effortLevel": "medium"
     }
   },
   "autoUpdatesChannel": "latest",

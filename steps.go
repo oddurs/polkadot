@@ -44,9 +44,7 @@ var links = []linkMap{
 	{"config/claude/rules", ".claude/rules"},
 	{"config/claude/skills", ".claude/skills"},
 	{"config/ripgrep", ".config/ripgrep"},
-	{"config/tmux/tmux.conf", ".tmux.conf"},
 	{"config/vscode/settings.json", "Library/Application Support/Code/User/settings.json"},
-	{"home/zshrc", ".zshrc"},
 	{"home/gitconfig", ".gitconfig"},
 	{"home/gitconfig.local", ".gitconfig.local"},
 	{"home/gitignore_global", ".gitignore_global"},
@@ -83,10 +81,41 @@ func doUnlink(l *link.Linker, t *tally) {
 	ui.Blank()
 }
 
+// retired lists links that an earlier version created and this version no
+// longer owns. Their sources are gone from the checkout, so without this a
+// machine that updates keeps a dangling link at each target.
+var retired = []linkMap{
+	{"config/tmux/tmux.conf", ".tmux.conf"},
+	{"home/zshrc", ".zshrc"},
+}
+
 func doLink(l *link.Linker, t *tally) {
 	ui.Section("dotfiles")
 	linkMappings(l, t, append(links, themeLinks...))
+	removeRetired(l, t)
 	ui.Blank()
+}
+
+// removeRetired removes a retired link only when it still points into this
+// checkout. A file the user put there instead is not ours to remove.
+func removeRetired(l *link.Linker, t *tally) {
+	for _, m := range retired {
+		managed, err := l.Unlink(filepath.Join(l.Root, m.from), filepath.Join(l.Home, m.to))
+		if err != nil {
+			ui.Result("~/"+m.to, "failed", err.Error())
+			t.fail++
+			continue
+		}
+		if !managed {
+			continue
+		}
+		if *dryRun {
+			ui.Result("~/"+m.to, "would", "remove retired link")
+		} else {
+			ui.Result("~/"+m.to, "removed", "retired link")
+		}
+		t.done++
+	}
 }
 
 func linkMappings(l *link.Linker, t *tally, mappings []linkMap) {
