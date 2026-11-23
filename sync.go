@@ -125,7 +125,6 @@ func doTimer(t *tally) {
 	ui.Section("timer")
 	home, _ := os.UserHomeDir()
 	root, _ := repoRoot()
-	dst := filepath.Join(home, "Library", "LaunchAgents", "dev.polkadot.sync.plist")
 
 	goBin, err := step.Run("/bin/sh", "-c", "command -v go")
 	if err != nil {
@@ -134,6 +133,12 @@ func doTimer(t *tally) {
 		ui.Blank()
 		return
 	}
+	if goos != "darwin" {
+		doTimerLinux(root, strings.TrimSpace(goBin), home, t)
+		ui.Blank()
+		return
+	}
+	dst := filepath.Join(home, "Library", "LaunchAgents", "dev.polkadot.sync.plist")
 	body := buildSyncPlist(root, strings.TrimSpace(goBin), home)
 
 	if *dryRun {

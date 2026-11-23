@@ -22,8 +22,9 @@ auto_switch = false
 
 [terminal]
 # New panes get fish as a login shell, so conf.d and PATH are correct inside
-# an agent's terminal exactly as they are in a normal one.
-default_shell = "/opt/homebrew/bin/fish"
+# an agent's terminal exactly as they are in a normal one. default_shell is
+# unset on purpose: herdr then uses $SHELL, which is fish on every machine,
+# at a path that differs between macOS and Linux.
 shell_mode = "login"
 # New panes open beside the pane you split from, not at $HOME.
 new_cwd = "follow"

@@ -57,7 +57,7 @@ var links = []linkMap{
 func doUnlink(l *link.Linker, t *tally) {
 	ui.Section("dotfiles")
 	home, _ := os.UserHomeDir()
-	for _, m := range append(links, themeLinks...) {
+	for _, m := range active(append(links, themeLinks...)) {
 		src := filepath.Join(l.Root, m.from)
 		dst := filepath.Join(home, m.to)
 		managed, err := l.Unlink(src, dst)
@@ -91,7 +91,7 @@ var retired = []linkMap{
 
 func doLink(l *link.Linker, t *tally) {
 	ui.Section("dotfiles")
-	linkMappings(l, t, append(links, themeLinks...))
+	linkMappings(l, t, active(append(links, themeLinks...)))
 	removeRetired(l, t)
 	ui.Blank()
 }
@@ -218,7 +218,7 @@ func doShell(home string, t *tally) {
 
 	fishPath, err := step.Run("/bin/sh", "-c", "command -v fish")
 	if err != nil || fishPath == "" {
-		ui.Result("fish", "failed", "not installed — run the brew step first")
+		ui.Result("fish", "failed", "not installed — run the packages step first")
 		t.fail++
 		ui.Blank()
 		return
@@ -240,7 +240,7 @@ func doShell(home string, t *tally) {
 	default:
 		ui.Note("registering fish in /etc/shells — sudo will ask for your password")
 		if err := step.Stream("/bin/sh", "-c",
-			"echo "+fishPath+" | sudo tee -a /etc/shells >/dev/null"); err != nil {
+			"echo "+fishPath+" | "+sudo()+"tee -a /etc/shells >/dev/null"); err != nil {
 			ui.Result("/etc/shells", "failed", "run by hand: echo "+fishPath+" | sudo tee -a /etc/shells")
 			t.fail++
 		} else {
@@ -249,7 +249,7 @@ func doShell(home string, t *tally) {
 		}
 	}
 
-	cur := os.Getenv("SHELL")
+	cur := loginShell()
 	switch {
 	case cur == fishPath:
 		ui.Result("login shell", "already", "fish")
@@ -283,21 +283,36 @@ func doTools(t *tally) {
 			ui.Result(tool.bin, "already", tool.note)
 			t.skip++
 		} else {
-			ui.Result(tool.bin, "failed", "missing — brew step should have installed it")
+			ui.Result(tool.bin, "failed", "missing — the packages step should have installed it")
 			t.fail++
 		}
 	}
 	ui.Blank()
 }
 
-func doAgents(t *tally) {
-	ui.Section("coding agents")
-	for _, a := range []struct{ bin, how string }{
+type agent struct{ bin, how string }
+
+// agentInstallers lists each agent with the installer its vendor documents
+// for this system. herdr is the terminal client; hc is herdr-core, the
+// server that the desktop and mobile apps attach to.
+func agentInstallers() []agent {
+	opencode := "brew install sst/tap/opencode"
+	if goos != "darwin" {
+		opencode = "curl -fsSL https://opencode.ai/v2/install | bash"
+	}
+	return []agent{
 		{"claude", "curl -fsSL https://claude.ai/install.sh | bash"},
 		{"codex", "npm i -g @openai/codex"},
-		{"opencode", "brew install sst/tap/opencode"},
+		{"opencode", opencode},
+		{"agy", "curl -fsSL https://antigravity.google/cli/install.sh | bash"},
 		{"herdr", "curl -fsSL https://herdr.dev/install.sh | sh"},
-	} {
+		{"hc", "curl -fsSL https://releases.herdr.dev/core/install.sh | sh"},
+	}
+}
+
+func doAgents(t *tally) {
+	ui.Section("coding agents")
+	for _, a := range agentInstallers() {
 		if step.Has(a.bin) {
 			ui.Result(a.bin, "already", "")
 			t.skip++
@@ -327,7 +342,7 @@ func doAgents(t *tally) {
 
 func doDoctor(home, root string) {
 	ui.Section("links")
-	for _, m := range append(links, themeLinks...) {
+	for _, m := range active(append(links, themeLinks...)) {
 		dst := filepath.Join(home, m.to)
 		want := filepath.Join(root, m.from)
 		got, err := os.Readlink(dst)
@@ -346,7 +361,11 @@ func doDoctor(home, root string) {
 	}
 	ui.Blank()
 	ui.Section("binaries")
-	for _, b := range []string{"brew", "fish", "starship", "mise", "zoxide", "atuin", "lazygit", "lazydocker", "btop", "gh", "fresh", "claude", "codex", "opencode", "herdr"} {
+	bins := []string{"fish", "starship", "mise", "zoxide", "atuin", "lazygit", "lazydocker", "btop", "gh", "fresh", "claude", "codex", "opencode", "agy", "herdr", "hc"}
+	if goos == "darwin" {
+		bins = append([]string{"brew"}, bins...)
+	}
+	for _, b := range bins {
 		switch {
 		case step.Runs(b):
 			ui.Result(b, "already", "")
@@ -361,6 +380,6 @@ func doDoctor(home, root string) {
 	}
 	ui.Blank()
 	ui.Section("shell")
-	ui.Result("login shell", "already", os.Getenv("SHELL"))
+	ui.Result("login shell", "already", loginShell())
 	ui.Blank()
 }

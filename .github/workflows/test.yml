@@ -18,3 +18,19 @@ jobs:
       - run: test -z "$(gofmt -l *.go internal/*/*.go)"
       - run: go test ./...
       - run: go vet ./...
+
+  # Sets up a clean Debian machine from nothing, the way a new server does.
+  # The unit tests cannot find a missing package or a tool with no Linux build.
+  debian:
+    runs-on: ubuntu-latest
+    container: debian:13
+    env:
+      NO_COLOR: "1"
+      # mise asks the GitHub API for release versions; a token avoids the
+      # anonymous rate limit.
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+      - run: ./bootstrap.sh --yes install
+      - run: ./bootstrap.sh --yes install
+      - run: ./bootstrap.sh doctor

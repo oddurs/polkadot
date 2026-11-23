@@ -1,6 +1,6 @@
 ## Summary
 
-<!-- What changes, and why does it belong in a portable Mac setup? -->
+<!-- What changes, and why does it belong in a setup for every machine? -->
 
 ## Validation
 

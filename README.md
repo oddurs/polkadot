@@ -1,8 +1,9 @@
 # polkadot
 
-A practical, personal macOS configuration that is safe to fork and pleasant to
-live with. It bootstraps a clean Mac, links declarative settings, and keeps
-credentials and machine state where they belong: off the Git history.
+A practical, personal configuration for a Mac and for a Debian server. It is
+safe to fork and pleasant to live with. It bootstraps a clean machine, links
+declarative settings, and keeps credentials and machine state where they
+belong: off the Git history.
 
 ```sh
 git clone https://github.com/oddurs/polkadot.git ~/Code/polkadot
@@ -10,8 +11,13 @@ cd ~/Code/polkadot
 ./bootstrap.sh
 ```
 
-The bootstrap installs the Xcode Command Line Tools, Homebrew, and Go when
-needed, then runs `go run . install`. It is deliberately macOS-only.
+On macOS the bootstrap installs the Xcode Command Line Tools, Homebrew, and Go
+when needed. On Debian or Ubuntu it installs Go and git with apt. It then runs
+`go run . install`.
+
+The two systems share one configuration. A Mac is a workstation: it also gets
+the terminal, the fonts and the desktop apps. A Linux machine is a server: it
+also gets lingering, a raised inotify limit and a running herdr-core.
 
 Coding-agent installers are opt-in:
 
@@ -41,13 +47,15 @@ someone else's account.
 | `polkadot install` | Install packages, link configuration, set up shell, tools, theme, and timer |
 | `polkadot link` | Link configuration only |
 | `polkadot unlink` | Remove only symlinks owned by this checkout |
-| `polkadot brew` | Install Homebrew packages from `Brewfile` |
+| `polkadot packages` | Install the `Brewfile` on macOS; `packages/linux.apt` and mise on Linux |
+| `polkadot runtimes` | Linux: install the tools that `config/mise/config.toml` lists |
+| `polkadot system` | Linux: enable lingering, raise the inotify limit, start herdr-core |
 | `polkadot shell` | Configure Fish as the login shell |
 | `polkadot tools` | Check command-line tools |
 | `polkadot agents` | Explicitly install coding agents |
 | `polkadot theme` | Link the bundled London Moquette theme |
 | `polkadot sync` | Fast-forward managed repositories and relink changes |
-| `polkadot timer` | Install the weekly `sync` launchd agent |
+| `polkadot timer` | Install the weekly `sync` timer: launchd on macOS, systemd on Linux |
 | `polkadot doctor` | Report configuration health without changing anything |
 
 Put flags before the command: `polkadot --dry-run install`. `--only=<step>`
@@ -61,6 +69,8 @@ approves external installers for intentional unattended runs.
 - `unlink` removes only links pointing into this checkout.
 - `sync` is fast-forward only and skips dirty trees and non-default branches.
 - Nothing writes macOS `defaults`; personal system preferences remain yours.
+- On Linux, `polkadot system` makes the only changes outside `$HOME`: one
+  file in `/etc/sysctl.d` and lingering for your user.
 
 ## Documentation
 

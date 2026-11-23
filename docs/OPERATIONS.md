@@ -1,6 +1,6 @@
 # Operations Guide
 
-Polkadot is a macOS setup you can run repeatedly. The repository is the source
+Polkadot is a setup for macOS and Debian that you can run repeatedly. The repository is the source
 of truth for configuration; each machine keeps its own credentials, histories,
 caches, and local overrides.
 
@@ -8,9 +8,10 @@ For the tool and layout choices, see the [configuration reference](REFERENCE.md)
 
 ## First machine
 
-Clone your fork with HTTPS, then run the bootstrap script. It opens the Xcode
-Command Line Tools installer when necessary, installs Homebrew and Go, and
-starts the normal install. It does not install coding agents unless you ask.
+Clone your fork with HTTPS, then run the bootstrap script. On macOS it opens
+the Xcode Command Line Tools installer when necessary and installs Homebrew
+and Go. On Debian or Ubuntu it installs Go and git with apt. It then starts
+the normal install. It does not install coding agents unless you ask.
 
 ```sh
 git clone https://github.com/YOU/polkadot.git ~/Code/polkadot
@@ -49,8 +50,31 @@ non-install command fail instead of silently doing nothing.
 `sync` only fast-forwards clean repositories that are checked out on their
 remote default branch. It skips feature branches, diverged repositories, dirty
 trees, and repositories without a known default branch. `polkadot timer`
-installs the weekly version of that same operation; its log is at
-`~/Library/Logs/polkadot-sync.log`.
+installs the weekly version of that same operation. On macOS its log is at
+`~/Library/Logs/polkadot-sync.log`. On Linux read it with
+`journalctl --user -u polkadot-sync`.
+
+## Linux server
+
+A Linux machine takes the same configuration without the desktop parts. The
+install runs these steps in order:
+
+| Step | What it does |
+|---|---|
+| `packages` | Installs `packages/linux.apt` with apt, then the mise binary |
+| `link` | Links the configuration. It skips Ghostty and VS Code |
+| `runtimes` | Runs `mise install` for the tools in `config/mise/config.toml` |
+| `shell` | Makes fish the login shell |
+| `timer` | Enables `polkadot-sync.timer` for the user |
+| `system` | Enables lingering, raises the inotify limit, starts herdr-core |
+
+The `system` step needs sudo and a running systemd. In a container it reports
+each item as skipped. herdr-core registers its own service with the systemd
+user manager, so Polkadot writes no unit for it. Install herdr-core first
+with `--with-agents` or `polkadot agents`.
+
+The command-line tools come from mise on Linux and from Homebrew on macOS.
+`tokei` and `tlrc` are not installed on Linux.
 
 ## Customization
 
