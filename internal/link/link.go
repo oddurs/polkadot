@@ -114,3 +114,83 @@ func (l *Linker) Unlink(src, target string) (bool, error) {
 	}
 	return true, nil
 }
+
+// Seed gives target a copy of src when target has none. It is for a file
+// that its own tool rewrites: the repository holds the starting point, and
+// the machine owns the file from then on. Seed never overwrites a file.
+//
+// One case is a migration. An earlier version linked these files, so the
+// tool wrote through the link into the checkout. Seed replaces that link
+// with a copy of what the link pointed at, and the machine keeps its content.
+func (l *Linker) Seed(src, target string) (Status, error) {
+	data, err := os.ReadFile(src)
+	if err != nil {
+		return Would, fmt.Errorf("source missing: %s", src)
+	}
+	info, err := os.Stat(src)
+	if err != nil {
+		return Would, err
+	}
+
+	ours := false
+	if cur, err := os.Readlink(target); err == nil && cur == src {
+		ours = true
+	} else if _, err := os.Lstat(target); err == nil {
+		return Already, nil
+	}
+
+	if l.DryRun {
+		return Would, nil
+	}
+	if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
+		return Would, err
+	}
+	if ours {
+		if err := os.Remove(target); err != nil {
+			return Would, fmt.Errorf("removing the old link %s: %w", target, err)
+		}
+	}
+	if err := os.WriteFile(target, data, info.Mode().Perm()); err != nil {
+		return Would, err
+	}
+	return Created, nil
+}
+
+// Unfold replaces a directory link that this linker made with a real
+// directory. A tool that writes beside its configuration wrote into the
+// checkout through that link. Unfold moves every entry out of the checkout
+// folder into the real directory, except the names in keep, which are the
+// files the repository tracks. The boolean reports whether target was such
+// a link.
+func (l *Linker) Unfold(srcDir, target string, keep []string) (bool, error) {
+	cur, err := os.Readlink(target)
+	if err != nil || cur != srcDir {
+		return false, nil
+	}
+	if l.DryRun {
+		return true, nil
+	}
+	entries, err := os.ReadDir(srcDir)
+	if err != nil {
+		return true, err
+	}
+	if err := os.Remove(target); err != nil {
+		return true, fmt.Errorf("removing the old link %s: %w", target, err)
+	}
+	if err := os.MkdirAll(target, 0o755); err != nil {
+		return true, err
+	}
+	kept := map[string]bool{}
+	for _, name := range keep {
+		kept[name] = true
+	}
+	for _, e := range entries {
+		if kept[e.Name()] {
+			continue
+		}
+		if err := os.Rename(filepath.Join(srcDir, e.Name()), filepath.Join(target, e.Name())); err != nil {
+			return true, fmt.Errorf("moving %s out of the checkout: %w", e.Name(), err)
+		}
+	}
+	return true, nil
+}

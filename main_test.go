@@ -152,7 +152,7 @@ func TestReadListSkipsCommentsAndBlanks(t *testing.T) {
 // file would silently stop being linked. gitconfig.local is the exception:
 // it is ignored by git and each machine creates its own.
 func TestEveryLinkSourceExists(t *testing.T) {
-	for _, m := range append(links, themeLinks...) {
+	for _, m := range append(append(links, themeLinks...), seeds...) {
 		if m.from == "home/gitconfig.local" {
 			continue
 		}
@@ -253,5 +253,24 @@ func TestWriteRootFileKeepsTheBody(t *testing.T) {
 	}
 	if string(got) != inotifyBody {
 		t.Fatalf("file holds %q, want %q", got, inotifyBody)
+	}
+}
+
+// A file is linked or seeded, never both: a link to a seeded file would
+// send the tool's writes back into the checkout.
+func TestNoFileIsBothLinkedAndSeeded(t *testing.T) {
+	linked := map[string]bool{}
+	for _, m := range append(links, themeLinks...) {
+		linked[m.to] = true
+	}
+	for _, m := range seeds {
+		if linked[m.to] {
+			t.Errorf("%s is linked and seeded", m.to)
+		}
+		for to := range linked {
+			if strings.HasPrefix(m.to, to+"/") {
+				t.Errorf("%s is seeded inside the linked folder %s", m.to, to)
+			}
+		}
 	}
 }

@@ -169,3 +169,116 @@ func TestUnlinkRemovesDanglingManagedLink(t *testing.T) {
 		t.Fatalf("dangling link still present: %v", err)
 	}
 }
+
+func TestSeedCopiesOnceAndNeverOverwrites(t *testing.T) {
+	root, home := t.TempDir(), t.TempDir()
+	src := filepath.Join(root, "settings.json")
+	target := filepath.Join(home, ".claude", "settings.json")
+	if err := os.WriteFile(src, []byte("from the repository"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	l := New(root, home, false)
+
+	if st, err := l.Seed(src, target); err != nil || st != Created {
+		t.Fatalf("first seed = %v, %v", st, err)
+	}
+	if fi, _ := os.Lstat(target); fi.Mode()&os.ModeSymlink != 0 {
+		t.Fatal("seed made a link; the tool would write into the checkout")
+	}
+
+	// The tool rewrites its file. A later seed must leave that alone.
+	if err := os.WriteFile(target, []byte("written by the tool"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if st, err := l.Seed(src, target); err != nil || st != Already {
+		t.Fatalf("second seed = %v, %v", st, err)
+	}
+	if got, _ := os.ReadFile(target); string(got) != "written by the tool" {
+		t.Fatalf("seed overwrote the tool's file: %q", got)
+	}
+}
+
+// An earlier version linked the file. The tool wrote through the link, so
+// the checkout holds the machine's content. The migration must keep it.
+func TestSeedReplacesItsOldLinkWithACopy(t *testing.T) {
+	root, home := t.TempDir(), t.TempDir()
+	src := filepath.Join(root, "config.toml")
+	target := filepath.Join(home, "config.toml")
+	if err := os.WriteFile(src, []byte("what the machine runs"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(src, target); err != nil {
+		t.Fatal(err)
+	}
+
+	if st, err := New(root, home, false).Seed(src, target); err != nil || st != Created {
+		t.Fatalf("seed over its old link = %v, %v", st, err)
+	}
+	fi, err := os.Lstat(target)
+	if err != nil || fi.Mode()&os.ModeSymlink != 0 {
+		t.Fatalf("target is still a link: %v", err)
+	}
+	if fi.Mode().Perm() != 0o600 {
+		t.Fatalf("mode = %v, want the source's 0600", fi.Mode().Perm())
+	}
+	if got, _ := os.ReadFile(target); string(got) != "what the machine runs" {
+		t.Fatalf("content lost: %q", got)
+	}
+}
+
+func TestUnfoldMovesToolStateOutOfTheCheckout(t *testing.T) {
+	root, home := t.TempDir(), t.TempDir()
+	srcDir := filepath.Join(root, "config", "herdr")
+	target := filepath.Join(home, ".config", "herdr")
+	for name, body := range map[string]string{"config.toml": "tracked", "plugins.json": "state", "session.json": "state"} {
+		if err := os.MkdirAll(srcDir, 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(srcDir, name), []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := os.MkdirAll(filepath.Join(srcDir, "plugins", "one"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(srcDir, target); err != nil {
+		t.Fatal(err)
+	}
+
+	managed, err := New(root, home, false).Unfold(srcDir, target, []string{"config.toml"})
+	if err != nil || !managed {
+		t.Fatalf("unfold = %v, %v", managed, err)
+	}
+	if fi, _ := os.Lstat(target); fi == nil || fi.Mode()&os.ModeSymlink != 0 || !fi.IsDir() {
+		t.Fatal("target is not a real directory")
+	}
+	for _, moved := range []string{"plugins.json", "session.json", "plugins/one"} {
+		if _, err := os.Stat(filepath.Join(target, moved)); err != nil {
+			t.Errorf("%s did not move to the real directory", moved)
+		}
+		if _, err := os.Stat(filepath.Join(srcDir, moved)); err == nil {
+			t.Errorf("%s is still in the checkout", moved)
+		}
+	}
+	if _, err := os.Stat(filepath.Join(srcDir, "config.toml")); err != nil {
+		t.Error("the tracked file left the checkout")
+	}
+}
+
+func TestUnfoldLeavesAForeignTargetAlone(t *testing.T) {
+	root, home := t.TempDir(), t.TempDir()
+	srcDir := filepath.Join(root, "herdr")
+	target := filepath.Join(home, "herdr")
+	if err := os.MkdirAll(srcDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(target, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if managed, err := New(root, home, false).Unfold(srcDir, target, nil); err != nil || managed {
+		t.Fatalf("unfold touched a real directory: %v, %v", managed, err)
+	}
+}

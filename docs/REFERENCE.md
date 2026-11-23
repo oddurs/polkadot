@@ -15,6 +15,21 @@ the operational contract lives in [OPERATIONS.md](OPERATIONS.md).
 | `packages/linux.apt` | apt | Linux: the shell, git, and build tools |
 | `config/mise/config.toml` | mise | Every machine: the pinned command-line tools |
 
+## Linked and seeded
+
+Polkadot puts a file on a machine in one of two ways.
+
+- **Linked.** The path on the machine is a symbolic link into the checkout. A
+  change in the repository reaches every machine at its next sync. Polkadot
+  links a file only when no tool writes to it.
+- **Seeded.** Polkadot copies the file once, when the machine has none. The
+  machine owns the file from then on. `~/.claude/settings.json`,
+  `~/.config/gh/config.yml`, `~/.codex/config.toml` and
+  `~/.config/herdr/config.toml` are seeded, because their tools rewrite them.
+
+A change to a seeded file reaches a new machine only. To change it on a
+machine that has the file, edit the file there.
+
 The tracked configuration is instructions, not state. Histories, OAuth files,
 plugin caches, local Git identity, and per-machine paths stay out of the repo.
 

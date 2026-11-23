@@ -3,12 +3,14 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"net"
 	"os"
 	"os/exec"
 	"os/user"
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/oddurs/polkadot/internal/link"
 	"github.com/oddurs/polkadot/internal/step"
@@ -34,10 +36,6 @@ var links = []linkMap{
 	{"config/atuin", ".config/atuin"},
 	{"config/mise", ".config/mise"},
 	{"config/btop", ".config/btop"},
-	{"config/herdr", ".config/herdr"},
-	// Only config.yml: hosts.yml beside it holds the OAuth token.
-	{"config/gh/config.yml", ".config/gh/config.yml"},
-	{"config/codex/config.toml", ".codex/config.toml"},
 	// opencode reads these from ~/.config/opencode. node_modules, bun.lock and
 	// the skills are machine state and stay out of the repo.
 	{"config/opencode/opencode.jsonc", ".config/opencode/opencode.jsonc"},
@@ -45,7 +43,6 @@ var links = []linkMap{
 	{"config/opencode/agents", ".config/opencode/agents"},
 	{"config/opencode/commands", ".config/opencode/commands"},
 	{"config/opencode/templates", ".config/opencode/templates"},
-	{"config/claude/settings.json", ".claude/settings.json"},
 	// Instructions, not state: CLAUDE.md loads every session, rules/ load when
 	// a matching file is touched, skills/ load on demand. Everything else
 	// under ~/.claude — history, projects, plugins, auto memory — is state
@@ -58,6 +55,94 @@ var links = []linkMap{
 	{"home/gitconfig.local", ".gitconfig.local"},
 	{"home/gitignore_global", ".gitignore_global"},
 	{"home/git_commit_template", ".git_commit_template"},
+}
+
+// seeds are files that their own tool rewrites. Claude writes its theme into
+// settings.json, gh rewrites config.yml at each sign-in, Codex records the
+// projects it trusts, and Herdr writes its hooks and sidebar rules. A link
+// would send every one of those writes into the checkout. polkadot copies
+// each file once, and the machine owns it from then on. A change to a seed
+// reaches a new machine, not one that already has the file.
+var seeds = []linkMap{
+	{"config/claude/settings.json", ".claude/settings.json"},
+	{"config/gh/config.yml", ".config/gh/config.yml"},
+	{"config/codex/config.toml", ".codex/config.toml"},
+	{"config/herdr/config.toml", ".config/herdr/config.toml"},
+}
+
+// herdrSocket answers while a Herdr server runs.
+func herdrRunning(home string) bool {
+	conn, err := net.DialTimeout("unix", filepath.Join(home, ".config", "herdr", "herdr.sock"), time.Second)
+	if err != nil {
+		return false
+	}
+	conn.Close()
+	return true
+}
+
+// unfoldHerdr ends the folder link that an earlier version made for Herdr.
+// Herdr keeps its sessions, sockets and plugins beside its configuration, so
+// all of that state lived in the checkout. The state moves to a real
+// ~/.config/herdr. A running server holds open files and sockets there, so
+// the move waits until the server is stopped.
+func unfoldHerdr(l *link.Linker, t *tally) {
+	src := filepath.Join(l.Root, "config", "herdr")
+	dst := filepath.Join(l.Home, ".config", "herdr")
+	if cur, err := os.Readlink(dst); err != nil || cur != src {
+		return
+	}
+	if herdrRunning(l.Home) {
+		ui.Result("~/.config/herdr", "warning", "still a link into the checkout: run `herdr server stop`, then `polkadot link`")
+		return
+	}
+	if _, err := l.Unfold(src, dst, []string{"config.toml"}); err != nil {
+		ui.Result("~/.config/herdr", "failed", err.Error())
+		t.fail++
+		return
+	}
+	if *dryRun {
+		ui.Result("~/.config/herdr", "would", "move Herdr's state out of the checkout")
+		t.done++
+		return
+	}
+	// plugins.json records each plugin by its full path, and those paths
+	// pointed into the checkout.
+	plugins := filepath.Join(dst, "plugins.json")
+	if data, err := os.ReadFile(plugins); err == nil {
+		moved := strings.ReplaceAll(string(data), src+"/", dst+"/")
+		if err := os.WriteFile(plugins, []byte(moved), 0o644); err != nil {
+			ui.Result("~/.config/herdr/plugins.json", "failed", err.Error())
+			t.fail++
+			return
+		}
+	}
+	ui.Result("~/.config/herdr", "moved", "Herdr's state is out of the checkout")
+	t.done++
+}
+
+func isLink(path string) bool {
+	fi, err := os.Lstat(path)
+	return err == nil && fi.Mode()&os.ModeSymlink != 0
+}
+
+func seedMappings(l *link.Linker, t *tally) {
+	for _, m := range seeds {
+		st, err := l.Seed(filepath.Join(l.Root, m.from), filepath.Join(l.Home, m.to))
+		switch {
+		case err != nil:
+			ui.Result("~/"+m.to, "failed", err.Error())
+			t.fail++
+		case st == link.Already:
+			ui.Result("~/"+m.to, "already", "the machine owns it")
+			t.skip++
+		case st == link.Would:
+			ui.Result("~/"+m.to, "would", "copy the starting file")
+			t.done++
+		default:
+			ui.Result("~/"+m.to, "copied", "the machine owns it from now on")
+			t.done++
+		}
+	}
 }
 
 // doUnlink removes only links that point back into this checkout. It leaves
@@ -101,6 +186,8 @@ var retired = []linkMap{
 func doLink(l *link.Linker, t *tally) {
 	ui.Section("dotfiles")
 	linkMappings(l, t, active(append(links, themeLinks...)))
+	unfoldHerdr(l, t)
+	seedMappings(l, t)
 	removeRetired(l, t)
 	ui.Blank()
 }
@@ -438,6 +525,21 @@ func doDoctor(home, root string) int {
 			} else {
 				ui.Result("~/"+m.to, "skipped", "absent")
 			}
+		}
+	}
+	ui.Blank()
+
+	ui.Section("seeded files")
+	for _, m := range seeds {
+		dst := filepath.Join(home, m.to)
+		fi, err := os.Lstat(dst)
+		switch {
+		case err != nil:
+			ui.Result("~/"+m.to, "skipped", "absent")
+		case fi.Mode()&os.ModeSymlink != 0, isLink(filepath.Dir(dst)):
+			ui.Result("~/"+m.to, "warning", "still a link into the checkout: run `polkadot link`")
+		default:
+			ui.Result("~/"+m.to, "already", "the machine owns it")
 		}
 	}
 	ui.Blank()
