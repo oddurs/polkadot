@@ -1,8 +1,8 @@
-// polkadot bootstraps a Mac the way I like it.
+// polkadot sets up a machine the way I like it: a Mac or a Debian server.
 //
-//	polkadot install     everything: brew, packages, links, shell, tools
+//	polkadot install     everything: packages, links, shell, tools
 //	polkadot link        symlinks only
-//	polkadot brew        Brewfile only
+//	polkadot packages    the Brewfile on macOS, apt and mise on Linux
 //	polkadot doctor      report what is and isn't in place
 //
 // Flags: --dry-run to see the plan, --only=<step> to run one part.
@@ -26,7 +26,7 @@ import (
 
 var (
 	dryRun     = flag.Bool("dry-run", false, "show what would change, touch nothing")
-	only       = flag.String("only", "", "run one step: brew, link, shell, tools, agents, theme, timer")
+	only       = flag.String("only", "", "run one step: packages, link, runtimes, shell, tools, agents, theme, timer, system")
 	withAgents = flag.Bool("with-agents", false, "allow third-party coding-agent installers during install")
 	yes        = flag.Bool("yes", false, "approve external installers without prompting")
 )
@@ -72,13 +72,16 @@ func main() {
 	}
 	ui.Banner(mode)
 
+	addLocalPaths(home)
+
 	l := link.New(root, home, *dryRun)
 	t := &tally{}
 
 	switch cmd {
 	case "install":
-		runIf("brew", func() { doBrew(t) })
+		runIf("packages", func() { doPackages(t) })
 		runIf("link", func() { doLink(l, t) })
+		runIf("runtimes", func() { doRuntimes(home, t) })
 		runIf("shell", func() { doShell(home, t) })
 		runIf("tools", func() { doTools(t) })
 		if *withAgents || *only == "agents" {
@@ -86,12 +89,17 @@ func main() {
 		}
 		runIf("theme", func() { doTheme(l, t) })
 		runIf("timer", func() { doTimer(t) })
+		runIf("system", func() { doSystem(t) })
 	case "link":
 		doLink(l, t)
 	case "unlink":
 		doUnlink(l, t)
-	case "brew":
-		doBrew(t)
+	case "packages", "brew":
+		doPackages(t)
+	case "runtimes":
+		doRuntimes(home, t)
+	case "system":
+		doSystem(t)
 	case "theme":
 		doTheme(l, t)
 	case "shell":
@@ -118,6 +126,10 @@ func main() {
 		ui.Note("replaced files were moved to " + strings.Replace(l.BackupDir, home, "~", 1))
 	}
 	ui.Summary(t.done, t.skip, t.fail)
+	// A timer and a CI job read the exit code, not the summary line.
+	if t.fail > 0 {
+		os.Exit(1)
+	}
 }
 
 func runIf(name string, fn func()) {
@@ -129,8 +141,9 @@ func runIf(name string, fn func()) {
 func validateArgs(cmd string) error {
 	if *only != "" {
 		valid := map[string]bool{
-			"brew": true, "link": true, "shell": true, "tools": true,
-			"agents": true, "theme": true, "timer": true,
+			"packages": true, "link": true, "runtimes": true, "shell": true,
+			"tools": true, "agents": true, "theme": true, "timer": true,
+			"system": true,
 		}
 		if !valid[*only] {
 			return fmt.Errorf("unknown --only step %q", *only)

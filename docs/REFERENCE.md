@@ -10,7 +10,8 @@ the operational contract lives in [OPERATIONS.md](OPERATIONS.md).
 | `config/` | `~/.config/` | Shell, terminal, CLI, agent, and editor settings |
 | `home/` | `~/` | Git, ignore rules, and commit template |
 | `theme/` | `~/.config/polkadot-theme` | London Moquette runtime assets |
-| `Brewfile` | Homebrew | Formulae, casks, and VS Code extensions |
+| `Brewfile` | Homebrew | macOS: formulae, casks, and VS Code extensions |
+| `packages/linux.apt` | apt | Linux: the shell, git, and build tools |
 
 The tracked configuration is instructions, not state. Histories, OAuth files,
 plugin caches, local Git identity, and per-machine paths stay out of the repo.

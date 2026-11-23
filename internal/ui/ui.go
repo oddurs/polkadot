@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// Colour only when somebody is watching. Under the launchd timer stdout is a
+// Colour only when somebody is watching. Under the sync timer stdout is a
 // log file, and escape codes in a log are noise you have to strip before you
 // can read what went wrong.
 var color = os.Getenv("NO_COLOR") == "" && os.Getenv("TERM") != "dumb" && isTerminal()
@@ -38,7 +38,7 @@ func Blue(s string) string   { return paint("34", s) }
 // Banner prints the run header.
 func Banner(mode string) {
 	fmt.Println()
-	fmt.Println("  " + Bold("polkadot") + Dim("  ·  a mac, the way I like it"))
+	fmt.Println("  " + Bold("polkadot") + Dim("  ·  a machine, the way I like it"))
 	if mode != "" {
 		fmt.Println("  " + Dim(mode))
 	}

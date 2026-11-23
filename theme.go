@@ -17,6 +17,6 @@ var themeLinks = []linkMap{
 
 func doTheme(l *link.Linker, t *tally) {
 	ui.Section("theme: London Moquette")
-	linkMappings(l, t, themeLinks)
+	linkMappings(l, t, active(themeLinks))
 	ui.Blank()
 }
