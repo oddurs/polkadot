@@ -391,16 +391,27 @@ func missingTools(home string) ([]string, error) {
 	return parseMissing(out)
 }
 
+// parseMissing reads `mise ls --missing --json`. mise also lists a version
+// that no configuration asks for, such as the target of an old "lts" alias;
+// that entry has no source. Only a version with a source is one this
+// machine should have.
 func parseMissing(out []byte) ([]string, error) {
-	tools := map[string]json.RawMessage{}
+	tools := map[string][]struct {
+		Source json.RawMessage `json:"source"`
+	}{}
 	if len(strings.TrimSpace(string(out))) > 0 {
 		if err := json.Unmarshal(out, &tools); err != nil {
 			return nil, err
 		}
 	}
-	missing := make([]string, 0, len(tools))
-	for name := range tools {
-		missing = append(missing, name)
+	var missing []string
+	for name, versions := range tools {
+		for _, v := range versions {
+			if len(v.Source) > 0 && string(v.Source) != "null" {
+				missing = append(missing, name)
+				break
+			}
+		}
 	}
 	sort.Strings(missing)
 	return missing, nil
