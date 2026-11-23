@@ -478,7 +478,10 @@ type agent struct{ bin, how string }
 func agentInstallers() []agent {
 	// The same installer on both systems, so both run the same major
 	// version. Homebrew gave a Mac version 1 while Linux had version 2.
-	opencode := "curl -fsSL https://opencode.ai/v2/install | bash"
+	// --no-modify-path: without it the installer appends a PATH line to the
+	// shell's file, and on a Mac with no ~/.zshrc it creates one.
+	// conf.d/00-path.fish already puts ~/.opencode/bin on PATH.
+	opencode := "curl -fsSL https://opencode.ai/v2/install | bash -s -- --no-modify-path"
 	return []agent{
 		{"claude", "curl -fsSL https://claude.ai/install.sh | bash"},
 		{"codex", "npm i -g @openai/codex"},
