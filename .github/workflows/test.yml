@@ -52,3 +52,5 @@ jobs:
       - run: ./bootstrap.sh doctor
       # As root, so the tests that write a root-owned file run here.
       - run: go test ./...
+      # The shell command must work from a folder that is not the checkout.
+      - run: cd /tmp && fish -lc 'polkadot version'
