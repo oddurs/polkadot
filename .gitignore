@@ -1,6 +1,10 @@
 bin/
 # Personal shell settings are intentionally machine-local.
 config/fish/conf.d/90-local.fish
+# config.fish belongs to the machine. Installers append to it (OrbStack,
+# Antigravity), and each line they add holds a path of that one machine.
+# Everything polkadot sets lives in conf.d/, which fish loads first.
+config/fish/config.fish
 # A local git identity can override the shared defaults without changing them.
 home/gitconfig.local
 # mise writes resolved versions here; the pins in config.toml are the source

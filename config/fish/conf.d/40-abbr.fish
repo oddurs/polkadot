@@ -97,3 +97,10 @@ abbr -a ml 'mise ls'
 alias rm 'rm -i'
 alias mv 'mv -i'
 alias cp 'cp -i'
+
+# Prezto's number-jump directory stack, which is the one habit worth keeping.
+if status is-interactive
+    for i in (seq 1 9)
+        alias $i="cd +$i"
+    end
+end

@@ -127,6 +127,11 @@ func doRuntimes(home string, t *tally) {
 	t.done++
 }
 
+func hcRunning() bool {
+	_, err := step.Run("hc", "server", "status")
+	return err == nil
+}
+
 func systemdRunning() bool {
 	_, err := os.Stat("/run/systemd/system")
 	return err == nil
@@ -203,6 +208,9 @@ func doSystem(t *tally) {
 	case *dryRun:
 		ui.Result("herdr-core", "would", "hc server start")
 		t.done++
+	case hcRunning():
+		ui.Result("herdr-core", "already", "running")
+		t.skip++
 	default:
 		if _, err := step.Run("hc", "server", "start"); err != nil {
 			ui.Result("herdr-core", "failed", "hc server start: "+err.Error())
