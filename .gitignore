@@ -1,11 +1,18 @@
 bin/
+# Personal shell settings are intentionally machine-local.
+config/fish/conf.d/90-local.fish
+# A local git identity can override the shared defaults without changing them.
+home/gitconfig.local
 # mise writes resolved versions here; the pins in config.toml are the source
 .mise.lock
 
-# Theme files placed by Subway Seat's installer. They are absolute symlinks
-# into ~/Code/subway-seat/dist, so they are machine-local by construction and
-# would be broken on any other clone. `polkadot theme` puts them back.
+# Compatibility ignores for artifacts from the earlier external theme setup.
+# The London Moquette bundle now lives in theme/; these keep an upgraded
+# machine from gaining unrelated worktree noise.
 config/*/themes/
+!config/fish/themes/
+config/fish/themes/*
+!config/fish/themes/london-moquette.theme
 config/nvim/colors/
 config/nvim/doc/subway-seat.txt
 config/nvim/lua/subway-seat/
@@ -30,3 +37,6 @@ config/herdr/release-notes.json
 
 # herdr downloads plugins here; they are clones, not configuration.
 config/herdr/plugins/
+
+# skills synced down from claude.ai; machine-written, not authored here
+config/claude/skills/synced/

@@ -1,0 +1,44 @@
+# London Moquette runtime bundle for Polkadot. Upstream attribution is in SUBWAY-SEAT-LICENSE.
+[delta "london-moquette"]
+	dark = true
+	syntax-theme = London Moquette
+	# changed lines: syntax colors on a tint; changed words on a stronger one
+	plus-style = syntax "#283E3A"
+	plus-non-emph-style = syntax "#283E3A"
+	plus-emph-style = syntax "#345345"
+	minus-style = syntax "#462B31"
+	minus-non-emph-style = syntax "#462B31"
+	minus-emph-style = syntax "#623538"
+	zero-style = syntax
+	whitespace-error-style = normal "#DB6052"
+	# git --color-moved: git's defaults and the git port's colors
+	map-styles = bold purple => syntax "#34242D", bold "#DE8946" => syntax "#34242D", bold blue => syntax "#36332A", bold "#7595DA" => syntax "#36332A", bold cyan => syntax "#203033", bold "#54B4B5" => syntax "#203033", bold yellow => syntax "#36332A", bold "#F2C03F" => syntax "#36332A"
+	# line numbers (with line-numbers = true) in the color of their change
+	line-numbers-plus-style = "#77C581"
+	line-numbers-minus-style = "#FE8474"
+	line-numbers-zero-style = "#73819C"
+	line-numbers-left-style = "#576685"
+	line-numbers-right-style = "#576685"
+	# file and hunk headers
+	file-style = "#E9EDF5" bold
+	file-decoration-style = "#DE8946" ul
+	hunk-header-style = file line-number syntax
+	hunk-header-file-style = "#C1C9D8"
+	hunk-header-line-number-style = "#7595DA"
+	hunk-header-decoration-style = "#7595DA" box
+	commit-decoration-style = "#F2C03F" box
+	inline-hint-style = "#73819C"
+	# git blame
+	blame-palette = "#1E2941 #172032 #263451"
+	blame-separator-style = "#576685"
+	# git grep / rg --json
+	grep-file-style = "#DE8946"
+	grep-line-number-style = "#77C581"
+	grep-match-line-style = syntax
+	grep-match-word-style = "#E9EDF5" "#5E5640" bold
+	grep-header-file-style = "#DE8946" bold
+	# merge conflicts (git's diff3 or zdiff3 conflict style)
+	merge-conflict-ours-diff-header-style = "#F2C03F" bold
+	merge-conflict-ours-diff-header-decoration-style = "#F2C03F" box
+	merge-conflict-theirs-diff-header-style = "#54B4B5" bold
+	merge-conflict-theirs-diff-header-decoration-style = "#54B4B5" box

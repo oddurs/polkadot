@@ -20,7 +20,7 @@
 
 # ─── model ────────────────────────────────────────────────────────────────
 
-model = "gpt-5.5-codex"
+model = "gpt-6-astra"
 # minimal | low | medium | high | xhigh. The work here is mostly not easy, and
 # the cheap answer to a hard question costs more than it saves.
 model_reasoning_effort = "high"
@@ -54,18 +54,18 @@ inherit = "all"
 
 [tui]
 notifications = true
-# Subway Seat London Moquette, linked into ~/.codex/themes by `polkadot theme`.
-# Switch with: sh ~/Code/subway-seat/install.sh switch <flavor>
+# London Moquette, linked into ~/.codex/themes by `polkadot theme`.
 theme = "london-moquette"
 
-# vscode | vscode-insiders | windsurf | cursor | none — and no `fresh`, which
+# vscode | vscode-insiders | windsurf | cursor | none - and no `fresh`, which
 # is this machine's $EDITOR. VS Code is installed and opens a file:line
 # citation at the right line, so it is the one that works rather than the one
 # that matches.
 file_opener = "vscode"
+screen_reader_detection_done = true
 
 [tui.model_availability_nux]
-gpt-6-astra = 1
+gpt-6-astra = 4
 
 # ─── history ──────────────────────────────────────────────────────────────
 
@@ -112,6 +112,21 @@ trust_level = "trusted"
 trust_level = "trusted"
 
 [projects."/Users/oddurs/Code/polkadot"]
+trust_level = "trusted"
+
+[projects."/Users/oddurs/Code/x-post"]
+trust_level = "trusted"
+
+[projects."/Users/oddurs/Code/ruler"]
+trust_level = "trusted"
+
+[projects."/Users/oddurs/Code/NetherC"]
+trust_level = "trusted"
+
+[projects."/Users/oddurs/Code/twerp"]
+trust_level = "trusted"
+
+[projects."/Users/oddurs/Code/eastereggs"]
 trust_level = "trusted"
 
 [hooks.state]

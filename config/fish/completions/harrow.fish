@@ -17,8 +17,9 @@ complete -c harrow -n '__fish_seen_subcommand_from config' -l force -d 'replace 
 
 complete -c harrow -n 'not __fish_seen_subcommand_from config themes completions' -s C -l directory -x -a '(__fish_complete_directories)' -d 'start looking for the project here'
 complete -c harrow -n 'not __fish_seen_subcommand_from config themes completions' -s a -l all -d 'show everything: finished, dropped, milestones'
-complete -c harrow -n 'not __fish_seen_subcommand_from config themes completions' -s b -l board -d 'open on the board'
-complete -c harrow -n 'not __fish_seen_subcommand_from config themes completions' -l stats -d 'open on the statistics'
+complete -c harrow -n 'not __fish_seen_subcommand_from config themes completions' -l lens -x -d 'needs, list, board, stats, or log'
+complete -c harrow -n 'not __fish_seen_subcommand_from config themes completions' -s b -l board -d 'open on the board (--lens board)'
+complete -c harrow -n 'not __fish_seen_subcommand_from config themes completions' -l stats -d 'open on the statistics (--lens stats)'
 complete -c harrow -n 'not __fish_seen_subcommand_from config themes completions' -s f -l filter -x -d 'open filtered, in cairn\'s grammar'
 complete -c harrow -n 'not __fish_seen_subcommand_from config themes completions' -l view -x -d 'open in one of the project\'s saved views'
 complete -c harrow -n 'not __fish_seen_subcommand_from config themes completions' -l group-by -x -d 'milestone, status, type, or any field'

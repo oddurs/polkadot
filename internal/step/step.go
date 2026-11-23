@@ -36,8 +36,15 @@ func Runs(bin string) bool {
 
 // Run executes a command, returning combined output.
 func Run(name string, args ...string) (string, error) {
+	return RunDir("", name, args...)
+}
+
+// RunDir executes a command in dir, returning combined output. An empty dir
+// keeps the caller's current working directory.
+func RunDir(dir, name string, args ...string) (string, error) {
 	cmd := exec.Command(name, args...)
 	cmd.Env = os.Environ()
+	cmd.Dir = dir
 	out, err := cmd.CombinedOutput()
 	return strings.TrimSpace(string(out)), err
 }
@@ -50,8 +57,14 @@ func Sh(line string) (string, error) {
 // Stream runs a command with its output attached to the terminal, for things
 // like brew bundle where the progress is the point.
 func Stream(name string, args ...string) error {
+	return StreamDir("", name, args...)
+}
+
+// StreamDir runs a command in dir with its output attached to the terminal.
+func StreamDir(dir, name string, args ...string) error {
 	cmd := exec.Command(name, args...)
 	cmd.Env = os.Environ()
+	cmd.Dir = dir
 	cmd.Stdout, cmd.Stderr, cmd.Stdin = os.Stdout, os.Stderr, os.Stdin
 	return cmd.Run()
 }

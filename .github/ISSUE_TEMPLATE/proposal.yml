@@ -1,0 +1,26 @@
+name: Configuration proposal
+description: Propose a portable improvement to the shared setup.
+title: "config: "
+labels: [configuration]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What repeated workflow or fresh-machine problem would this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: Describe the tracked configuration, affected tools, and the intended default.
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Safety and portability
+      description: Explain how existing files, credentials, machine-specific state, and forks are handled.
+    validations:
+      required: true

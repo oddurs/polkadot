@@ -14,8 +14,8 @@ set -gx XDG_DATA_HOME $HOME/.local/share
 set -gx XDG_CACHE_HOME $HOME/.cache
 set -gx XDG_STATE_HOME $HOME/.local/state
 
-# bat's base16 theme reads the terminal's own 16 colours, so it is Gotham
-# wherever Gotham is loaded and follows the terminal if that changes.
+# bat's base16 theme reads the terminal's own 16 colours, so it wears whatever
+# palette the terminal has loaded and follows it when that changes.
 set -gx BAT_THEME base16
 
 # ripgrep respects a global config file for the flags worth always having.

@@ -12,7 +12,7 @@
 onboarding = false
 
 [theme]
-# Subway Seat generates herdr's chrome against catppuccin as its base, so the
+# London Moquette maps Herdr's chrome against catppuccin as its base, so the
 # name has to match or the overrides land on the wrong roles. The override
 # block itself is appended by `polkadot theme` and rewritten in place; there is
 # deliberately no [theme.custom] here, because a second one is not a merge —
@@ -39,8 +39,7 @@ manifest_check = true
 prefix = "ctrl+a"
 
 
-# >>> subway-seat >>>
-# Subway Seat — generated from palette.py by build.py. Edit the palette, not this file.
+# London Moquette
 # London Moquette; base theme: catppuccin
 [theme.custom]
 panel_bg = "#1E2941"
@@ -62,7 +61,6 @@ green = "#77C581"
 red = "#FE8474"
 blue = "#7595DA"
 teal = "#54B4B5"
-# <<< subway-seat <<<
 
 # >>> namesync begin (managed block -- `namesync setup --undo` removes it)
 # Added by namesync. $project, $branch, $worktree, $locked, $since and $n are
@@ -72,14 +70,14 @@ teal = "#54B4B5"
 # current agent state; $age is how long the intent has been the current one.
 [ui.sidebar.agents]
 rows = [
-  ["state_icon", { token = "$n", fg = "#54B4B5", bold = true }, { token = "$project", fg = "#D8DEEA", bold = true }, { token = "$worktree", fg = "#DE8946" }, { token = "$acct", fg = "#AE9EDC" }, { token = "$locked", fg = "#DE8946" }, { token = "$stale", fg = "#73819C" }, { token = "$since", fg = "#73819C" }],
-  [{ token = "terminal_title_stripped", fg = "#7595DA" }],
+  ["state_icon", { token = "$n", fg = "#54B4B5", bold = true }, { token = "$project", fg = "#D8DEEA", bold = true }, { token = "$worktree", fg = "#DE8946" }, { token = "$acct", fg = "#AE9EDC" }, { token = "$locked", fg = "#DE8946" }, { token = "$stale", fg = "#73819C" }, { token = "$dirty", fg = "#F2C03F" }, { token = "$unmerged", fg = "#54B4B5" }, { token = "$prs", fg = "#7595DA" }, { token = "$since", fg = "#73819C" }],
+  [{ token = "$summary", fg = "#7595DA" }],
 ]
 
 [ui.sidebar.spaces]
 rows = [
-  ["state_icon", { token = "$n", fg = "#54B4B5", bold = true }, { token = "$project", fg = "#D8DEEA", bold = true }, { token = "$worktree", fg = "#DE8946" }, { token = "$locked", fg = "#DE8946" }, { token = "branch", fg = "#73819C" }, { token = "git_status", fg = "#F2C03F" }, { token = "$age", fg = "#73819C" }],
-  [{ token = "workspace", fg = "#7595DA" }],
+  ["state_icon", { token = "$n", fg = "#54B4B5", bold = true }, { token = "$project", fg = "#D8DEEA", bold = true }, { token = "$worktree", fg = "#DE8946" }, { token = "$locked", fg = "#DE8946" }, { token = "$stale", fg = "#73819C" }, { token = "$dirty", fg = "#F2C03F" }, { token = "$unmerged", fg = "#54B4B5" }, { token = "$prs", fg = "#7595DA" }],
+  [{ token = "$summary", fg = "#7595DA" }],
 ]
 # <<< namesync end
 

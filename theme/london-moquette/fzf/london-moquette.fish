@@ -1,0 +1,2 @@
+# London Moquette runtime bundle for Polkadot. Upstream attribution is in SUBWAY-SEAT-LICENSE.
+set -gx FZF_DEFAULT_OPTS "$FZF_DEFAULT_OPTS --color=dark,fg:#C1C9D8,bg:-1,hl:#F2C03F,fg+:#E9EDF5,bg+:#263451,hl+:#FFD36C,info:#73819C,prompt:#DE8946,pointer:#DE8946,marker:#77C581,spinner:#F2C03F,header:#54B4B5,border:#3D4F72,gutter:-1,query:#D8DEEA,ghost:#73819C,disabled:#73819C,nomatch:#576685,selected-bg:#303F61,separator:#303F61,scrollbar:#3D4F72,label:#A9B2C4,preview-border:#3D4F72,preview-label:#A9B2C4"

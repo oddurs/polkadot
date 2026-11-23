@@ -3,13 +3,8 @@
 
 # Theme.
 #
-# Not set here. `polkadot theme` appends `theme = London Moquette` in a marked
-# block at the end of this file, and its installer rewrites that block in
-# place — so naming a theme here too would leave a dead line behind every time
-# the flavor changed.
-#
-#   sh ~/Code/subway-seat/install.sh switch <flavor>
-#   ghostty +list-themes    browse everything with live preview
+# London Moquette is linked by `polkadot theme` from the bundled theme files.
+# It is named here directly because this setup intentionally has one flavor.
 
 # ─── type ─────────────────────────────────────────────────────────────────
 font-family = JetBrainsMono Nerd Font
@@ -45,6 +40,5 @@ keybind = cmd+opt+down=goto_split:down
 keybind = cmd+shift+enter=toggle_split_zoom
 keybind = cmd+k=clear_screen
 
-# >>> subway-seat >>>
+# London Moquette
 theme = London Moquette
-# <<< subway-seat <<<

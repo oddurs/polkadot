@@ -1,0 +1,6 @@
+# Copy this to ~/.gitconfig.local to override the shared defaults without
+# changing the repository. It is included last, so these values win.
+
+[user]
+	name = Your Name
+	email = you@example.com
