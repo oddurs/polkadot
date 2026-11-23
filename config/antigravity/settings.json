@@ -1,0 +1,51 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/settings.json",
+  "agentMode": "accept-edits",
+  "enableTerminalSandbox": true,
+  "notifications": true,
+  "permissions": {
+    "allow": [
+      "command(scripts/task)",
+      "command(scripts/agent doctor)",
+      "command(scripts/agent list)",
+      "command(git status)",
+      "command(git diff)",
+      "command(git log)",
+      "command(git show)",
+      "command(git branch)",
+      "command(gh pr view)",
+      "command(gh pr list)",
+      "command(gh pr diff)",
+      "command(gh pr checks)",
+      "command(cargo check)",
+      "command(cargo build)",
+      "command(cargo test)",
+      "command(cargo clippy)",
+      "command(cargo fmt)",
+      "command(pnpm)",
+      "command(go build)",
+      "command(go test)",
+      "command(go vet)",
+      "command(ls)",
+      "command(cat)",
+      "command(rg)",
+      "command(fd)",
+      "command(jq)",
+      "command(cairn)",
+      "command(webshot)"
+    ],
+    "ask": [
+      "command(git push)",
+      "command(git commit)"
+    ],
+    "deny": [
+      "command(git commit --no-verify)",
+      "command(git push --no-verify)",
+      "command(git push --force)",
+      "command(git push -f)",
+      "command(git push origin main)",
+      "command(rm -rf)",
+      "command(sudo)"
+    ]
+  }
+}

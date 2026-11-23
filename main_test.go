@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"encoding/xml"
 	"os"
 	"strings"
@@ -112,9 +113,12 @@ func TestAgentInstallersPerSystem(t *testing.T) {
 		}
 		return ""
 	}
+	// One installer for both systems: two installers gave two major versions.
+	withGOOS(t, "darwin")
+	mac := find("opencode")
 	withGOOS(t, "linux")
-	if strings.Contains(find("opencode"), "brew") {
-		t.Fatal("linux installs opencode with Homebrew")
+	if find("opencode") != mac || strings.Contains(mac, "brew") {
+		t.Fatalf("opencode installers differ or use Homebrew: %q", mac)
 	}
 	for _, bin := range []string{"hc", "agy"} {
 		if find(bin) == "" {
@@ -344,5 +348,36 @@ func TestServerPromptDiffersOnlyInItsLook(t *testing.T) {
 	}
 	if a, b := body("config/starship.toml"), body("config/starship-server.toml"); a != b {
 		t.Fatal("config/starship-server.toml has drifted from config/starship.toml outside its look")
+	}
+}
+
+// A seed is copied to a new machine as it is. A path of one machine in it is
+// useless there, and this repository is public: the path names a project.
+func TestSeedsHoldNoMachinePath(t *testing.T) {
+	for _, m := range seeds {
+		data, err := os.ReadFile(m.from)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, bad := range []string{"/Users/", "/home/"} {
+			if strings.Contains(string(data), bad) {
+				t.Errorf("%s holds a path under %s", m.from, bad)
+			}
+		}
+	}
+}
+
+func TestJSONSeedsParse(t *testing.T) {
+	for _, m := range seeds {
+		if !strings.HasSuffix(m.from, ".json") {
+			continue
+		}
+		data, err := os.ReadFile(m.from)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := json.Unmarshal(data, new(any)); err != nil {
+			t.Errorf("%s is not valid JSON: %v", m.from, err)
+		}
 	}
 }
