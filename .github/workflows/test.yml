@@ -19,6 +19,22 @@ jobs:
       - run: go test ./...
       - run: go vet ./...
 
+  # Links the configuration into an empty home on a Mac and runs doctor. It
+  # does not run Homebrew: installing the desktop apps takes too long for CI.
+  macos:
+    runs-on: macos-latest
+    env:
+      NO_COLOR: "1"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - run: go test ./...
+      - run: HOME="$RUNNER_TEMP/home" go run . --yes --only=link install
+      - run: HOME="$RUNNER_TEMP/home" go run . --yes --only=theme install
+      - run: go run . version
+
   # Sets up a clean Debian machine from nothing, the way a new server does.
   # The unit tests cannot find a missing package or a tool with no Linux build.
   debian:

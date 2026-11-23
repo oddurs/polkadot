@@ -146,3 +146,81 @@ func TestReadListSkipsCommentsAndBlanks(t *testing.T) {
 		t.Fatalf("readList = %v", got)
 	}
 }
+
+// A link whose source is missing is skipped without an error, so a renamed
+// file would silently stop being linked. gitconfig.local is the exception:
+// it is ignored by git and each machine creates its own.
+func TestEveryLinkSourceExists(t *testing.T) {
+	for _, m := range append(links, themeLinks...) {
+		if m.from == "home/gitconfig.local" {
+			continue
+		}
+		if _, err := os.Stat(m.from); err != nil {
+			t.Errorf("link source %s does not exist", m.from)
+		}
+	}
+}
+
+// One tool, one owner. A tool in both lists installs twice on a Mac, and the
+// two copies drift apart.
+func TestBrewfileAndMiseShareNoTool(t *testing.T) {
+	brew, err := os.ReadFile("packages/darwin.Brewfile")
+	if err != nil {
+		t.Fatal(err)
+	}
+	mise, err := os.ReadFile("config/mise/config.toml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// mise itself is the installer, and go runs polkadot before mise exists.
+	bootstrap := map[string]bool{"mise": true, "go": true}
+	for _, line := range strings.Split(string(brew), "\n") {
+		if !strings.HasPrefix(line, "brew \"") {
+			continue
+		}
+		name := strings.Split(line, "\"")[1]
+		if bootstrap[name] {
+			continue
+		}
+		for _, entry := range strings.Split(string(mise), "\n") {
+			if strings.HasPrefix(entry, name+" = \"") {
+				t.Errorf("%s is in the Brewfile and unrestricted in the mise configuration", name)
+			}
+		}
+	}
+}
+
+func TestEveryAgentReadsTheSharedInstructions(t *testing.T) {
+	want := map[string]bool{
+		".claude/CLAUDE.md": false, ".codex/AGENTS.md": false,
+		".config/opencode/AGENTS.md": false, ".gemini/AGENTS.md": false,
+	}
+	for _, m := range links {
+		if _, ok := want[m.to]; ok {
+			if m.from != "agents/AGENTS.md" {
+				t.Errorf("%s links %s, not the shared file", m.to, m.from)
+			}
+			want[m.to] = true
+		}
+	}
+	for to, seen := range want {
+		if !seen {
+			t.Errorf("no link for %s", to)
+		}
+	}
+}
+
+func TestParseMissing(t *testing.T) {
+	got, err := parseMissing([]byte(`{"ripgrep":[{"version":"15.2.0"}],"fd":[{"version":"10.5.2"}]}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Join(got, ",") != "fd,ripgrep" {
+		t.Fatalf("parseMissing = %v", got)
+	}
+	for _, empty := range []string{"", "{}", "\n"} {
+		if got, err := parseMissing([]byte(empty)); err != nil || len(got) != 0 {
+			t.Fatalf("parseMissing(%q) = %v, %v", empty, got, err)
+		}
+	}
+}

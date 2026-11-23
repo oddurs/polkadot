@@ -17,6 +17,10 @@ end
 fish_add_path -g $HOME/.cargo/bin
 fish_add_path -g $HOME/.bun/bin
 fish_add_path -g $HOME/go/bin
+# mcdir lives in its own repository. polkadot clones it here and sync keeps it
+# current, so fish loads the function from the clone.
+test -d $HOME/.local/share/polkadot/mcdir; and set -g fish_function_path $fish_function_path $HOME/.local/share/polkadot/mcdir
+
 # The OpenCode installer uses its own directory on Linux.
 test -d $HOME/.opencode/bin; and fish_add_path -g $HOME/.opencode/bin
 fish_add_path -g $HOME/.local/bin

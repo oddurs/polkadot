@@ -26,7 +26,7 @@ import (
 
 var (
 	dryRun     = flag.Bool("dry-run", false, "show what would change, touch nothing")
-	only       = flag.String("only", "", "run one step: packages, link, runtimes, shell, tools, agents, theme, timer, system")
+	only       = flag.String("only", "", "run one step: packages, repos, link, runtimes, shell, tools, agents, theme, timer, system")
 	withAgents = flag.Bool("with-agents", false, "allow third-party coding-agent installers during install")
 	yes        = flag.Bool("yes", false, "approve external installers without prompting")
 )
@@ -66,6 +66,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	// version prints one line and nothing else, so a script can read it.
+	if cmd == "version" {
+		fmt.Println(version(root))
+		return
+	}
+
 	mode := ""
 	if *dryRun {
 		mode = "dry run — nothing will be written"
@@ -80,10 +86,11 @@ func main() {
 	switch cmd {
 	case "install":
 		runIf("packages", func() { doPackages(t) })
+		runIf("repos", func() { doRepos(root, home, t) })
 		runIf("link", func() { doLink(l, t) })
 		runIf("runtimes", func() { doRuntimes(home, t) })
 		runIf("shell", func() { doShell(home, t) })
-		runIf("tools", func() { doTools(t) })
+		runIf("tools", func() { doTools(home, t) })
 		if *withAgents || *only == "agents" {
 			runIf("agents", func() { doAgents(t) })
 		}
@@ -105,7 +112,7 @@ func main() {
 	case "shell":
 		doShell(home, t)
 	case "tools":
-		doTools(t)
+		doTools(home, t)
 	case "agents":
 		doAgents(t)
 	case "sync":
@@ -113,8 +120,12 @@ func main() {
 	case "timer":
 		doTimer(t)
 	case "doctor":
-		doDoctor(home, root)
+		if doDoctor(home, root) > 0 {
+			os.Exit(1)
+		}
 		return
+	case "repos":
+		doRepos(root, home, t)
 	default:
 		fmt.Fprintf(os.Stderr, "unknown command %q\n\n", cmd)
 		flag.Usage()
@@ -141,7 +152,7 @@ func runIf(name string, fn func()) {
 func validateArgs(cmd string) error {
 	if *only != "" {
 		valid := map[string]bool{
-			"packages": true, "link": true, "runtimes": true, "shell": true,
+			"packages": true, "repos": true, "link": true, "runtimes": true, "shell": true,
 			"tools": true, "agents": true, "theme": true, "timer": true,
 			"system": true,
 		}

@@ -47,8 +47,10 @@ someone else's account.
 | `polkadot install` | Install packages, link configuration, set up shell, tools, theme, and timer |
 | `polkadot link` | Link configuration only |
 | `polkadot unlink` | Remove only symlinks owned by this checkout |
-| `polkadot packages` | Install the `Brewfile` on macOS; `packages/linux.apt` and mise on Linux |
-| `polkadot runtimes` | Linux: install the tools that `config/mise/config.toml` lists |
+| `polkadot packages` | Install `packages/darwin.Brewfile` on macOS; `packages/linux.apt` and mise on Linux |
+| `polkadot repos` | Clone the managed repositories, such as mcdir |
+| `polkadot runtimes` | Install the pinned tools that `config/mise/config.toml` lists |
+| `polkadot version` | Print the tag and commit of this checkout |
 | `polkadot system` | Linux: enable lingering, raise the inotify limit, start herdr-core |
 | `polkadot shell` | Configure Fish as the login shell |
 | `polkadot tools` | Check command-line tools |

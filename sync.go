@@ -11,12 +11,50 @@ import (
 	"github.com/oddurs/polkadot/internal/ui"
 )
 
-type managedRepo struct{ name, path string }
+// managedRepo is a checkout that sync keeps current. A repository with a url
+// is also cloned by the repos step; one without a url is the user's to clone.
+type managedRepo struct{ name, path, url string }
 
 func managedRepos(root, home string) []managedRepo {
 	return []managedRepo{
-		{"polkadot", root},
-		{"fresh-config", filepath.Join(home, ".config", "fresh")},
+		{"polkadot", root, ""},
+		{"fresh-config", filepath.Join(home, ".config", "fresh"), ""},
+		// fish finds the mcdir function here: see conf.d/00-path.fish.
+		{"mcdir", filepath.Join(home, ".local", "share", "polkadot", "mcdir"), "https://github.com/oddurs/mcdir.git"},
+	}
+}
+
+// doRepos clones each managed repository that has a url and is not on this
+// machine yet. sync keeps the clones current afterwards.
+func doRepos(root, home string, t *tally) {
+	ui.Section("repositories")
+	defer ui.Blank()
+	for _, r := range managedRepos(root, home) {
+		if r.url == "" {
+			continue
+		}
+		if _, err := os.Stat(filepath.Join(r.path, ".git")); err == nil {
+			ui.Result(r.name, "already", "cloned")
+			t.skip++
+			continue
+		}
+		if *dryRun {
+			ui.Result(r.name, "would", "git clone "+r.url)
+			t.done++
+			continue
+		}
+		if err := os.MkdirAll(filepath.Dir(r.path), 0o755); err != nil {
+			ui.Result(r.name, "failed", err.Error())
+			t.fail++
+			continue
+		}
+		if _, err := step.Run("git", "clone", "--quiet", r.url, r.path); err != nil {
+			ui.Result(r.name, "failed", "git clone "+r.url)
+			t.fail++
+			continue
+		}
+		ui.Result(r.name, "cloned", "")
+		t.done++
 	}
 }
 

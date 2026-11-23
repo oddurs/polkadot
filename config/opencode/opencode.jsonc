@@ -20,7 +20,7 @@
   "model": "openrouter/sonnet",
   "small_model": "openrouter/haiku",
 
-  "instructions": ["AGENTS.md"],
+  "instructions": ["AGENTS.md", "STACK.md"],
 
   "provider": {
     "openrouter": {

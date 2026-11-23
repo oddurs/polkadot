@@ -1,9 +1,13 @@
 # Completions for the dotfiles installer.
 complete -c polkadot -f
-complete -c polkadot -n __fish_use_subcommand -a install -d 'Everything: brew, links, shell, agents'
+complete -c polkadot -n __fish_use_subcommand -a install -d 'Everything: packages, links, tools, shell'
 complete -c polkadot -n __fish_use_subcommand -a link    -d 'Symlinks only'
 complete -c polkadot -n __fish_use_subcommand -a unlink  -d 'Remove only links managed by this checkout'
-complete -c polkadot -n __fish_use_subcommand -a brew    -d 'Homebrew and the Brewfile only'
+complete -c polkadot -n __fish_use_subcommand -a packages -d 'Homebrew on macOS; apt and mise on Linux'
+complete -c polkadot -n __fish_use_subcommand -a repos   -d 'Clone the managed repositories'
+complete -c polkadot -n __fish_use_subcommand -a runtimes -d 'Install the pinned mise tools'
+complete -c polkadot -n __fish_use_subcommand -a system  -d 'Linux: lingering, inotify limit, herdr-core'
+complete -c polkadot -n __fish_use_subcommand -a version -d 'Print the tag and commit of this checkout'
 complete -c polkadot -n __fish_use_subcommand -a shell   -d 'Configure fish as the login shell'
 complete -c polkadot -n __fish_use_subcommand -a tools   -d 'Check required command-line tools'
 complete -c polkadot -n __fish_use_subcommand -a agents  -d 'Install coding agents explicitly'
@@ -14,4 +18,4 @@ complete -c polkadot -n __fish_use_subcommand -a doctor  -d 'Report state, chang
 complete -c polkadot -l dry-run -d 'Show the plan, write nothing'
 complete -c polkadot -l with-agents -d 'Allow agent installers during install'
 complete -c polkadot -l yes -d 'Approve external installers without prompting'
-complete -c polkadot -l only -x -a 'brew link shell tools agents theme timer' -d 'Run one install step'
+complete -c polkadot -l only -x -a 'packages repos link runtimes shell tools agents theme timer system' -d 'Run one install step'
