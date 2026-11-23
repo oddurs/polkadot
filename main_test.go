@@ -274,3 +274,19 @@ func TestNoFileIsBothLinkedAndSeeded(t *testing.T) {
 		}
 	}
 }
+
+// "lts" and "latest" name a different version on different days, so two
+// machines set up a month apart would run different tools. Node moved from
+// 24 to 26 that way. go stays on "latest" on purpose: polkadot itself needs
+// a current Go, and Go keeps old programs building.
+func TestMiseConfigPinsNode(t *testing.T) {
+	data, err := os.ReadFile("config/mise/config.toml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, line := range strings.Split(string(data), "\n") {
+		if strings.HasPrefix(line, "node = ") && (strings.Contains(line, "lts") || strings.Contains(line, "latest")) {
+			t.Fatalf("node follows a moving name: %s", line)
+		}
+	}
+}

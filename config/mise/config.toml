@@ -4,7 +4,10 @@
 # These are the fallbacks for a directory that pins nothing.
 
 [tools]
-node = "lts"
+# A major version, not "lts": the name "lts" moves to a new major when one
+# becomes LTS. A machine set up after that day then runs a different Node
+# from the others, and doctor reports the old machines as missing a tool.
+node = "24"
 python = "3.13"
 go = "latest"
 
