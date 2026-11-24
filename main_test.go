@@ -6,6 +6,7 @@ import (
 	"errors"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -162,6 +163,31 @@ func TestMacGitconfigIsLinkedOnDarwinOnly(t *testing.T) {
 	}
 	if local < mac {
 		t.Error("home/gitconfig must include ~/.gitconfig.local after ~/.gitconfig.darwin")
+	}
+}
+
+// A Mac that gets this checkout with a plain `git pull` has the new
+// ~/.gitconfig at once, through the existing link, and no ~/.gitconfig.darwin
+// until `polkadot link` runs. Doctor must report that state as a failure.
+func TestDoctorFailsWithoutTheMacGitconfigLink(t *testing.T) {
+	root, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	home := t.TempDir()
+	withGOOS(t, "darwin")
+	if got := doctorLinks(home, root); got != 1 {
+		t.Fatalf("doctor counts %d failures in a home without ~/.gitconfig.darwin, want 1", got)
+	}
+	if err := os.Symlink(filepath.Join(root, "home/gitconfig.darwin"), filepath.Join(home, ".gitconfig.darwin")); err != nil {
+		t.Fatal(err)
+	}
+	if got := doctorLinks(home, root); got != 0 {
+		t.Fatalf("doctor counts %d failures with the link in place, want 0", got)
+	}
+	withGOOS(t, "linux")
+	if got := doctorLinks(t.TempDir(), root); got != 0 {
+		t.Fatalf("doctor counts %d failures on linux, want 0", got)
 	}
 }
 
