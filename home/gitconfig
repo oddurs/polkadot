@@ -111,7 +111,7 @@
 
 # Git has no include condition for the operating system. polkadot links
 # home/gitconfig.darwin to this path on macOS only, and git ignores an include
-# that does not exist. A setting that works on one system only goes there.
+# that does not exist. A setting that works on macOS only goes there.
 [include]
 	path = ~/.gitconfig.darwin
 

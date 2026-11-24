@@ -97,6 +97,13 @@ macOS only, such as the `osxkeychain` credential helper, goes in
 macOS only, and the shared file includes that path. Git ignores the include
 on a machine that has no such file. A Linux machine has no credential helper:
 use SSH remotes there, or set a helper in `home/gitconfig.local`.
+`credential.helper` holds a list, so on a Mac a helper in
+`home/gitconfig.local` adds to `osxkeychain`. An empty `helper =` line before
+the new helper resets the list.
+
+A Mac that received this layout through a plain `git pull` must run
+`polkadot link` once to create `~/.gitconfig.darwin`. Until then
+`polkadot doctor` reports the absent link as a failure.
 
 The Fish wrapper discovers the checkout containing its own source. If you run
 the binary from another location, set `POLKADOT_ROOT` to that checkout.
