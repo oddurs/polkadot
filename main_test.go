@@ -63,7 +63,7 @@ func withGOOS(t *testing.T, value string) {
 }
 
 // A Linux machine is a server. It must not get a link for the desktop
-// terminal or the desktop editor, whose targets do not exist there.
+// terminal, the desktop editor, or the macOS git settings.
 func TestLinuxSkipsDesktopLinks(t *testing.T) {
 	withGOOS(t, "linux")
 	for _, m := range active(append(links, themeLinks...)) {
@@ -89,6 +89,96 @@ func TestDarwinOnlyNamesRealSources(t *testing.T) {
 		if !known[from] {
 			t.Fatalf("darwinOnly names %s, which no mapping links", from)
 		}
+	}
+}
+
+// gitSettings reads a git config file into "section.key" = value. It knows
+// the plain form that the tracked files use: no quoted values, no line
+// continuation. The same key twice becomes one value, joined with a line break.
+func gitSettings(t *testing.T, path string) map[string]string {
+	t.Helper()
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	out := map[string]string{}
+	section := ""
+	for _, line := range strings.Split(string(data), "\n") {
+		line = strings.TrimSpace(line)
+		switch {
+		case line == "" || strings.HasPrefix(line, "#") || strings.HasPrefix(line, ";"):
+		case strings.HasPrefix(line, "["):
+			section = strings.ToLower(strings.Trim(line, "[]"))
+		default:
+			key, value, _ := strings.Cut(line, "=")
+			name := section + "." + strings.ToLower(strings.TrimSpace(key))
+			value = strings.TrimSpace(value)
+			if old, ok := out[name]; ok {
+				value = old + "\n" + value
+			}
+			out[name] = value
+		}
+	}
+	return out
+}
+
+// macOnlyGitSettings names the settings that fail or do nothing on Linux.
+// credential-osxkeychain does not exist there, so each HTTPS credential
+// lookup printed "'credential-osxkeychain' is not a git command". The
+// fsmonitor daemon has a macOS and a Windows build only.
+var macOnlyGitSettings = []string{"credential.helper", "core.fsmonitor"}
+
+// ~/.gitconfig is one file for both systems. A macOS-only setting in it
+// reaches the Linux machine too.
+func TestSharedGitconfigHoldsNoMacOnlySetting(t *testing.T) {
+	shared := gitSettings(t, "home/gitconfig")
+	mac := gitSettings(t, "home/gitconfig.darwin")
+	for _, name := range macOnlyGitSettings {
+		if value, ok := shared[name]; ok {
+			t.Errorf("home/gitconfig sets %s = %s: move it to home/gitconfig.darwin", name, value)
+		}
+		if _, ok := mac[name]; !ok {
+			t.Errorf("home/gitconfig.darwin does not set %s", name)
+		}
+	}
+}
+
+// Three parts carry the macOS git settings: the link on macOS, no link on
+// Linux, and the include in the shared file. The include must come before
+// ~/.gitconfig.local, because the machine's own file has the last word.
+func TestMacGitconfigIsLinkedOnDarwinOnly(t *testing.T) {
+	linked := func() bool {
+		for _, m := range active(links) {
+			if m.from == "home/gitconfig.darwin" && m.to == ".gitconfig.darwin" {
+				return true
+			}
+		}
+		return false
+	}
+	withGOOS(t, "darwin")
+	if !linked() {
+		t.Error("macOS does not link home/gitconfig.darwin to ~/.gitconfig.darwin")
+	}
+	withGOOS(t, "linux")
+	if linked() {
+		t.Error("linux links home/gitconfig.darwin")
+	}
+
+	includes := strings.Split(gitSettings(t, "home/gitconfig")["include.path"], "\n")
+	mac, local := -1, -1
+	for i, path := range includes {
+		switch path {
+		case "~/.gitconfig.darwin":
+			mac = i
+		case "~/.gitconfig.local":
+			local = i
+		}
+	}
+	if mac < 0 {
+		t.Fatal("home/gitconfig does not include ~/.gitconfig.darwin")
+	}
+	if local < mac {
+		t.Error("home/gitconfig must include ~/.gitconfig.local after ~/.gitconfig.darwin")
 	}
 }
 

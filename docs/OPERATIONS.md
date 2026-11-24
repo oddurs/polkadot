@@ -62,7 +62,7 @@ install runs these steps in order:
 | Step | What it does |
 |---|---|
 | `packages` | Installs `packages/linux.apt` with apt, then the mise binary |
-| `link` | Links the configuration. It skips Ghostty and VS Code |
+| `link` | Links the configuration. It skips Ghostty, VS Code and the macOS git settings |
 | `runtimes` | Runs `mise install` for the tools in `config/mise/config.toml` |
 | `shell` | Makes fish the login shell |
 | `timer` | Enables `polkadot-sync.timer` for the user |
@@ -90,6 +90,13 @@ polkadot link
 `home/gitconfig.local` is linked to `~/.gitconfig.local` and included after
 the shared Git config, so it is the correct place for your identity and work
 overrides. The repository does not set a Git name or email for fork users.
+
+`home/gitconfig` is one file for both systems. A Git setting that works on
+macOS only, such as the `osxkeychain` credential helper, goes in
+`home/gitconfig.darwin`. Polkadot links that file to `~/.gitconfig.darwin` on
+macOS only, and the shared file includes that path. Git ignores the include
+on a machine that has no such file. A Linux machine has no credential helper:
+use SSH remotes there, or set a helper in `home/gitconfig.local`.
 
 The Fish wrapper discovers the checkout containing its own source. If you run
 the binary from another location, set `POLKADOT_ROOT` to that checkout.

@@ -53,6 +53,8 @@ var links = []linkMap{
 	{"config/ripgrep", ".config/ripgrep"},
 	{"config/vscode/settings.json", "Library/Application Support/Code/User/settings.json"},
 	{"home/gitconfig", ".gitconfig"},
+	// The macOS-only git settings. home/gitconfig includes this path.
+	{"home/gitconfig.darwin", ".gitconfig.darwin"},
 	{"home/gitconfig.local", ".gitconfig.local"},
 	{"home/gitignore_global", ".gitignore_global"},
 	{"home/git_commit_template", ".git_commit_template"},
