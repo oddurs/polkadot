@@ -1,11 +1,17 @@
 # System packages for the Linux target. apt installs only what must be part
 # of the system: the login shell, git, and what a tool build needs. mise
 # installs everything else, pinned in config/mise/config.toml.
+#
+# rsync and sqlite3 are here because macOS has both in its base system, so
+# a Linux machine gets the same two commands. A machine that receives an
+# rsync transfer over SSH must have rsync itself.
 build-essential
 ca-certificates
 curl
 fish
 git
 locales
+rsync
+sqlite3
 unzip
 xz-utils

@@ -12,7 +12,7 @@ the operational contract lives in [OPERATIONS.md](OPERATIONS.md).
 | `theme/` | `~/.config/polkadot-theme` | London Moquette runtime assets |
 | `agents/AGENTS.md` | each agent's instruction path | One instruction file for Claude, Codex, OpenCode, and Antigravity |
 | `packages/darwin.Brewfile` | Homebrew | macOS: the shell, git, desktop apps |
-| `packages/linux.apt` | apt | Linux: the shell, git, and build tools |
+| `packages/linux.apt` | apt | Linux: the shell, git, build tools, rsync and sqlite3 |
 | `config/mise/config.toml` | mise | Every machine: the pinned command-line tools |
 
 ## Linked and seeded
@@ -110,7 +110,7 @@ Three lists, one owner for each tool:
 |---|---|---|
 | `config/mise/config.toml` | mise, every machine | The command-line tools, each pinned to one version |
 | `packages/darwin.Brewfile` | Homebrew, macOS | fish, git, Go, mise, desktop apps, and three tools with no macOS build in mise |
-| `packages/linux.apt` | apt, Linux | fish, git, and build tools |
+| `packages/linux.apt` | apt, Linux | fish, git, build tools, rsync and sqlite3 |
 
 To update a tool, change its version in `config/mise/config.toml` in a pull
 request. Each machine installs the new version at its next `sync` and
