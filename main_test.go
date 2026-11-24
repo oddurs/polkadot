@@ -3,7 +3,9 @@ package main
 import (
 	"encoding/json"
 	"encoding/xml"
+	"errors"
 	"os"
+	"os/exec"
 	"strings"
 	"testing"
 )
@@ -92,52 +94,34 @@ func TestDarwinOnlyNamesRealSources(t *testing.T) {
 	}
 }
 
-// gitSettings reads a git config file into "section.key" = value. It knows
-// the plain form that the tracked files use: no quoted values, no line
-// continuation. The same key twice becomes one value, joined with a line break.
-func gitSettings(t *testing.T, path string) map[string]string {
+// gitConfig asks git itself what one config file holds, so the tests read
+// each form that git reads: a subsection, a quoted value, a comment after a
+// value. With --file, git does not follow an include. git exits with 1 when
+// no key matches: that is an empty answer, not an error.
+func gitConfig(t *testing.T, path string, args ...string) []string {
 	t.Helper()
-	data, err := os.ReadFile(path)
+	out, err := exec.Command("git", append([]string{"config", "--file", path}, args...)...).Output()
+	var exit *exec.ExitError
+	if errors.As(err, &exit) && exit.ExitCode() == 1 {
+		return nil
+	}
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("git config --file %s %v: %v", path, args, err)
 	}
-	out := map[string]string{}
-	section := ""
-	for _, line := range strings.Split(string(data), "\n") {
-		line = strings.TrimSpace(line)
-		switch {
-		case line == "" || strings.HasPrefix(line, "#") || strings.HasPrefix(line, ";"):
-		case strings.HasPrefix(line, "["):
-			section = strings.ToLower(strings.Trim(line, "[]"))
-		default:
-			key, value, _ := strings.Cut(line, "=")
-			name := section + "." + strings.ToLower(strings.TrimSpace(key))
-			value = strings.TrimSpace(value)
-			if old, ok := out[name]; ok {
-				value = old + "\n" + value
-			}
-			out[name] = value
-		}
-	}
-	return out
+	return strings.Split(strings.TrimSpace(string(out)), "\n")
 }
 
-// macOnlyGitSettings names the settings that fail or do nothing on Linux.
-// credential-osxkeychain does not exist there, so each HTTPS credential
-// lookup printed "'credential-osxkeychain' is not a git command". The
-// fsmonitor daemon has a macOS and a Windows build only.
-var macOnlyGitSettings = []string{"credential.helper", "core.fsmonitor"}
-
 // ~/.gitconfig is one file for both systems. A macOS-only setting in it
-// reaches the Linux machine too.
+// reaches the Linux machine too. Linux has no credential-osxkeychain, so
+// each HTTPS credential lookup printed "'credential-osxkeychain' is not a
+// git command". The fsmonitor daemon has a macOS and a Windows build only.
+// The pattern also matches a helper for one URL: credential.<url>.helper.
 func TestSharedGitconfigHoldsNoMacOnlySetting(t *testing.T) {
-	shared := gitSettings(t, "home/gitconfig")
-	mac := gitSettings(t, "home/gitconfig.darwin")
-	for _, name := range macOnlyGitSettings {
-		if value, ok := shared[name]; ok {
-			t.Errorf("home/gitconfig sets %s = %s: move it to home/gitconfig.darwin", name, value)
-		}
-		if _, ok := mac[name]; !ok {
+	for _, line := range gitConfig(t, "home/gitconfig", "--get-regexp", `^(credential\..*helper|core\.fsmonitor)$`) {
+		t.Errorf("home/gitconfig sets %s: move it to home/gitconfig.darwin", line)
+	}
+	for _, name := range []string{"credential.helper", "core.fsmonitor"} {
+		if gitConfig(t, "home/gitconfig.darwin", "--get", name) == nil {
 			t.Errorf("home/gitconfig.darwin does not set %s", name)
 		}
 	}
@@ -164,9 +148,8 @@ func TestMacGitconfigIsLinkedOnDarwinOnly(t *testing.T) {
 		t.Error("linux links home/gitconfig.darwin")
 	}
 
-	includes := strings.Split(gitSettings(t, "home/gitconfig")["include.path"], "\n")
 	mac, local := -1, -1
-	for i, path := range includes {
+	for i, path := range gitConfig(t, "home/gitconfig", "--get-all", "include.path") {
 		switch path {
 		case "~/.gitconfig.darwin":
 			mac = i
