@@ -32,6 +32,9 @@ jobs:
           go-version-file: go.mod
       - run: go test ./...
       - run: HOME="$RUNNER_TEMP/home" go run . --yes --only=link install
+      # git must reach the keychain helper through the include in ~/.gitconfig.
+      # --global leaves out the system file, which sets the same helper on a Mac.
+      - run: test "$(HOME="$RUNNER_TEMP/home" git config --global --includes --get credential.helper)" = osxkeychain
       - run: HOME="$RUNNER_TEMP/home" go run . --yes --only=theme install
       - run: go run . version
 

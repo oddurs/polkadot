@@ -4,3 +4,16 @@
 [user]
 	name = Your Name
 	email = you@example.com
+
+# Sign commits with an SSH key. The shared file sets gpg.format = ssh already.
+# GitHub shows "Verified" only after you add the public key to your account
+# as a signing key. An authentication key alone does not count.
+# The allowed-signers file lets `git log --show-signature` check a signature
+# on this machine. Each line holds an email and a public key.
+#
+# [user]
+# 	signingkey = ~/.ssh/id_ed25519.pub
+# [gpg "ssh"]
+# 	allowedSignersFile = ~/.config/git/allowed_signers
+# [commit]
+# 	gpgsign = true

@@ -53,6 +53,8 @@ var links = []linkMap{
 	{"config/ripgrep", ".config/ripgrep"},
 	{"config/vscode/settings.json", "Library/Application Support/Code/User/settings.json"},
 	{"home/gitconfig", ".gitconfig"},
+	// The macOS-only git settings. home/gitconfig includes this path.
+	{"home/gitconfig.darwin", ".gitconfig.darwin"},
 	{"home/gitconfig.local", ".gitconfig.local"},
 	{"home/gitignore_global", ".gitignore_global"},
 	{"home/git_commit_template", ".git_commit_template"},
@@ -525,27 +527,8 @@ func doAgents(t *tally) {
 // doDoctor reports the health of this machine and changes nothing. It
 // returns the number of failures, so a script can act on the result.
 func doDoctor(home, root string) int {
-	failed := 0
 	ui.Section("links")
-	for _, m := range active(append(links, themeLinks...)) {
-		dst := filepath.Join(home, m.to)
-		want := filepath.Join(root, m.from)
-		got, err := os.Readlink(dst)
-		switch {
-		case err == nil && got == want:
-			ui.Result("~/"+m.to, "already", "linked")
-		case err == nil:
-			ui.Result("~/"+m.to, "failed", "points elsewhere: "+got)
-			failed++
-		default:
-			if _, err := os.Lstat(dst); err == nil {
-				ui.Result("~/"+m.to, "failed", "exists but is not a link")
-				failed++
-			} else {
-				ui.Result("~/"+m.to, "skipped", "absent")
-			}
-		}
-	}
+	failed := doctorLinks(home, root)
 	ui.Blank()
 
 	ui.Section("seeded files")
@@ -609,6 +592,40 @@ func doDoctor(home, root string) int {
 		}
 	}
 	ui.Blank()
+	return failed
+}
+
+// includedLinks names the link sources that a linked file includes. An absent
+// link is a failure for these: ~/.gitconfig includes ~/.gitconfig.darwin, and
+// git ignores a missing include, so a Mac would lose its credential helper
+// with no message.
+var includedLinks = map[string]bool{"home/gitconfig.darwin": true}
+
+// doctorLinks reports each link and returns the number of failures.
+func doctorLinks(home, root string) int {
+	failed := 0
+	for _, m := range active(append(links, themeLinks...)) {
+		dst := filepath.Join(home, m.to)
+		want := filepath.Join(root, m.from)
+		got, err := os.Readlink(dst)
+		switch {
+		case err == nil && got == want:
+			ui.Result("~/"+m.to, "already", "linked")
+		case err == nil:
+			ui.Result("~/"+m.to, "failed", "points elsewhere: "+got)
+			failed++
+		default:
+			if _, err := os.Lstat(dst); err == nil {
+				ui.Result("~/"+m.to, "failed", "exists but is not a link")
+				failed++
+			} else if includedLinks[m.from] {
+				ui.Result("~/"+m.to, "failed", "absent: run `polkadot link`")
+				failed++
+			} else {
+				ui.Result("~/"+m.to, "skipped", "absent")
+			}
+		}
+	}
 	return failed
 }
 
