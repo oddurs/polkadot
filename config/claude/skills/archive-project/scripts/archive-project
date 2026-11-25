@@ -1,0 +1,444 @@
+#!/bin/sh
+set -eu
+
+# archive-project: take a project off this machine without losing work.
+#
+# The remote is the archive of record. A git bundle in the cold copy is a
+# second copy that does not depend on the remote. Nothing is deleted before
+# both exist and the bundle has passed a test clone.
+
+usage() {
+  cat <<'EOF'
+Usage: archive-project <verb> <name> [options]
+
+  audit <name>      Print everything the project owns. Changes nothing.
+  run <name>        Save all work, write the cold copy, then remove the project.
+      --snapshot    Save uncommitted work to archive/wip/<branch> refs.
+      --kill        Stop the processes that run inside the project.
+  restore <name>    Clone the project back from the remote, or from the bundle.
+
+The project is $ARCHIVE_CODE_DIR/<name> (default ~/Code/<name>). Its worktrees
+are in .worktrees/<name>, and the cold copy goes to .archive/<name>.
+EOF
+}
+
+say() { printf '%s\n' "$*"; }
+die() {
+  printf 'archive-project: %s\n' "$*" >&2
+  exit 1
+}
+
+# Build output that a fresh checkout makes again. Ignored files outside these
+# paths may be settings or secrets, so the cold copy keeps them.
+REBUILT='(^|/)(target|node_modules|\.next|dist|build|out|\.venv|venv|__pycache__|\.turbo|\.cache|coverage|test-results|playwright-report|\.playwright-mcp|\.pytest_cache|\.mypy_cache|\.ruff_cache)/|\.tsbuildinfo$|(^|/)next-env\.d\.ts$'
+
+[ $# -ge 2 ] || {
+  usage >&2
+  exit 2
+}
+verb=$1
+name=$2
+shift 2
+snapshot=no
+kill_procs=no
+for arg in "$@"; do
+  case "$arg" in
+  --snapshot) snapshot=yes ;;
+  --kill) kill_procs=yes ;;
+  *) die "unknown option: $arg" ;;
+  esac
+done
+case "$name" in
+'' | */* | .*) die "the name must be a directory name, not a path: $name" ;;
+esac
+
+code=${ARCHIVE_CODE_DIR:-$HOME/Code}
+proj=$code/$name
+wtdir=$code/.worktrees/$name
+cold=$code/.archive/$name
+
+# The agent keeps transcripts and scratch files under a name made from the
+# path, with every character that is not a letter or a digit replaced.
+encode() { printf '%s' "$1" | sed 's/[^A-Za-z0-9]/-/g'; }
+
+worktrees() {
+  git -C "$proj" worktree list --porcelain | sed -n 's/^worktree //p' |
+    while IFS= read -r wt; do
+      # A worktree whose directory is gone has nothing to save.
+      if [ -d "$wt" ]; then printf '%s\n' "$wt"; fi
+    done
+}
+
+# The directories that belong to the project: the checkout, the worktree
+# folder, and any worktree that lives somewhere else. The list is read once,
+# because the process scan asks for it for every process.
+load_roots() {
+  {
+    printf '%s\n%s\n' "$proj" "$wtdir"
+    worktrees
+  } | sort -u >"$tmp/roots"
+}
+
+inside() {
+  while IFS= read -r root; do
+    case "$1" in
+    "$root" | "$root"/*) return 0 ;;
+    esac
+  done <"$tmp/roots"
+  return 1
+}
+
+parent_of() {
+  # The command name in /proc/<pid>/stat may hold spaces and brackets, so
+  # the fields are counted from the last closing bracket.
+  sed 's/.*) //' "/proc/$1/stat" 2>/dev/null | cut -d' ' -f2
+}
+
+# When an agent session inside the project runs this script, the session and
+# its helper processes must survive. They are the tree below the highest
+# ancestor of this script that works inside the project.
+caller_root() {
+  walk=$$
+  top=''
+  while [ -n "$walk" ] && [ "$walk" -gt 1 ]; do
+    at=$(readlink "/proc/$walk/cwd" 2>/dev/null) || at=''
+    if [ -n "$at" ] && inside "$at"; then top=$walk; fi
+    walk=$(parent_of "$walk")
+  done
+  printf '%s' "$top"
+}
+
+in_tree() {
+  walk=$1
+  while [ -n "$walk" ] && [ "$walk" -gt 1 ]; do
+    if [ "$walk" = "$2" ]; then return 0; fi
+    walk=$(parent_of "$walk")
+  done
+  return 1
+}
+
+live_processes() {
+  [ -d /proc/self ] || return 0
+  keep=$(caller_root)
+  for dir in /proc/[0-9]*; do
+    pid=${dir#/proc/}
+    # A process of another user, or one that ended meanwhile, has no
+    # readable cwd. Neither belongs to this project.
+    cwd=$(readlink "$dir/cwd" 2>/dev/null) || continue
+    inside "$cwd" || continue
+    if [ -n "$keep" ] && in_tree "$pid" "$keep"; then continue; fi
+    printf '%s\n' "$pid"
+  done
+}
+
+services() {
+  for dir in "$HOME/.config/systemd/user" /etc/systemd/system; do
+    [ -d "$dir" ] || continue
+    grep -rlE "(^|[=: \"'])($proj|$wtdir)(/|[\"' ]|\$)" "$dir" || [ $? -eq 1 ]
+  done
+}
+
+containers() {
+  command -v docker >/dev/null 2>&1 || return 0
+  docker ps -a --format '{{.Names}}	{{.Label "com.docker.compose.project.working_dir"}}' 2>/dev/null |
+    while IFS='	' read -r cname cdir; do
+      if [ -n "$cdir" ] && inside "$cdir"; then printf '%s\n' "$cname"; fi
+    done
+}
+
+docker_readable() {
+  command -v docker >/dev/null 2>&1 || return 0
+  docker ps >/dev/null 2>&1
+}
+
+kept_ignored() {
+  git -C "$1" ls-files --others --ignored --exclude-standard --directory |
+    grep -vE "$REBUILT" || [ $? -eq 1 ]
+}
+
+# Only exact names are matched. A pattern would also match the data of
+# another project whose name starts with this one.
+agent_data() {
+  uid=$(id -u)
+  while IFS= read -r root; do
+    enc=$(encode "$root")
+    for path in "$HOME/.claude/projects/$enc" "/tmp/claude-$uid/$enc"; do
+      if [ -e "$path" ]; then printf '%s\n' "$path"; fi
+    done
+  done <"$tmp/roots"
+}
+
+unpushed() { git -C "$proj" log --branches --not --remotes --format=%h; }
+
+# Sets $blockers (run cannot proceed), $dirty and $procs.
+audit() {
+  blockers=0
+  say "Project   $proj"
+  say "Cold copy $cold"
+
+  say ""
+  say "Remote"
+  if remote=$(git -C "$proj" remote get-url origin 2>/dev/null); then
+    say "  $remote"
+    count=$(unpushed | wc -l | tr -d ' ')
+    say "  commits not on the remote: $count (run pushes them)"
+  else
+    remote=''
+    say "  BLOCKER: no remote named origin. Create a private repository and add it."
+    blockers=$((blockers + 1))
+  fi
+
+  say ""
+  say "Worktrees"
+  dirty=''
+  for_each_worktree audit_worktree
+  stashes=$(git -C "$proj" stash list | wc -l | tr -d ' ')
+  [ "$stashes" -eq 0 ] || say "  stashes: $stashes (the bundle keeps them; the remote does not)"
+
+  say ""
+  say "Ignored files that the cold copy keeps"
+  : >"$tmp/kept"
+  for_each_worktree audit_ignored
+  if [ -s "$tmp/kept" ]; then cat "$tmp/kept"; else say "  none"; fi
+
+  say ""
+  say "Live processes"
+  procs=$(live_processes)
+  if [ -n "$procs" ]; then
+    for pid in $procs; do
+      say "  $pid $(tr '\0' ' ' <"/proc/$pid/cmdline" 2>/dev/null | cut -c1-70)"
+    done
+    say "  run needs --kill"
+  elif [ -d /proc/self ]; then
+    say "  none"
+  else
+    say "  not checked: this system has no /proc"
+  fi
+  # The kernel hides the cwd of a process from a caller in another group,
+  # even for the same user. Under sg or newgrp the scan would find nothing.
+  if [ -d /proc/self ] && [ "$(id -g)" != "$(id -g "$(id -un)")" ]; then
+    say "  BLOCKER: this shell runs under the group $(id -gn), so your processes are hidden. Run it without sg or newgrp."
+    blockers=$((blockers + 1))
+  fi
+
+  say ""
+  say "Services and containers"
+  found=$(services)
+  found_containers=$(containers)
+  if [ -n "$found$found_containers" ]; then
+    [ -z "$found" ] || say "$found" | sed 's/^/  unit      /'
+    [ -z "$found_containers" ] || say "$found_containers" | sed 's/^/  container /'
+    say "  BLOCKER: remove these first. They hold state that this script does not save."
+    blockers=$((blockers + 1))
+  elif docker_readable; then
+    say "  none"
+  else
+    say "  no unit. Containers not checked: docker ps failed for this user."
+  fi
+
+  say ""
+  say "Agent transcripts and scratch files"
+  data=$(agent_data)
+  if [ -n "$data" ]; then say "$data" | sed 's/^/  /'; else say "  none"; fi
+}
+
+for_each_worktree() {
+  worktrees >"$tmp/worktrees"
+  while IFS= read -r wt; do "$1" "$wt"; done <"$tmp/worktrees"
+}
+
+audit_worktree() {
+  branch=$(git -C "$1" symbolic-ref -q --short HEAD) || branch='(detached)'
+  changes=$(git -C "$1" status --porcelain | wc -l | tr -d ' ')
+  say "  $1  $branch  uncommitted: $changes"
+  if [ "$changes" -gt 0 ]; then
+    dirty="$dirty$1
+"
+  fi
+}
+
+audit_ignored() {
+  kept_ignored "$1" | sed "s|^|  $1/|" >>"$tmp/kept"
+}
+
+snapshot_worktree() {
+  wt=$1
+  [ -n "$(git -C "$wt" status --porcelain)" ] || return 0
+  if branch=$(git -C "$wt" symbolic-ref -q --short HEAD); then
+    ref=refs/heads/archive/wip/$branch
+  else
+    ref=refs/heads/archive/wip/detached-$(git -C "$wt" rev-parse --short HEAD)-$(basename "$wt")
+  fi
+  # The snapshot is built with a copy of the index, so the branch and the
+  # worktree stay as they are. It is a record of unfinished work, not a
+  # commit offered on the branch, so it does not go through `git commit`.
+  index=$tmp/index
+  cp "$(git -C "$wt" rev-parse --path-format=absolute --git-path index)" "$index"
+  GIT_INDEX_FILE=$index git -C "$wt" add -A
+  tree=$(GIT_INDEX_FILE=$index git -C "$wt" write-tree)
+  commit=$(git -C "$wt" commit-tree "$tree" -p HEAD -m "chore: snapshot uncommitted work before archive")
+  git -C "$wt" update-ref "$ref" "$commit"
+  say "  $ref  <-  $wt"
+}
+
+pack_ignored() {
+  kept_ignored "$1" >"$tmp/ignored"
+  [ -s "$tmp/ignored" ] || return 0
+  n=$((n + 1))
+  tar -C "$1" -cf "$cold/ignored-$n.tar" -T "$tmp/ignored"
+  say "ignored-$n.tar  $1" >>"$cold/MANIFEST"
+  say "  ignored-$n.tar  <-  $1"
+}
+
+remove_worktree() {
+  [ "$1" = "$proj" ] && return 0
+  git -C "$proj" worktree remove --force "$1"
+}
+
+run() {
+  if [ ! -d "$proj" ]; then
+    [ -f "$cold/MANIFEST" ] || die "no project at $proj and no cold copy at $cold"
+    say "$name is already archived: $cold"
+    return 0
+  fi
+  git -C "$proj" rev-parse --git-dir >/dev/null 2>&1 || die "$proj is not a git repository"
+  [ ! -e "$cold" ] || die "$cold exists. An earlier run stopped half way: inspect it, then remove it."
+
+  load_roots
+  audit
+  say ""
+  [ "$blockers" -eq 0 ] || die "$blockers blocker(s) above. Nothing was changed."
+  [ -z "$dirty" ] || [ "$snapshot" = yes ] ||
+    die "uncommitted work exists. Commit it, or pass --snapshot. Nothing was changed."
+  [ -z "$procs" ] || [ "$kill_procs" = yes ] ||
+    die "processes run inside the project. Stop them, or pass --kill. Nothing was changed."
+
+  if [ -n "$dirty" ]; then
+    say "Snapshot uncommitted work"
+    for_each_worktree snapshot_worktree
+  fi
+
+  say "Push every branch and tag to $remote"
+  git -C "$proj" push --quiet origin --all
+  git -C "$proj" push --quiet origin --tags
+  left=$(unpushed)
+  [ -z "$left" ] || die "these commits are still not on the remote: $left"
+
+  say "Write the cold copy"
+  mkdir -p "$code/.archive"
+  # The cold copy may hold secrets from ignored files.
+  mkdir -m 700 "$cold"
+  git -C "$proj" bundle create --quiet "$cold/repo.bundle" --all
+  git -C "$proj" bundle verify --quiet "$cold/repo.bundle"
+  git clone --quiet --mirror "$cold/repo.bundle" "$tmp/clone"
+  git -C "$proj" for-each-ref --format='%(objectname) %(refname)' refs/heads refs/tags | sort >"$tmp/refs.want"
+  git -C "$tmp/clone" for-each-ref --format='%(objectname) %(refname)' refs/heads refs/tags | sort >"$tmp/refs.got"
+  cmp -s "$tmp/refs.want" "$tmp/refs.got" || die "a clone of the bundle does not match the repository. Nothing was removed."
+  say "  repo.bundle: a test clone has all $(wc -l <"$tmp/refs.want" | tr -d ' ') branches and tags"
+
+  {
+    say "name      $name"
+    say "archived  $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    say "host      $(uname -n)"
+    say "path      $proj"
+    say "remote    $remote"
+    say ""
+    say "Branches and tags:"
+    cat "$tmp/refs.want"
+    say ""
+    say "Files in this cold copy:"
+    say "repo.bundle  every ref, including stashes"
+  } >"$cold/MANIFEST"
+  n=0
+  for_each_worktree pack_ignored
+
+  if [ -n "$procs" ]; then
+    say "Stop the processes"
+    for pid in $procs; do kill "$pid" 2>/dev/null || [ ! -d "/proc/$pid" ]; done
+    tries=0
+    while [ -n "$(live_processes)" ] && [ "$tries" -lt 10 ]; do
+      sleep 1
+      tries=$((tries + 1))
+    done
+    for pid in $(live_processes); do kill -9 "$pid" 2>/dev/null || [ ! -d "/proc/$pid" ]; done
+  fi
+
+  say "Remove the project"
+  data=$(agent_data)
+  in_use=$(caller_root)
+  for_each_worktree remove_worktree
+  rm -rf "$wtdir" "$proj"
+  if [ -n "$in_use" ]; then
+    say "  The session that runs this script works inside the project, so its"
+    say "  transcripts and scratch files stay. Remove them when it has ended:"
+    [ -z "$data" ] || say "$data" | sed 's/^/    /'
+  elif [ -n "$data" ]; then
+    mkdir "$cold/agent"
+    say "$data" | while IFS= read -r path; do
+      case "$path" in
+      /tmp/*) rm -rf "$path" ;;
+      *) mv "$path" "$cold/agent/" ;;
+      esac
+    done
+    say "agent/       transcripts of the agent sessions" >>"$cold/MANIFEST"
+  fi
+
+  case "$remote" in
+  *github.com*)
+    repo=$(printf '%s' "$remote" | sed -E 's#^(git@github\.com:|https://github\.com/)##; s#\.git$##')
+    if command -v gh >/dev/null 2>&1; then
+      say "Mark $repo as archived on GitHub"
+      gh repo archive "$repo" --yes
+    else
+      say "gh is not installed: mark $repo as archived by hand."
+    fi
+    ;;
+  esac
+
+  say ""
+  say "$name is archived. Cold copy: $cold"
+  say "Bring it back with: archive-project restore $name"
+}
+
+restore() {
+  [ -f "$cold/MANIFEST" ] || die "no cold copy at $cold"
+  [ ! -e "$proj" ] || die "$proj exists already"
+  remote=$(sed -n 's/^remote    //p' "$cold/MANIFEST")
+  if git ls-remote --exit-code "$remote" >/dev/null 2>&1; then
+    say "Clone from $remote"
+    git clone --quiet "$remote" "$proj"
+  else
+    say "The remote does not answer. Clone from the bundle."
+    git clone --quiet "$cold/repo.bundle" "$proj"
+    git -C "$proj" remote set-url origin "$remote"
+  fi
+  first=$(sed -n "s|^\(ignored-[0-9]*\.tar\)  $proj\$|\1|p" "$cold/MANIFEST")
+  if [ -n "$first" ]; then
+    say "Put back the ignored files of the main checkout"
+    tar -C "$proj" -xf "$cold/$first"
+  fi
+  say ""
+  say "$name is restored at $proj. The cold copy stays at $cold."
+  say "Snapshots of uncommitted work are the branches below archive/wip/."
+  case "$remote" in
+  *github.com*) say "The GitHub repository is read-only until: gh repo unarchive <owner>/$name" ;;
+  esac
+}
+
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+case "$verb" in
+audit)
+  git -C "$proj" rev-parse --git-dir >/dev/null 2>&1 || die "no git repository at $proj"
+  load_roots
+  audit
+  [ "$blockers" -eq 0 ] || exit 1
+  ;;
+run) run ;;
+restore) restore ;;
+*)
+  usage >&2
+  exit 2
+  ;;
+esac
