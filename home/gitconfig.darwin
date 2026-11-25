@@ -1,0 +1,10 @@
+# ─── git, macOS only ──────────────────────────────────────────────────────
+# Managed by polkadot: ~/Code/polkadot/home/gitconfig.darwin
+# home/gitconfig includes this file. polkadot links it on macOS only.
+
+[core]
+	# The built-in file system monitor has a macOS and a Windows build only.
+	fsmonitor = true
+
+[credential]
+	helper = osxkeychain

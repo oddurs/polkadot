@@ -1,11 +1,15 @@
 # System packages for the Linux target. apt installs only what must be part
 # of the system: the login shell, git, and what a tool build needs. mise
 # installs everything else, pinned in config/mise/config.toml.
+#
+# rsync is here because mise has no rsync, and a machine that receives an
+# rsync transfer over SSH must have rsync itself.
 build-essential
 ca-certificates
 curl
 fish
 git
 locales
+rsync
 unzip
 xz-utils

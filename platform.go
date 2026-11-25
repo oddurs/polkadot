@@ -14,10 +14,12 @@ import (
 var goos = runtime.GOOS
 
 // darwinOnly names the link sources that only a Mac uses: the desktop
-// terminal and the desktop editor. A Linux machine is a server.
+// terminal, the desktop editor, and the git settings that need macOS. A
+// Linux machine is a server.
 var darwinOnly = map[string]bool{
 	"config/ghostty/config":         true,
 	"config/vscode/settings.json":   true,
+	"home/gitconfig.darwin":         true,
 	"theme/london-moquette/ghostty": true,
 }
 

@@ -3,7 +3,10 @@ package main
 import (
 	"encoding/json"
 	"encoding/xml"
+	"errors"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -63,7 +66,7 @@ func withGOOS(t *testing.T, value string) {
 }
 
 // A Linux machine is a server. It must not get a link for the desktop
-// terminal or the desktop editor, whose targets do not exist there.
+// terminal, the desktop editor, or the macOS git settings.
 func TestLinuxSkipsDesktopLinks(t *testing.T) {
 	withGOOS(t, "linux")
 	for _, m := range active(append(links, themeLinks...)) {
@@ -89,6 +92,102 @@ func TestDarwinOnlyNamesRealSources(t *testing.T) {
 		if !known[from] {
 			t.Fatalf("darwinOnly names %s, which no mapping links", from)
 		}
+	}
+}
+
+// gitConfig asks git itself what one config file holds, so the tests read
+// each form that git reads: a subsection, a quoted value, a comment after a
+// value. With --file, git does not follow an include. git exits with 1 when
+// no key matches: that is an empty answer, not an error.
+func gitConfig(t *testing.T, path string, args ...string) []string {
+	t.Helper()
+	out, err := exec.Command("git", append([]string{"config", "--file", path}, args...)...).Output()
+	var exit *exec.ExitError
+	if errors.As(err, &exit) && exit.ExitCode() == 1 {
+		return nil
+	}
+	if err != nil {
+		t.Fatalf("git config --file %s %v: %v", path, args, err)
+	}
+	return strings.Split(strings.TrimSpace(string(out)), "\n")
+}
+
+// ~/.gitconfig is one file for both systems. A macOS-only setting in it
+// reaches the Linux machine too. Linux has no credential-osxkeychain, so
+// each HTTPS credential lookup printed "'credential-osxkeychain' is not a
+// git command". The fsmonitor daemon has a macOS and a Windows build only.
+// The pattern also matches a helper for one URL: credential.<url>.helper.
+func TestSharedGitconfigHoldsNoMacOnlySetting(t *testing.T) {
+	for _, line := range gitConfig(t, "home/gitconfig", "--get-regexp", `^(credential\..*helper|core\.fsmonitor)$`) {
+		t.Errorf("home/gitconfig sets %s: move it to home/gitconfig.darwin", line)
+	}
+	for _, name := range []string{"credential.helper", "core.fsmonitor"} {
+		if gitConfig(t, "home/gitconfig.darwin", "--get", name) == nil {
+			t.Errorf("home/gitconfig.darwin does not set %s", name)
+		}
+	}
+}
+
+// Three parts carry the macOS git settings: the link on macOS, no link on
+// Linux, and the include in the shared file. The include must come before
+// ~/.gitconfig.local, because the machine's own file has the last word.
+func TestMacGitconfigIsLinkedOnDarwinOnly(t *testing.T) {
+	linked := func() bool {
+		for _, m := range active(links) {
+			if m.from == "home/gitconfig.darwin" && m.to == ".gitconfig.darwin" {
+				return true
+			}
+		}
+		return false
+	}
+	withGOOS(t, "darwin")
+	if !linked() {
+		t.Error("macOS does not link home/gitconfig.darwin to ~/.gitconfig.darwin")
+	}
+	withGOOS(t, "linux")
+	if linked() {
+		t.Error("linux links home/gitconfig.darwin")
+	}
+
+	mac, local := -1, -1
+	for i, path := range gitConfig(t, "home/gitconfig", "--get-all", "include.path") {
+		switch path {
+		case "~/.gitconfig.darwin":
+			mac = i
+		case "~/.gitconfig.local":
+			local = i
+		}
+	}
+	if mac < 0 {
+		t.Fatal("home/gitconfig does not include ~/.gitconfig.darwin")
+	}
+	if local < mac {
+		t.Error("home/gitconfig must include ~/.gitconfig.local after ~/.gitconfig.darwin")
+	}
+}
+
+// A Mac that gets this checkout with a plain `git pull` has the new
+// ~/.gitconfig at once, through the existing link, and no ~/.gitconfig.darwin
+// until `polkadot link` runs. Doctor must report that state as a failure.
+func TestDoctorFailsWithoutTheMacGitconfigLink(t *testing.T) {
+	root, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	home := t.TempDir()
+	withGOOS(t, "darwin")
+	if got := doctorLinks(home, root); got != 1 {
+		t.Fatalf("doctor counts %d failures in a home without ~/.gitconfig.darwin, want 1", got)
+	}
+	if err := os.Symlink(filepath.Join(root, "home/gitconfig.darwin"), filepath.Join(home, ".gitconfig.darwin")); err != nil {
+		t.Fatal(err)
+	}
+	if got := doctorLinks(home, root); got != 0 {
+		t.Fatalf("doctor counts %d failures with the link in place, want 0", got)
+	}
+	withGOOS(t, "linux")
+	if got := doctorLinks(t.TempDir(), root); got != 0 {
+		t.Fatalf("doctor counts %d failures on linux, want 0", got)
 	}
 }
 
