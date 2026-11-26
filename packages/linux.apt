@@ -4,12 +4,17 @@
 #
 # rsync is here because mise has no rsync, and a machine that receives an
 # rsync transfer over SSH must have rsync itself.
+#
+# lsof is here because project scripts use it to find the processes that
+# work in a folder. Without it such a script finds none, and it reports no
+# error.
 build-essential
 ca-certificates
 curl
 fish
 git
 locales
+lsof
 rsync
 unzip
 xz-utils
